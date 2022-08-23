@@ -15,13 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from management.api.account import MyTokenRefreshView, TokenLoginView
+from management.api.account import ChangePasswordView, ForgotPassword, ForgotPasswordVerify, MyTokenRefreshView, TokenLoginView
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django_twilio.views import sms
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -41,10 +42,16 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     path('api/', include([
-        path('login/', TokenLoginView.as_view(), name='login'),
-        path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+        path('account/', include([
+            path('login/', TokenLoginView.as_view(), name='login'),
+            path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+            path('forgot_password/', ForgotPassword.as_view(), name="forgot_password"),
+            path('forgot_password/verify/', ForgotPasswordVerify.as_view(), name="forgot_password_verify"),
+            path('change_password/', ChangePasswordView.as_view(), name='change_password'),
+        ])),
         path('user/', include([
 
         ]))
-    ]))
+    ])),
+
 ]

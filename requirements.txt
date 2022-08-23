@@ -4,3 +4,5 @@ django-cors-headers
 djangorestframework-simplejwt
 drf-yasg
 mysqlclient
+django-twilio
+otp_twilio

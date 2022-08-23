@@ -9,7 +9,6 @@ class ApiCode():
     def success(code=1, message="success", data=None):
         return ApiCode.toDict(code, message, data)
 
-    def success(code=0, message="error", data=None):
+    def error(code=0, message="error", data=None):
         return ApiCode.toDict(code, message, data)
-
 

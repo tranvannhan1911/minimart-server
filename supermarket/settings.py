@@ -43,7 +43,12 @@ INSTALLED_APPS = [
     'management',
     'rest_framework',
     'rest_framework_simplejwt',
-    'drf_yasg'
+    'drf_yasg',
+    'django_twilio',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_hotp',
+    'django_otp.plugins.otp_static',
+    'otp_twilio'
 ]
 
 MIDDLEWARE = [
@@ -180,3 +185,9 @@ SIMPLE_JWT = {
 }
 
 REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
+
+TWILIO_NUMBER = OTP_TWILIO_FROM = "+19705784710"
+TWILIO_ACCOUNT_SID = OTP_TWILIO_ACCOUNT = "AC2b7debcdb06e6517c53147d6a71ad0ff"
+TWILIO_AUTH_TOKEN = OTP_TWILIO_AUTH = "505ddadf9387742819e9839447696739"
+OTP_TWILIO_TOKEN_VALIDITY = 360
+OTP_TWILIO_TOKEN_TEMPLATE = "Mã xác minh của bạn là {token}"

@@ -36,6 +36,35 @@ class User(AbstractUser):
     def __str__(self):
         return self.so_dien_thoai
 
+    @staticmethod
+    def check_exists(so_dien_thoai, is_active=None):
+        if is_active == None:
+            return User.objects.filter(so_dien_thoai=so_dien_thoai).exists()
+        return User.objects.filter(so_dien_thoai=so_dien_thoai, is_active=is_active).exists()
+
+    @staticmethod
+    def format_phone(so_dien_thoai):
+        if so_dien_thoai[:3] != "+84":
+            if so_dien_thoai[0] == "0":
+                so_dien_thoai = "+84"+so_dien_thoai[1:]
+            else:
+                so_dien_thoai = "+84"+so_dien_thoai
+        return so_dien_thoai
+
+    def convert_phone(so_dien_thoai):
+        if so_dien_thoai[:3] == "+84":
+            if so_dien_thoai[3] == "0":
+                so_dien_thoai = so_dien_thoai[3:]
+            else:
+                so_dien_thoai = "0"+so_dien_thoai[3:]
+        return so_dien_thoai
+
+    @staticmethod
+    def random_password():
+        import string
+        import random
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+
     class Meta:
         db_table = 'TaiKhoan'
 

@@ -2,11 +2,13 @@ FROM ubuntu:20.04
 
 WORKDIR /app
 
+ENV TZ=Asia/Ho_Chi_Minh
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt update -y
 
-RUN apt install git gcc g++ make python3-dev \
-    python3-pip libxml2-dev libxslt1-dev zlib1g-dev \
-    libmysqlclient-dev gettext curl -y
+RUN apt install git gcc g++ make python3-dev -y
+RUN apt install python3-pip -y
+RUN apt install libmysqlclient-dev gettext curl -y
 
 COPY requirements.txt .
 
