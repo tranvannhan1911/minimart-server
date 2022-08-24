@@ -86,7 +86,7 @@ class ForgotPassword(generics.GenericAPIView):
         verifier.user = user
         try:
             verifier.generate_challenge()
-        except:
+        except Exception:
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
