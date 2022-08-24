@@ -44,7 +44,7 @@ urlpatterns = [
     path('api/', include([
         path('account/', include([
             path('login/', TokenLoginView.as_view(), name='login'),
-            path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+            path('token/refresh/', MyTokenRefreshView.as_view(), name='token_refresh'),
             path('forgot_password/', ForgotPassword.as_view(), name="forgot_password"),
             path('forgot_password/verify/', ForgotPasswordVerify.as_view(), name="forgot_password_verify"),
             path('change_password/', ChangePasswordView.as_view(), name='change_password'),

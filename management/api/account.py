@@ -14,6 +14,7 @@ from rest_framework_simplejwt.settings import api_settings
 from drf_yasg.utils import swagger_auto_schema
 
 from management.utils.apicode import ApiCode
+from management.utils.swagger import SwaggerSchema
 from management.utils.twilio import MessageClient
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -48,10 +49,10 @@ class TokenLoginView(TokenObtainPairView):
 class MyTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        return ApiCode.success(data=data["access"])
+        return ApiCode.success(data=data)
 
 class MyTokenRefreshView(TokenRefreshView):
-    # _serializer_class = MyTokenRefreshSerializer
+    serializer_class = MyTokenRefreshSerializer
     
     @swagger_auto_schema(responses={200: ResponseTokenAccessSerializer})
     def post(self, request, *args, **kwargs):
@@ -67,7 +68,7 @@ class MyTokenRefreshView(TokenRefreshView):
 class ForgotPassword(generics.GenericAPIView):
     serializer_class = PhoneSerializer
 
-    # @swagger_auto_schema(responses={200: ResponseTokenAccessSerializer})
+    @swagger_auto_schema(responses={200: SwaggerSchema.success()})
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() == False:
@@ -83,19 +84,17 @@ class ForgotPassword(generics.GenericAPIView):
         verifier = TwilioSMSDevice()
         verifier.number = number
         verifier.user = user
-        # print(number)
-        verifier.generate_challenge()
-        # try:
-        #     verifier.generate_challenge()
-        # except:
-        #     return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
+        try:
+            verifier.generate_challenge()
+        except:
+            return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 
 class ForgotPasswordVerify(generics.GenericAPIView):
     serializer_class = PhoneVerifySerializer
 
-    # @swagger_auto_schema(responses={200: ResponseTokenAccessSerializer})
+    @swagger_auto_schema(responses={200: SwaggerSchema.success()})
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() == False:
@@ -124,6 +123,8 @@ class ForgotPasswordVerify(generics.GenericAPIView):
 
 class ChangePasswordView(generics.GenericAPIView):
     serializer_class = ChangePasswordSerializer
+
+    @swagger_auto_schema(responses={200: SwaggerSchema.success()})
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() == False:

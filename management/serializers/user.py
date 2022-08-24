@@ -15,6 +15,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     mat_khau = serializers.CharField()
     mat_khau_moi = serializers.CharField()
 
+############# response ################
 class TokenSerializer(serializers.Serializer):
     access = serializers.CharField()
     refresh = serializers.CharField()

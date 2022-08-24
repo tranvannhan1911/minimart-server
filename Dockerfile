@@ -7,8 +7,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt update -y
 
 RUN apt install git gcc g++ make python3-dev -y
-RUN apt install python3-pip -y
-RUN apt install libmysqlclient-dev gettext curl -y
+RUN apt install python3-pip gettext curl -y
+
+RUN apt update -y
+RUN apt install libmysqlclient-dev -y
 
 COPY requirements.txt .
 

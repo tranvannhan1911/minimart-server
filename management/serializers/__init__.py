@@ -5,5 +5,7 @@ class ResponeSerializer(serializers.Serializer):
     data = serializers.DictField()
     message = serializers.CharField(required = False)
 
-# class ResponeSuccessSerializer(ResponeSerializer):
-#     data = serializers.DictField()
+class ResponeSuccessSerializer(ResponeSerializer):
+    code = serializers.IntegerField(initial=1)
+    data = serializers.DictField(initial=None)
+    message = serializers.CharField(initial="success")

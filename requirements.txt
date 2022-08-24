@@ -5,4 +5,4 @@ djangorestframework-simplejwt
 drf-yasg
 mysqlclient
 django-twilio
-otp_twilio
+django-otp-twilio
