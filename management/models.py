@@ -52,6 +52,7 @@ class User(AbstractUser):
                 phone = "+84"+phone
         return phone
 
+    @staticmethod
     def convert_phone(phone):
         if phone[:3] == "+84":
             if phone[3] == "0":
@@ -209,8 +210,8 @@ class OrderDetail(models.Model):
         db_table = 'OrderDetail'
 
 class InventoryReceivingVoucher(models.Model):
-    voucher_id = models.CharField('Mã phiếu nhập hàng', primary_key=True
-        , max_length=15)
+    voucher_id = models.CharField('Mã phiếu nhập hàng', primary_key=True, 
+        max_length=15)
     date_created = models.DateTimeField('Thời gian tạo')
     status = models.CharField('Trạng thái', max_length=15)
     note = models.TextField('Ghi chú')
