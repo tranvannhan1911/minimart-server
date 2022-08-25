@@ -205,6 +205,9 @@ class OrderDetail(models.Model):
     total = models.FloatField('Thành tiền')
     note = models.TextField('Ghi chú')
 
+    class Meta:
+        db_table = 'OrderDetail'
+
 class InventoryReceivingVoucher(models.Model):
     voucher_id = models.CharField('Mã phiếu nhập hàng', primary_key=True
         , max_length=15)
