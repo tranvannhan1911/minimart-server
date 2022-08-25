@@ -4,16 +4,16 @@ from management.models import User
 from management.serializers import ResponeSerializer
 
 class PhoneSerializer(serializers.Serializer):
-    so_dien_thoai = serializers.CharField()
+    phone = serializers.CharField()
 
 class PhoneVerifySerializer(serializers.Serializer):
-    so_dien_thoai = serializers.CharField()
+    phone = serializers.CharField()
     code = serializers.CharField()
 
 class ChangePasswordSerializer(serializers.Serializer):
-    so_dien_thoai = serializers.CharField()
-    mat_khau = serializers.CharField()
-    mat_khau_moi = serializers.CharField()
+    phone = serializers.CharField()
+    password = serializers.CharField()
+    new_password = serializers.CharField()
 
 ############# response ################
 class TokenSerializer(serializers.Serializer):

@@ -2,15 +2,15 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, so_dien_thoai, password, **extra_fields):
-        if not so_dien_thoai:
+    def create_user(self, phone, password, **extra_fields):
+        if not phone:
             raise ValueError('Số điện thoại không được để trống')
-        user = self.model(so_dien_thoai=so_dien_thoai, **extra_fields)
+        user = self.model(phone=phone, **extra_fields)
         user.set_password(password)
         user.save()
         return user
 
-    def create_superuser(self, so_dien_thoai, password, **extra_fields):
+    def create_superuser(self, phone, password, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
@@ -19,45 +19,46 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-        return self.create_user(so_dien_thoai, password, **extra_fields)
+        return self.create_user(phone, password, **extra_fields)
 
 class User(AbstractUser):
-    so_dien_thoai = models.CharField('Số điện thoại', max_length=15, unique=True)
+    phone = models.CharField('Số điện thoại', max_length=15, unique=True)
 
+    email = None
     username = None
     first_name = None
     last_name = None
 
-    USERNAME_FIELD = 'so_dien_thoai'
+    USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.so_dien_thoai
+        return self.phone
 
     @staticmethod
-    def check_exists(so_dien_thoai, is_active=None):
+    def check_exists(phone, is_active=None):
         if is_active == None:
-            return User.objects.filter(so_dien_thoai=so_dien_thoai).exists()
-        return User.objects.filter(so_dien_thoai=so_dien_thoai, is_active=is_active).exists()
+            return User.objects.filter(phone=phone).exists()
+        return User.objects.filter(phone=phone, is_active=is_active).exists()
 
     @staticmethod
-    def format_phone(so_dien_thoai):
-        if so_dien_thoai[:3] != "+84":
-            if so_dien_thoai[0] == "0":
-                so_dien_thoai = "+84"+so_dien_thoai[1:]
+    def format_phone(phone):
+        if phone[:3] != "+84":
+            if phone[0] == "0":
+                phone = "+84"+phone[1:]
             else:
-                so_dien_thoai = "+84"+so_dien_thoai
-        return so_dien_thoai
+                phone = "+84"+phone
+        return phone
 
-    def convert_phone(so_dien_thoai):
-        if so_dien_thoai[:3] == "+84":
-            if so_dien_thoai[3] == "0":
-                so_dien_thoai = so_dien_thoai[3:]
+    def convert_phone(phone):
+        if phone[:3] == "+84":
+            if phone[3] == "0":
+                phone = phone[3:]
             else:
-                so_dien_thoai = "0"+so_dien_thoai[3:]
-        return so_dien_thoai
+                phone = "0"+phone[3:]
+        return phone
 
     @staticmethod
     def random_password():
@@ -68,135 +69,234 @@ class User(AbstractUser):
     class Meta:
         db_table = 'TaiKhoan'
 
-class KhachHang(models.Model):
-    ma_khach_hang = models.CharField('Mã khách hàng', primary_key=True, 
-        max_length=15)
-    nguoi_dung = models.OneToOneField(User, on_delete=models.CASCADE)
-    ten_khach_hang = models.CharField('Tên khách hàng', max_length=30)
-    gioi_tinh = models.CharField(verbose_name='Giới tính', max_length=1, default='U', choices=(
-        ('M', 'Nam'),
-        ('F', 'Nữ'),
-        ('U', 'Không xác định'),
-    )),
-    ghi_chu = models.TextField('Tên khách hàng', blank=True)
-
-    class Meta:
-        db_table = 'KhachHang'
-
-class NhanVien(models.Model):
-    ma_nhan_vien = models.CharField('Tên nhân viên', primary_key=True
-        , max_length=15)
-    ten_nhan_vien = models.CharField('Tên nhân viên', max_length=30)
-    so_dien_thoai = models.CharField('Số điện thoại', max_length=15)
-    so_cccd = models.CharField('Số căn cước công dân', max_length=15)
-    dia_chi = models.CharField('Địa chỉ', max_length=255)
-    gioi_tinh = models.CharField(verbose_name='Giới tính', max_length=1, default='U', choices=(
-        ('M', 'Nam'),
-        ('F', 'Nữ'),
-        ('U', 'Không xác định'),
-    )),
-    ngay_sinh = models.DateField('Ngày sinh', default='1900-01-01')
-    email = models.CharField('Địa chỉ email', max_length=50)
-    trang_thai = models.BooleanField('Trạng thái')
-
-    class Meta:
-        db_table = 'NhanVien'
-
-class DonHang(models.Model):
-    ma_don_hang = models.CharField('Mã đơn hàng', primary_key=True, 
-        max_length=15)
-    ghi_chu = models.TextField('Ghi chú')
-    khach_hang = models.ForeignKey(KhachHang, on_delete=models.PROTECT)
-
-    class Meta:
-        db_table = 'DonHang'
-
-class LoaiSanPham(models.Model):
-    ma_loai_san_pham = models.CharField('Mã loại sản phẩm', primary_key=True
-        , max_length=15)
-    ten_loai_san_pham = models.CharField('Tên loại sản phẩm', max_length=255)
-    mo_ta = models.TextField('Mô tả loại sản phẩm', 
-        help_text='Mô tả của loại sản phẩm')
-    ghi_chu = models.TextField('Ghi chú', 
-        help_text='Ghi chú nội bộ')
-
-    class Meta:
-        db_table = 'LoaiSanPham'
-
-class NhaCungCap(models.Model):
-    ma_ncc =  models.CharField('Mã nhà cung cấp', primary_key=True
-        , max_length=15)
-    ten_ncc = models.CharField('Tên nhà cung cấp', max_length=100)
-    so_dien_thoai = models.CharField('Số điện thoại', max_length=15)
-    email = models.CharField('Địa chỉ email', max_length=50)
-    ma_so_thue = models.CharField('Địa chỉMã số thuế', max_length=20)
-    dia_chi = models.CharField('Địa chỉ', max_length=255)
-    ghi_chu = models.TextField('Ghi chú', 
-        help_text='Ghi chú nội bộ')
-
-    class Meta:
-        db_table = 'NhaCungCap'
-
-
-class SanPham(models.Model):
-    ma_san_pham = models.CharField('Mã sản phẩm', primary_key=True
-        , max_length=15)
-    ten_san_pham = models.CharField('Tên sản phẩm', max_length=255)
-    mo_ta = models.TextField('Mô tả sản phẩm')
-    hinh_anh = models.CharField('Hình ảnh sản phẩm', max_length=255, blank=True)
-    so_luong = models.PositiveIntegerField('Số lượng')
-    ma_vach = models.CharField('Mã vạch', max_length=15)
-    anh_ma_vach = models.CharField('Ảnh mã vạch', max_length=255)
-    loai_san_pham = models.ForeignKey(LoaiSanPham, on_delete=models.PROTECT,
-        related_name='ds_san_pham')
-    nha_cung_cap = models.ForeignKey(NhaCungCap, on_delete=models.PROTECT,
-        related_name='ds_san_pham')
-
-    class Meta:
-        db_table = 'SanPham'
-
-
-class DonViTinh(models.Model):
-    ma_don_vi = models.AutoField('Mã đơn vị tính', primary_key=True)
-    don_vi = models.CharField('Tên đơn vị tính', max_length=30)
-    gia_tri_quy_doi = models.PositiveIntegerField('Giá trị quy đổi',
-        help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?')
-    don_vi_mac_dinh_ban_hang = models.BooleanField('Đơn vị mặc định bán hàng',
-        help_text='Là đơn vị mặc định để bán hàng hay không?')
-    don_vi_mac_dinh = models.BooleanField('Đơn vị mặc định',
-        help_text='Là đơn vị mặc định hay không (thường là đơn vị nhỏ nhất)')
-    san_pham = models.ForeignKey(SanPham, on_delete=models.CASCADE,
-        related_name='ds_don_vi_tinh')
-
-    class Meta:
-        db_table = 'DonViTinh'
-
-class BienThe(models.Model):
-    ma_bien_the = models.AutoField('Mã biến thể', primary_key=True)
-    ten_bien_the = models.CharField('Tên biến thể', max_length=30)
-    ma_vach = models.CharField('Mã vạch', max_length=15)
-    anh_ma_vach = models.CharField('Ảnh mã vạch', max_length=255)
-    san_pham = models.ForeignKey(SanPham, on_delete=models.CASCADE,
-        related_name='ds_bien_the')
-
-    class Meta:
-        db_table = 'BienThe'
-
-# class PhieuNhapHang(models.Model):
-#     ma_phieu_nhap_hang = models.CharField('Mã phiếu nhập hàng', primary_key=True
-#         , max_length=15)
+class CustomerType(models.Model):
+    name = models.CharField('Tên nhóm khách hàng', max_length=50)
+    description = models.TextField('Mô tả nhóm khách hàng')
+    note = models.TextField('Ghi chú', blank=True)
     
-class BangGia(models.Model):
-    ma_bang_gia = models.AutoField('Mã bảng giá', primary_key=True)
-    san_pham = models.ForeignKey(SanPham, verbose_name='Sản phẩm', on_delete=models.CASCADE,
-        related_name='ds_bang_gia')
-    bien_the = models.ForeignKey(BienThe, verbose_name='Biến thể', on_delete=models.CASCADE,
-        related_name='ds_bang_gia')
-    don_vi_tinh = models.ForeignKey(DonViTinh, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
-        related_name='ds_bang_gia')
-    gia = models.FloatField('Giá bán')
-    bat_dau = models.DateTimeField('Thời gian bắt đầu',
+    class Meta:
+        db_table = 'CustomerType'
+
+
+class Customer(models.Model):
+    customer_id = models.CharField('Mã khách hàng', primary_key=True, 
+        max_length=15)
+    account = models.OneToOneField(User, on_delete=models.CASCADE)
+    type = models.ForeignKey(CustomerType, on_delete=models.PROTECT, null=True)
+    fullname = models.CharField('Tên khách hàng', max_length=30)
+    gender = models.CharField(verbose_name='Giới tính', max_length=1, default='U', choices=(
+        ('M', 'Nam'),
+        ('F', 'Nữ'),
+        ('U', 'Không xác định'),
+    )),
+    note = models.TextField('Ghi chú', blank=True)
+
+    class Meta:
+        db_table = 'Customer'
+
+class Staff(models.Model):
+    staff_id = models.CharField('Mã nhân viên', primary_key=True
+        , max_length=15)
+    fullname = models.CharField('Tên nhân viên', max_length=30)
+    phone = models.CharField('Số điện thoại', max_length=15)
+    cccd = models.CharField('Số căn cước công dân', max_length=15)
+    address = models.CharField('Địa chỉ', max_length=255)
+    gender = models.CharField(verbose_name='Giới tính', max_length=1, default='U', choices=(
+        ('M', 'Nam'),
+        ('F', 'Nữ'),
+        ('U', 'Không xác định'),
+    )),
+    day_of_birth = models.DateField('Ngày sinh', default='1900-01-01')
+    email = models.CharField('Địa chỉ email', max_length=50)
+    status = models.BooleanField('Trạng thái')
+
+    class Meta:
+        db_table = 'Staff'
+
+
+class ProductType(models.Model):
+    product_type_id = models.CharField('Mã loại sản phẩm', primary_key=True
+        , max_length=15)
+    product_type_name = models.CharField('Tên loại sản phẩm', max_length=255)
+    description = models.TextField('Mô tả loại sản phẩm', 
+        help_text='Mô tả của loại sản phẩm')
+    note = models.TextField('Ghi chú', 
+        help_text='Ghi chú nội bộ')
+
+    class Meta:
+        db_table = 'ProductType'
+
+class Supplier(models.Model):
+    supplier_id =  models.CharField('Mã nhà cung cấp', primary_key=True
+        , max_length=15)
+    supplier_name = models.CharField('Tên nhà cung cấp', max_length=100)
+    phone = models.CharField('Số điện thoại', max_length=15)
+    email = models.CharField('Địa chỉ email', max_length=50)
+    address = models.CharField('Địa chỉ', max_length=255)
+    note = models.TextField('Ghi chú', 
+        help_text='Ghi chú nội bộ')
+
+    class Meta:
+        db_table = 'Supplier'
+
+
+class Product(models.Model):
+    product_id = models.CharField('Mã sản phẩm', primary_key=True
+        , max_length=15)
+    product_name = models.CharField('Tên sản phẩm', max_length=255)
+    description = models.TextField('Mô tả sản phẩm')
+    image = models.CharField('Hình ảnh sản phẩm', max_length=255, blank=True)
+    barcode = models.CharField('Mã vạch', max_length=15)
+    barcode_image = models.CharField('Ảnh mã vạch', max_length=255)
+    product_type = models.ForeignKey(ProductType, on_delete=models.PROTECT, 
+        related_name='products', null=True)
+
+    class Meta:
+        db_table = 'Product'
+
+
+class Unit(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
+        related_name='units')
+    unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
+    unit_name = models.CharField('Tên đơn vị tính', max_length=30)
+    value = models.PositiveIntegerField('Giá trị quy đổi',
+        help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?')
+    allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
+        help_text='Cho phép bán hàng bằng đơn vị này không?')
+    is_base_unit = models.BooleanField('Đơn vị cơ bản',
+        help_text='Có phải là đơn vị cơ bản hay không (đơn vị nhỏ nhất)')
+
+    class Meta:
+        db_table = 'Unit'
+    
+class PriceList(models.Model):
+    price_list_id = models.AutoField('Mã bảng giá', primary_key=True)
+    product = models.ForeignKey(Product, verbose_name='Sản phẩm', on_delete=models.CASCADE,
+        related_name='pricelists')
+    unit = models.ForeignKey(Unit, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
+        related_name='pricelists')
+    price = models.FloatField('Giá bán')
+    start_date = models.DateTimeField('Thời gian bắt đầu',
         help_text='Thời gian bắt đâu áp dụng bảng giá')
-    ket_thuc = models.DateTimeField('Thời gian kết thúc',
+    end_date = models.DateTimeField('Thời gian kết thúc',
         help_text='Thời gian kết thúc áp dụng bảng giá')
 
+    class Meta:
+        db_table = 'PriceList'
+
+
+class Order(models.Model):
+    order_id = models.CharField('Mã đơn hàng', primary_key=True, 
+        max_length=15)
+    staff = models.ForeignKey(Staff, on_delete=models.PROTECT, null=True)
+    note = models.TextField('Ghi chú')
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT,
+        related_name='orders', null=True)
+
+    class Meta:
+        db_table = 'Order'
+
+class OrderDetail(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    price = models.ForeignKey(PriceList, on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField('Số lượng')
+    total = models.FloatField('Thành tiền')
+    note = models.TextField('Ghi chú')
+
+class InventoryReceivingVoucher(models.Model):
+    voucher_id = models.CharField('Mã phiếu nhập hàng', primary_key=True
+        , max_length=15)
+    date_created = models.DateTimeField('Thời gian tạo')
+    status = models.CharField('Trạng thái', max_length=15)
+    note = models.TextField('Ghi chú')
+    total = models.FloatField('Thành tiền')
+    
+    class Meta:
+        db_table = 'InventoryReceivingVoucher'
+
+class InventoryReceivingVoucherDetail(models.Model):
+    receiving_voucher = models.ForeignKey(InventoryReceivingVoucher, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField('Số lượng')
+    price = models.FloatField('Giá nhập')
+    note = models.TextField('Ghi chú')
+
+    class Meta:
+        db_table = 'InventoryReceivingVoucherDetail'
+
+class InventoryVoucher(models.Model):
+    voucher_id = models.CharField('Mã phiếu kiểm kê', primary_key=True
+        , max_length=15)
+    date_created = models.DateTimeField('Thời gian tạo')
+    status = models.CharField('Trạng thái', max_length=15)
+    note = models.TextField('Ghi chú')
+
+    class Meta:
+        db_table = 'InventoryVoucher'
+
+class InventoryVoucherDetail(models.Model):
+    inventory_voucher = models.ForeignKey(InventoryVoucher, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    quantity_before = models.PositiveIntegerField('Số lượng trước')
+    quantity_after = models.PositiveIntegerField('Số lượng sau')
+    note = models.TextField('Ghi chú')
+
+    class Meta:
+        db_table = 'InventoryVoucherDetail'
+
+
+class Promotion(models.Model):
+    promotion_code = models.CharField('Mã khuyến mãi', max_length=15)
+    title = models.CharField('Tiêu đề của chương trình khuyến mãi', max_length=255)
+    image = models.CharField('Hình ảnh', max_length=255)
+    
+    applicable_customer_types = models.ManyToManyField(CustomerType, db_table='ApplicableCustomerType')
+
+    start_date = models.DateTimeField('Thời gian bắt đầu áp dụng')
+    end_date = models.DateTimeField('Thời gian kết thúc')
+
+    type = models.CharField('Loại khuyến mãi', max_length=15, choices=(
+        ('Product', 'Tặng sản phẩm'),
+        ('Percent', 'Giảm số tiền theo % hóa đơn'),
+        ('Fixed', 'Giảm số tiền được định trước'),
+    ))
+
+    status = models.CharField('Trạng thái', max_length=15)
+    max_quantity = models.IntegerField('Số lần áp dụng tối đa')
+    max_quantity_per_customer = models.IntegerField('Số lần áp dụng tối đa trên khách hàng')
+    max_quantity_per_customer_per_day = models.IntegerField('Số lần áp dụng tối đa trên khách hàng trên 1 ngày')
+
+    class Meta:
+        db_table = 'Promotion'
+
+class PromotionProductVoucher(models.Model):
+    promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
+    applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct')
+    applicable_product_types = models.ManyToManyField(ProductType, db_table='ApplicableProductType')
+    quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua')
+    quantity_received = models.PositiveIntegerField('Số lượng sản phẩm được nhận')
+
+    class Meta:
+        db_table = 'PromotionProductVoucher'
+
+class PromotionPercentVoucher(models.Model):
+    promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
+    minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn')
+    percent = models.FloatField('Phần trăm giảm giá')
+    maximum_reduction_amount = models.FloatField('Số tiền được giảm tối đa')
+
+    class Meta:
+        db_table = 'PromotionPercentVoucher'
+
+class PromotionFixedVoucher(models.Model):
+    promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
+    minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn')
+    reduction_amount = models.FloatField('Số tiền được giảm')
+
+    class Meta:
+        db_table = 'PromotionFixedVoucher'

@@ -6,3 +6,4 @@ drf-yasg
 mysqlclient
 django-twilio
 django-otp-twilio
+tzdata

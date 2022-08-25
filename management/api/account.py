@@ -74,12 +74,12 @@ class ForgotPassword(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
-        number = User.format_phone(serializer.data["so_dien_thoai"])
-        so_dien_thoai = User.convert_phone(number)
-        if User.check_exists(so_dien_thoai, True) == False:
+        number = User.format_phone(serializer.data["phone"])
+        phone = User.convert_phone(number)
+        if User.check_exists(phone, True) == False:
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
-        user = User.objects.get(so_dien_thoai = so_dien_thoai)
+        user = User.objects.get(phone = phone)
 
         verifier = TwilioSMSDevice()
         verifier.number = number
@@ -100,14 +100,14 @@ class ForgotPasswordVerify(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
-        number = User.format_phone(serializer.data["so_dien_thoai"])
+        number = User.format_phone(serializer.data["phone"])
         code = serializer.data["code"]
-        so_dien_thoai = User.convert_phone(number)
-        if (User.check_exists(so_dien_thoai, True) == False or
+        phone = User.convert_phone(number)
+        if (User.check_exists(phone, True) == False or
             TwilioSMSDevice.objects.filter(number=number, token=code).exists() == False):
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
-        user = User.objects.get(so_dien_thoai = so_dien_thoai)
+        user = User.objects.get(phone = phone)
 
         verifier = TwilioSMSDevice.objects.get(number=number, token=code)
         if verifier.verify_token(code) == False:
@@ -130,18 +130,18 @@ class ChangePasswordView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
-        so_dien_thoai = serializer.data["so_dien_thoai"]
-        mat_khau = serializer.data["mat_khau"]
-        mat_khau_moi = serializer.data["mat_khau_moi"]
+        phone = serializer.data["phone"]
+        password = serializer.data["password"]
+        new_password = serializer.data["new_password"]
 
-        if User.check_exists(so_dien_thoai, True) == False:
+        if User.check_exists(phone, True) == False:
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
-        user = User.objects.get(so_dien_thoai=so_dien_thoai)
-        if user.check_password(mat_khau) == False:
+        user = User.objects.get(phone=phone)
+        if user.check_password(password) == False:
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
         
-        user.set_password(mat_khau_moi)
+        user.set_password(new_password)
         user.save()
 
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
