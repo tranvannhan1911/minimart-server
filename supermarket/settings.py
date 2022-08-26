@@ -148,7 +148,10 @@ AUTH_USER_MODEL = 'management.User'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAdminUser'
+#    ),
 }
 
 SIMPLE_JWT = {
@@ -193,5 +196,12 @@ OTP_TWILIO_TOKEN_VALIDITY = 360
 OTP_TWILIO_TOKEN_TEMPLATE = "Mã xác minh của bạn là {token}"
 
 SWAGGER_SETTINGS = {
-    "DEFAULT_MODEL_RENDERING": "example"
+    "DEFAULT_MODEL_RENDERING": "example",
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        }
+    },
 }

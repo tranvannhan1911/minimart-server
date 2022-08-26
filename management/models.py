@@ -68,7 +68,7 @@ class User(AbstractUser):
         return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
     class Meta:
-        db_table = 'TaiKhoan'
+        db_table = 'Account'
 
 class CustomerType(models.Model):
     name = models.CharField('Tên nhóm khách hàng', max_length=50)
@@ -80,24 +80,26 @@ class CustomerType(models.Model):
 
 
 class Customer(models.Model):
-    customer_id = models.CharField('Mã khách hàng', primary_key=True, 
-        max_length=15)
-    account = models.OneToOneField(User, on_delete=models.CASCADE)
+    customer_id = models.AutoField('Mã khách hàng', primary_key=True)
+    account = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     type = models.ForeignKey(CustomerType, on_delete=models.PROTECT, null=True)
     fullname = models.CharField('Tên khách hàng', max_length=30)
-    gender = models.CharField(verbose_name='Giới tính', max_length=1, default='U', choices=(
+    gender = models.CharField('Giới tính', max_length=1, default='U', choices=(
         ('M', 'Nam'),
         ('F', 'Nữ'),
         ('U', 'Không xác định'),
-    )),
+    ))
     note = models.TextField('Ghi chú', blank=True)
 
     class Meta:
         db_table = 'Customer'
+    
+    @property
+    def get_gender(self):
+        return self.get_gender_display()
 
 class Staff(models.Model):
-    staff_id = models.CharField('Mã nhân viên', primary_key=True
-        , max_length=15)
+    staff_id = models.AutoField('Mã nhân viên', primary_key=True)
     fullname = models.CharField('Tên nhân viên', max_length=30)
     phone = models.CharField('Số điện thoại', max_length=15)
     cccd = models.CharField('Số căn cước công dân', max_length=15)
@@ -106,7 +108,7 @@ class Staff(models.Model):
         ('M', 'Nam'),
         ('F', 'Nữ'),
         ('U', 'Không xác định'),
-    )),
+    ))
     day_of_birth = models.DateField('Ngày sinh', default='1900-01-01')
     email = models.CharField('Địa chỉ email', max_length=50)
     status = models.BooleanField('Trạng thái')
@@ -114,10 +116,12 @@ class Staff(models.Model):
     class Meta:
         db_table = 'Staff'
 
+    @property
+    def get_gender(self):
+        return self.get_gender_display()
 
 class ProductType(models.Model):
-    product_type_id = models.CharField('Mã loại sản phẩm', primary_key=True
-        , max_length=15)
+    product_type_id = models.AutoField('Mã loại sản phẩm', primary_key=True)
     product_type_name = models.CharField('Tên loại sản phẩm', max_length=255)
     description = models.TextField('Mô tả loại sản phẩm', 
         help_text='Mô tả của loại sản phẩm')
@@ -128,8 +132,7 @@ class ProductType(models.Model):
         db_table = 'ProductType'
 
 class Supplier(models.Model):
-    supplier_id =  models.CharField('Mã nhà cung cấp', primary_key=True
-        , max_length=15)
+    supplier_id =  models.AutoField('Mã nhà cung cấp', primary_key=True)
     supplier_name = models.CharField('Tên nhà cung cấp', max_length=100)
     phone = models.CharField('Số điện thoại', max_length=15)
     email = models.CharField('Địa chỉ email', max_length=50)
@@ -142,8 +145,7 @@ class Supplier(models.Model):
 
 
 class Product(models.Model):
-    product_id = models.CharField('Mã sản phẩm', primary_key=True
-        , max_length=15)
+    product_id = models.AutoField('Mã sản phẩm', primary_key=True)
     product_name = models.CharField('Tên sản phẩm', max_length=255)
     description = models.TextField('Mô tả sản phẩm')
     image = models.CharField('Hình ảnh sản phẩm', max_length=255, blank=True)
@@ -157,9 +159,9 @@ class Product(models.Model):
 
 
 class Unit(models.Model):
+    unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
         related_name='units')
-    unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
     unit_name = models.CharField('Tên đơn vị tính', max_length=30)
     value = models.PositiveIntegerField('Giá trị quy đổi',
         help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?')
@@ -188,8 +190,7 @@ class PriceList(models.Model):
 
 
 class Order(models.Model):
-    order_id = models.CharField('Mã đơn hàng', primary_key=True, 
-        max_length=15)
+    order_id = models.AutoField('Mã đơn hàng', primary_key=True)
     staff = models.ForeignKey(Staff, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú')
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT,
@@ -210,8 +211,7 @@ class OrderDetail(models.Model):
         db_table = 'OrderDetail'
 
 class InventoryReceivingVoucher(models.Model):
-    voucher_id = models.CharField('Mã phiếu nhập hàng', primary_key=True, 
-        max_length=15)
+    voucher_id = models.AutoField('Mã phiếu nhập hàng', primary_key=True)
     date_created = models.DateTimeField('Thời gian tạo')
     status = models.CharField('Trạng thái', max_length=15)
     note = models.TextField('Ghi chú')
@@ -233,8 +233,7 @@ class InventoryReceivingVoucherDetail(models.Model):
         db_table = 'InventoryReceivingVoucherDetail'
 
 class InventoryVoucher(models.Model):
-    voucher_id = models.CharField('Mã phiếu kiểm kê', primary_key=True
-        , max_length=15)
+    voucher_id = models.AutoField('Mã phiếu kiểm kê', primary_key=True)
     date_created = models.DateTimeField('Thời gian tạo')
     status = models.CharField('Trạng thái', max_length=15)
     note = models.TextField('Ghi chú')

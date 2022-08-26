@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt import serializers as serializers_jwt
-from management.models import User
+from management.models import Customer, User
 from management.serializers import ResponeSerializer
 
 class PhoneSerializer(serializers.Serializer):
@@ -15,6 +15,28 @@ class ChangePasswordSerializer(serializers.Serializer):
     password = serializers.CharField()
     new_password = serializers.CharField()
 
+class CustomerSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(source='account.phone')
+    class Meta:
+        model = Customer
+        fields = ('customer_id', 'type', 'fullname', 'gender', 'note', 'phone')
+        extra_kwargs = {
+            'customer_id': {
+                'read_only': True
+            }
+        }
+
+    def create(self, validated_data):
+        account = User.objects.create(phone=validated_data["account"]["phone"])
+        validated_data.pop("account")
+        customer = Customer.objects.create(
+            account=account,
+            **validated_data
+        )
+        return customer
+
+
+
 ############# response ################
 class TokenSerializer(serializers.Serializer):
     access = serializers.CharField()
@@ -28,3 +50,12 @@ class TokenAccessSerializer(serializers.Serializer):
 
 class ResponseTokenAccessSerializer(ResponeSerializer):
     data = TokenAccessSerializer()
+
+class ReadCustomerSerializer(serializers.HyperlinkedModelSerializer):
+    phone = serializers.CharField(source='account.phone')
+    class Meta:
+        model = Customer
+        fields = ('customer_id', 'type', 'fullname', 'gender', 'note', 'phone')
+
+class ResponseCustomerSerializer(ResponeSerializer):
+    data = ReadCustomerSerializer()

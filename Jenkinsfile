@@ -96,8 +96,6 @@ pipeline {
             }
             post{
                 success{
-                    sh "docker exec minimart python3 manage.py makemigrations"
-                    sh "docker exec minimart python3 manage.py makemigrations management"
                     sh "docker exec minimart python3 manage.py migrate"
                 }
             }
