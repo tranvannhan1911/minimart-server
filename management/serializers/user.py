@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt import serializers as serializers_jwt
-from management.models import Customer, User
+from management.models import Customer, CustomerType, User
 from management.serializers import ResponeSerializer
 
 class PhoneSerializer(serializers.Serializer):
@@ -68,17 +68,16 @@ class UpdateCustomerSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-        
 
-
-    # def up(self, validated_data):
-    #     account = User.objects.create(phone=validated_data["account"]["phone"])
-    #     validated_data.pop("account")
-    #     customer = Customer.objects.create(
-    #         account=account,
-    #         **validated_data
-    #     )
-    #     return customer
+class CustomerTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerType
+        fields = ('id', 'name', 'description', 'note')
+        extra_kwargs = {
+            'id': {
+                'read_only': True
+            }
+        }
 
 
 ############# response ################

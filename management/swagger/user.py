@@ -102,3 +102,41 @@ class SwaggerUserSchema():
             }
         }
     )
+
+    customer_type_get = openapi.Response(
+        description="Successful",
+        examples={
+            "application/json": {
+                "code": 1,
+                "message": "success",
+                "data": {
+                    "id": 2,
+                    "name": "Khách hàng mới",
+                    "description": "Khách hàng mới",
+                    "note": ""
+                }
+            }
+        }
+    )
+
+    customer_type_list = openapi.Response(
+        description="Successful",
+        examples={
+            "application/json": {
+                "code": 1,
+                "message": "success",
+                "data": {
+                    "count": 1,
+                    "results": [
+                    {
+                        "id": 2,
+                        "name": "Khách hàng mới",
+                        "description": "Khách hàng mới",
+                        "note": ""
+                    }
+                    ]
+                }
+            
+            }
+        }
+    )
