@@ -35,6 +35,50 @@ class CustomerSerializer(serializers.ModelSerializer):
         )
         return customer
 
+class UpdateCustomerSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(source='account.phone')
+    class Meta:
+        model = Customer
+        fields = ('type', 'fullname', 'gender', 'note', 'phone')
+        extra_kwargs = {
+            'type': {
+                'required': True
+            },
+            'fullname': {
+                'required': True
+            },
+            'gender': {
+                'required': True
+            },
+            'note': {
+                'required': True
+            },
+            'phone': {
+                'required': True
+            },
+        }
+
+    def update(self, instance, validated_data):
+        account = User.objects.get(phone=validated_data["account"]["phone"])
+        # instance.account = account
+        instance.type = validated_data["type"]
+        instance.fullname = validated_data["fullname"]
+        instance.gender = validated_data["gender"]
+        instance.note = validated_data["note"]
+        instance.save()
+        return instance
+
+        
+
+
+    # def up(self, validated_data):
+    #     account = User.objects.create(phone=validated_data["account"]["phone"])
+    #     validated_data.pop("account")
+    #     customer = Customer.objects.create(
+    #         account=account,
+    #         **validated_data
+    #     )
+    #     return customer
 
 
 ############# response ################
@@ -51,7 +95,7 @@ class TokenAccessSerializer(serializers.Serializer):
 class ResponseTokenAccessSerializer(ResponeSerializer):
     data = TokenAccessSerializer()
 
-class ReadCustomerSerializer(serializers.HyperlinkedModelSerializer):
+class ReadCustomerSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(source='account.phone')
     class Meta:
         model = Customer

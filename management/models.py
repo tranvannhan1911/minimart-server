@@ -101,7 +101,7 @@ class Customer(models.Model):
 class Staff(models.Model):
     staff_id = models.AutoField('Mã nhân viên', primary_key=True)
     fullname = models.CharField('Tên nhân viên', max_length=30)
-    phone = models.CharField('Số điện thoại', max_length=15)
+    phone = models.CharField('Số điện thoại', max_length=15, unique=True)
     cccd = models.CharField('Số căn cước công dân', max_length=15)
     address = models.CharField('Địa chỉ', max_length=255)
     gender = models.CharField(verbose_name='Giới tính', max_length=1, default='U', choices=(
@@ -111,7 +111,7 @@ class Staff(models.Model):
     ))
     day_of_birth = models.DateField('Ngày sinh', default='1900-01-01')
     email = models.CharField('Địa chỉ email', max_length=50)
-    status = models.BooleanField('Trạng thái')
+    status = models.BooleanField('Trạng thái', default=True)
 
     class Meta:
         db_table = 'Staff'

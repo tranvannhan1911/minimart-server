@@ -1,19 +1,8 @@
 from drf_yasg import openapi
 from management.serializers import ResponeSuccessSerializer
 from management.utils.apicode import ApiCode
-class SwaggerSchema():
 
-    token = openapi.Parameter("Authorization", in_="header", type="string")
-
-    @staticmethod
-    def success():
-        return openapi.Response(
-            description="Successful",
-            schema=ResponeSuccessSerializer,
-            examples={
-                "application/json": ApiCode.success()
-            }
-        )
+class SwaggerUserSchema():
 
     @staticmethod
     def customer_info():
@@ -62,6 +51,54 @@ class SwaggerSchema():
                         }
                         ]
                     }
-                    }
+                }
             }
         )
+
+    staff_get = openapi.Response(
+        description="Successful",
+        examples={
+            "application/json": {
+                "code": 1,
+                "message": "success",
+                "data": {
+                    "staff_id": 1,
+                    "phone": "0987654321",
+                    "fullname": "Nhân Trần",
+                    "cccd": "128912812892",
+                    "address": "Thủ Đức",
+                    "gender": "M",
+                    "day_of_birth": "2001-11-19",
+                    "email": "tranvannhan1911@gmail.com",
+                    "status": True
+                }
+            }
+        }
+    )
+
+    staff_list = openapi.Response(
+        description="Successful",
+        examples={
+            "application/json": {
+                "code": 1,
+                "message": "success",
+                "data": {
+                    "count": 1,
+                    "results": [
+                    {
+                        "staff_id": 1,
+                        "phone": "0987654321",
+                        "fullname": "Nhân Trần",
+                        "cccd": "128912812892",
+                        "address": "Thủ Đức",
+                        "gender": "M",
+                        "day_of_birth": "2001-11-19",
+                        "email": "tranvannhan1911@gmail.com",
+                        "status": True
+                    }
+                    ]
+                }
+            
+            }
+        }
+    )

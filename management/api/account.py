@@ -14,7 +14,7 @@ from rest_framework_simplejwt.settings import api_settings
 from drf_yasg.utils import swagger_auto_schema
 
 from management.utils.apicode import ApiCode
-from management.utils.swagger import SwaggerSchema
+from management.swagger import SwaggerSchema
 from management.utils.twilio import MessageClient
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):

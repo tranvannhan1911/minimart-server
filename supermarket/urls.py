@@ -24,7 +24,8 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
 
-from management.api.customer import AddCustomerView, GetCustomerView, ListCustomerView
+from management.api.customer import AddCustomerView, DeleteCustomerView, GetCustomerView, ListCustomerView, UpdateCustomerView
+from management.api.staff import AddStaffView, DeleteStaffView, GetStaffView, ListStaffView, UpdateStaffView
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -55,7 +56,16 @@ urlpatterns = [
         path('customer/', include([
             path('', ListCustomerView.as_view(), name='get_customer'),
             path('add/', AddCustomerView.as_view(), name='add_customer'),
-            path('<int:customer_id>/', GetCustomerView.as_view(), name='get_customer')
+            path('<int:customer_id>/', GetCustomerView.as_view(), name='get_customer'),
+            path('<int:customer_id>/update/', UpdateCustomerView.as_view(), name='update_customer'),
+            path('<int:customer_id>/delete/', DeleteCustomerView.as_view(), name='delete_customer'),
+        ])),
+        path('staff/', include([
+            path('', ListStaffView.as_view(), name='get_staff'),
+            path('add/', AddStaffView.as_view(), name='add_staff'),
+            path('<int:staff_id>/', GetStaffView.as_view(), name='get_staff'),
+            path('<int:staff_id>/update/', UpdateStaffView.as_view(), name='update_staff'),
+            path('<int:staff_id>/delete/', DeleteStaffView.as_view(), name='update_staff'),
         ]))
     ])),
 

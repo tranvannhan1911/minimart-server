@@ -9,11 +9,15 @@ from management import serializers
 
 from management.models import Customer
 
-from management.serializers.user import CustomerSerializer, ReadCustomerSerializer, ResponseCustomerSerializer
+from management.serializers.user import (
+    CustomerSerializer, ReadCustomerSerializer, 
+    ResponseCustomerSerializer, UpdateCustomerSerializer
+)
 from management.utils.apicode import ApiCode
 from drf_yasg.utils import swagger_auto_schema
 
-from management.utils.swagger import SwaggerSchema
+from management.swagger import SwaggerSchema
+from management.swagger.user import  SwaggerUserSchema
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class AddCustomerView(generics.GenericAPIView):
@@ -23,7 +27,7 @@ class AddCustomerView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerSchema.customer_info()})
+        responses={200: SwaggerUserSchema.customer_info()})
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() == False:
@@ -38,6 +42,28 @@ class AddCustomerView(generics.GenericAPIView):
         response = ReadCustomerSerializer(customer)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
+class UpdateCustomerView(generics.GenericAPIView):
+    serializer_class = UpdateCustomerSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (permissions.IsAdminUser,)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerUserSchema.customer_info()})
+        
+    def put(self, request, customer_id):
+        customer = get_object_or_404(Customer, customer_id=customer_id)
+        serializer = self.get_serializer(customer, data=request.data)
+
+        if serializer.is_valid() == False:
+            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+
+        customer = serializer.save()
+        customer = Customer.objects.get(customer_id=customer.customer_id)
+
+        response = ReadCustomerSerializer(customer)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
+
 class GetCustomerView(generics.RetrieveAPIView):
     # serializer_class = CustomerSerializer
     authentication_classes = [JWTAuthentication]
@@ -45,14 +71,32 @@ class GetCustomerView(generics.RetrieveAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerSchema.customer_info()})
+        responses={200: SwaggerUserSchema.customer_info()})
+        
     def get(self, request, customer_id):
         if not Customer.objects.filter(customer_id=customer_id).exists():
-            return Response(data = ApiCode.error(), status = status.HTTP_404_OK)
+            return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
         customer = Customer.objects.get(customer_id=customer_id)
         response = ReadCustomerSerializer(customer)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
+ 
+class DeleteCustomerView(generics.DestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (permissions.IsAdminUser,)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerSchema.success()})
+
+    def delete(self, request, customer_id):
+        if not Customer.objects.filter(customer_id=customer_id).exists():
+            return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
+
+        customer = Customer.objects.get(customer_id=customer_id)
+        customer.delete()
+        return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+
 
 class ListCustomerView(generics.GenericAPIView):
     serializer_class = ReadCustomerSerializer
@@ -64,7 +108,7 @@ class ListCustomerView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerSchema.customer_list})
+        responses={200: SwaggerUserSchema.customer_list})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         response = self.get_serializer(data=queryset, many=True)
