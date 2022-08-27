@@ -178,9 +178,9 @@ class PriceList(models.Model):
     price_list_id = models.AutoField('Mã bảng giá', primary_key=True)
     
     start_date = models.DateTimeField('Thời gian bắt đầu',
-        help_text='Thời gian bắt đâu áp dụng bảng giá')
+        help_text='Thời gian bắt đâu áp dụng bảng giá', default=timezone.now)
     end_date = models.DateTimeField('Thời gian kết thúc',
-        help_text='Thời gian kết thúc áp dụng bảng giá')
+        help_text='Thời gian kết thúc áp dụng bảng giá', default=timezone.now)
     status = models.BooleanField('Trạng thái', default=True)
 
     class Meta:
@@ -189,9 +189,9 @@ class PriceList(models.Model):
 class PriceDetail(models.Model):
     pricelist = models.ForeignKey(PriceList, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, verbose_name='Sản phẩm', on_delete=models.CASCADE,
-        related_name='pricelists', null=True)
+        related_name='pricedetails', null=True)
     unit = models.ForeignKey(Unit, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
-        related_name='pricelists', null=True)
+        related_name='pricedetails', null=True)
     price = models.FloatField('Giá bán', default=0)
 
     class Meta:
@@ -203,7 +203,8 @@ class Order(models.Model):
     note = models.TextField('Ghi chú')
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT,
         related_name='orders', null=True)
-    date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now())
+    date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now)
+    total = models.FloatField('Thành tiền', default=0)
 
     class Meta:
         db_table = 'Order'
@@ -211,9 +212,11 @@ class Order(models.Model):
 class OrderDetail(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    price = models.ForeignKey(PriceList, on_delete=models.PROTECT)
+    unit = models.ForeignKey(Unit, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
+        null=True)
+    price = models.ForeignKey(PriceDetail, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField('Số lượng')
-    total = models.FloatField('Thành tiền')
+    total = models.FloatField('Thành tiền', default=0)
     note = models.TextField('Ghi chú')
 
     class Meta:
@@ -224,24 +227,27 @@ class Refund(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     staff = models.ForeignKey(Staff, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú')
-    date_created = models.DateTimeField('Ngày trả hàng', default=timezone.now())
+    date_created = models.DateTimeField('Ngày trả hàng', default=timezone.now)
 
     class Meta:
         db_table = 'Refund'
 
 class InventoryReceivingVoucher(models.Model):
     voucher_id = models.AutoField('Mã phiếu nhập hàng', primary_key=True)
-    status = models.CharField('Trạng thái', max_length=15)
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, null=True)
+    status = models.CharField('Trạng thái', max_length=15, choices=(
+        ("pending", "Chờ xác nhận"),
+        ("complete", "Hoàn thành"),
+    ))
     note = models.TextField('Ghi chú')
     total = models.FloatField('Thành tiền')
-    date_created = models.DateTimeField('Ngày nhập hàng', default=timezone.now())
+    date_created = models.DateTimeField('Ngày nhập hàng', default=timezone.now)
     
     class Meta:
         db_table = 'InventoryReceivingVoucher'
 
 class InventoryReceivingVoucherDetail(models.Model):
     receiving_voucher = models.ForeignKey(InventoryReceivingVoucher, on_delete=models.CASCADE)
-    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField('Số lượng')
@@ -253,9 +259,9 @@ class InventoryReceivingVoucherDetail(models.Model):
 
 class InventoryVoucher(models.Model):
     voucher_id = models.AutoField('Mã phiếu kiểm kê', primary_key=True)
-    status = models.CharField('Trạng thái', max_length=15)
+    # status = models.CharField('Trạng thái', max_length=15)
     note = models.TextField('Ghi chú')
-    date_created = models.DateTimeField('Ngày tạo phiếu kiểm kê', default=timezone.now())
+    date_created = models.DateTimeField('Ngày tạo phiếu kiểm kê', default=timezone.now)
 
     class Meta:
         db_table = 'InventoryVoucher'
@@ -273,9 +279,10 @@ class InventoryVoucherDetail(models.Model):
 
 class WarehouseTransaction(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    order = models.ForeignKey(Order, on_delete=models.PROTECT, null=True)
-    inventory_voucher = models.ForeignKey(InventoryVoucher, on_delete=models.PROTECT, null=True)
-    receiving_voucher = models.ForeignKey(InventoryReceivingVoucher, on_delete=models.PROTECT, null=True)
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, null=True)
+    order_detail = models.ForeignKey(OrderDetail, on_delete=models.PROTECT, null=True)
+    inventory_receiving_detail = models.ForeignKey(InventoryReceivingVoucherDetail, on_delete=models.PROTECT, null=True)
+    inventory_detail = models.ForeignKey(InventoryVoucherDetail, on_delete=models.PROTECT, null=True)
     change = models.IntegerField('Thay đổi')
     type = models.CharField("Loại biến động", max_length=30, choices=(
         ('order', 'Bán hàng'),
@@ -283,7 +290,7 @@ class WarehouseTransaction(models.Model):
         ('inventory_receiving', 'Nhập hàng'),
         ('refund', 'Trả hàng'),
     ))
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now())
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
 
     class Meta:
         db_table = 'WarehouseTransaction'
@@ -295,8 +302,8 @@ class Promotion(models.Model):
     
     applicable_customer_groups = models.ManyToManyField(CustomerGroup, db_table='ApplicableCustomerGroup')
 
-    start_date = models.DateTimeField('Thời gian bắt đầu áp dụng')
-    end_date = models.DateTimeField('Thời gian kết thúc')
+    start_date = models.DateTimeField('Thời gian bắt đầu áp dụng', default=timezone.now)
+    end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
 
     status = models.BooleanField('Trạng thái')
     max_quantity = models.IntegerField('Số lần áp dụng tối đa')
@@ -345,7 +352,7 @@ class PromotionHistory(models.Model):
         ('Fixed', 'Giảm số tiền được định trước'),
     ))
     reduction_amount = models.FloatField('Số tiền được giảm', null=True)
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now())
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
 
     class Meta:
         db_table = 'PromotionHistory'
