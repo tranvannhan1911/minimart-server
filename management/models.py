@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.utils import timezone
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password, **extra_fields):
@@ -202,6 +203,7 @@ class Order(models.Model):
     note = models.TextField('Ghi chú')
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT,
         related_name='orders', null=True)
+    date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now())
 
     class Meta:
         db_table = 'Order'
@@ -222,16 +224,17 @@ class Refund(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     staff = models.ForeignKey(Staff, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú')
+    date_created = models.DateTimeField('Ngày trả hàng', default=timezone.now())
 
     class Meta:
         db_table = 'Refund'
 
 class InventoryReceivingVoucher(models.Model):
     voucher_id = models.AutoField('Mã phiếu nhập hàng', primary_key=True)
-    date_created = models.DateTimeField('Thời gian tạo')
     status = models.CharField('Trạng thái', max_length=15)
     note = models.TextField('Ghi chú')
     total = models.FloatField('Thành tiền')
+    date_created = models.DateTimeField('Ngày nhập hàng', default=timezone.now())
     
     class Meta:
         db_table = 'InventoryReceivingVoucher'
@@ -250,9 +253,9 @@ class InventoryReceivingVoucherDetail(models.Model):
 
 class InventoryVoucher(models.Model):
     voucher_id = models.AutoField('Mã phiếu kiểm kê', primary_key=True)
-    date_created = models.DateTimeField('Thời gian tạo')
     status = models.CharField('Trạng thái', max_length=15)
     note = models.TextField('Ghi chú')
+    date_created = models.DateTimeField('Ngày tạo phiếu kiểm kê', default=timezone.now())
 
     class Meta:
         db_table = 'InventoryVoucher'
@@ -280,6 +283,7 @@ class WarehouseTransaction(models.Model):
         ('inventory_receiving', 'Nhập hàng'),
         ('refund', 'Trả hàng'),
     ))
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now())
 
     class Meta:
         db_table = 'WarehouseTransaction'
@@ -341,6 +345,7 @@ class PromotionHistory(models.Model):
         ('Fixed', 'Giảm số tiền được định trước'),
     ))
     reduction_amount = models.FloatField('Số tiền được giảm', null=True)
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now())
 
     class Meta:
         db_table = 'PromotionHistory'
