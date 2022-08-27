@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 
-from management.models import CustomerType
-from management.serializers.user import CustomerTypeSerializer
+from management.models import CustomerGroup
+from management.serializers.user import CustomerGroupSerializer
 from management.utils.apicode import ApiCode
 from drf_yasg.utils import swagger_auto_schema
 
@@ -14,37 +14,37 @@ from management.swagger import SwaggerSchema
 from management.swagger.user import  SwaggerUserSchema
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-class AddCustomerTypeView(generics.GenericAPIView):
-    serializer_class = CustomerTypeSerializer
+class AddCustomerGroupView(generics.GenericAPIView):
+    serializer_class = CustomerGroupSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = (permissions.IsAdminUser,)
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerUserSchema.customer_type_get})
+        responses={200: SwaggerUserSchema.customer_group_get})
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        customer_type = serializer.save()
+        customer_group = serializer.save()
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
-class UpdateCustomerTypeView(generics.GenericAPIView):
-    serializer_class = CustomerTypeSerializer
+class UpdateCustomerGroupView(generics.GenericAPIView):
+    serializer_class = CustomerGroupSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = (permissions.IsAdminUser,)
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerUserSchema.customer_type_get})
+        responses={200: SwaggerUserSchema.customer_group_get})
         
     def put(self, request, id):
-        if not CustomerType.objects.filter(pk=id).exists():
+        if not CustomerGroup.objects.filter(pk=id).exists():
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
-        customer_type = CustomerType.objects.get(pk=id)
-        serializer = self.get_serializer(customer_type, data=request.data)
+        customer_group = CustomerGroup.objects.get(pk=id)
+        serializer = self.get_serializer(customer_group, data=request.data)
 
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
@@ -52,33 +52,33 @@ class UpdateCustomerTypeView(generics.GenericAPIView):
         serializer.save()
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
-class GetCustomerTypeView(generics.RetrieveAPIView):
-    # serializer_class = CustomerTypeSerializer
+class GetCustomerGroupView(generics.RetrieveAPIView):
+    # serializer_class = CustomerGroupSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = (permissions.IsAuthenticated,)
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerUserSchema.customer_type_get})
+        responses={200: SwaggerUserSchema.customer_group_get})
     def get(self, request, id):
-        if not CustomerType.objects.filter(pk=id).exists():
+        if not CustomerGroup.objects.filter(pk=id).exists():
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
-        customer_type = CustomerType.objects.get(pk=id)
-        response = CustomerTypeSerializer(customer_type)
+        customer_group = CustomerGroup.objects.get(pk=id)
+        response = CustomerGroupSerializer(customer_group)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
-class ListCustomerTypeView(generics.GenericAPIView):
-    serializer_class = CustomerTypeSerializer
+class ListCustomerGroupView(generics.GenericAPIView):
+    serializer_class = CustomerGroupSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        return CustomerType.objects.all()
+        return CustomerGroup.objects.all()
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerUserSchema.customer_type_list})
+        responses={200: SwaggerUserSchema.customer_group_list})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         response = self.get_serializer(data=queryset, many=True)
@@ -89,7 +89,7 @@ class ListCustomerTypeView(generics.GenericAPIView):
         }), status = status.HTTP_200_OK)
 
 
-class DeleteCustomerTypeView(generics.DestroyAPIView):
+class DeleteCustomerGroupView(generics.DestroyAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = (permissions.IsAdminUser,)
 
@@ -98,10 +98,10 @@ class DeleteCustomerTypeView(generics.DestroyAPIView):
         responses={200: SwaggerSchema.success()})
 
     def delete(self, request, id):
-        if not CustomerType.objects.filter(pk=id).exists():
+        if not CustomerGroup.objects.filter(pk=id).exists():
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
-        customer_type = CustomerType.objects.get(pk=id)
-        customer_type.delete()
+        customer_group = CustomerGroup.objects.get(pk=id)
+        customer_group.delete()
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 

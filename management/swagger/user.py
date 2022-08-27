@@ -103,7 +103,7 @@ class SwaggerUserSchema():
         }
     )
 
-    customer_type_get = openapi.Response(
+    customer_group_get = openapi.Response(
         description="Successful",
         examples={
             "application/json": {
@@ -119,7 +119,7 @@ class SwaggerUserSchema():
         }
     )
 
-    customer_type_list = openapi.Response(
+    customer_group_list = openapi.Response(
         description="Successful",
         examples={
             "application/json": {

@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
                 ('max_quantity', models.IntegerField(verbose_name='Số lần áp dụng tối đa')),
                 ('max_quantity_per_customer', models.IntegerField(verbose_name='Số lần áp dụng tối đa trên khách hàng')),
                 ('max_quantity_per_customer_per_day', models.IntegerField(verbose_name='Số lần áp dụng tối đa trên khách hàng trên 1 ngày')),
-                ('applicable_customer_types', models.ManyToManyField(db_table='ApplicableCustomerType', to='management.customertype')),
+                ('applicable_customer_groups', models.ManyToManyField(db_table='ApplicableCustomerType', to='management.customertype')),
             ],
         ),
         migrations.RemoveField(

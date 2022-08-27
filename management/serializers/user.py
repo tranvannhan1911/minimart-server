@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt import serializers as serializers_jwt
-from management.models import Customer, CustomerType, User
+from management.models import Customer, CustomerGroup, User
 from management.serializers import ResponeSerializer
 
 class PhoneSerializer(serializers.Serializer):
@@ -69,9 +69,9 @@ class UpdateCustomerSerializer(serializers.ModelSerializer):
         return instance
 
 
-class CustomerTypeSerializer(serializers.ModelSerializer):
+class CustomerGroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomerType
+        model = CustomerGroup
         fields = ('id', 'name', 'description', 'note')
         extra_kwargs = {
             'id': {

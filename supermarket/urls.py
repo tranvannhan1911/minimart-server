@@ -25,7 +25,7 @@ from drf_yasg import openapi
 from django_twilio.views import sms
 
 from management.api.customer import AddCustomerView, DeleteCustomerView, GetCustomerView, ListCustomerView, UpdateCustomerView
-from management.api.customer_type import AddCustomerTypeView, DeleteCustomerTypeView, GetCustomerTypeView, ListCustomerTypeView, UpdateCustomerTypeView
+from management.api.customer_group import AddCustomerGroupView, DeleteCustomerGroupView, GetCustomerGroupView, ListCustomerGroupView, UpdateCustomerGroupView
 from management.api.staff import AddStaffView, DeleteStaffView, GetStaffView, ListStaffView, UpdateStaffView
 
 schema_view = get_schema_view(
@@ -61,12 +61,12 @@ urlpatterns = [
             path('<int:customer_id>/update/', UpdateCustomerView.as_view(), name='update_customer'),
             path('<int:customer_id>/delete/', DeleteCustomerView.as_view(), name='delete_customer'),
         ])),
-        path('customer-type/', include([
-            path('', ListCustomerTypeView.as_view(), name='get_customer_type'),
-            path('add/', AddCustomerTypeView.as_view(), name='add_customer_type'),
-            path('<int:id>/', GetCustomerTypeView.as_view(), name='get_customer_type'),
-            path('<int:id>/update/', UpdateCustomerTypeView.as_view(), name='update_customer_type'),
-            path('<int:id>/delete/', DeleteCustomerTypeView.as_view(), name='delete_customer_type'),
+        path('customer-group/', include([
+            path('', ListCustomerGroupView.as_view(), name='get_customer_group'),
+            path('add/', AddCustomerGroupView.as_view(), name='add_customer_group'),
+            path('<int:id>/', GetCustomerGroupView.as_view(), name='get_customer_group'),
+            path('<int:id>/update/', UpdateCustomerGroupView.as_view(), name='update_customer_group'),
+            path('<int:id>/delete/', DeleteCustomerGroupView.as_view(), name='delete_customer_group'),
         ])),
         path('staff/', include([
             path('', ListStaffView.as_view(), name='get_staff'),
