@@ -205,3 +205,5 @@ SWAGGER_SETTINGS = {
         }
     },
 }
+
+CORS_ALLOW_ALL_ORIGINS = True

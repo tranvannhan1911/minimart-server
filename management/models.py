@@ -90,6 +90,7 @@ class Customer(models.Model):
         ('F', 'Nữ'),
         ('U', 'Không xác định'),
     ))
+    address = models.CharField('Địa chỉ', max_length=255, null=True)
     note = models.TextField('Ghi chú', blank=True)
 
     class Meta:
@@ -144,6 +145,16 @@ class Supplier(models.Model):
     class Meta:
         db_table = 'Supplier'
 
+class HierarchyTree(models.Model):
+    name = models.CharField('Tên cấp', max_length=50)
+    level = models.IntegerField('Cấp', default=0)
+    type = models.CharField('Loại', max_length=15, choices=(
+        ("product", "Sản phẩm"),
+    ))
+    parent = models.ForeignKey("management.HierarchyTree", on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        db_table = 'HierarchyTree'
 
 class Product(models.Model):
     product_id = models.AutoField('Mã sản phẩm', primary_key=True)
@@ -152,7 +163,9 @@ class Product(models.Model):
     image = models.CharField('Hình ảnh sản phẩm', max_length=255, blank=True)
     barcode = models.CharField('Mã vạch', max_length=15)
     barcode_image = models.CharField('Ảnh mã vạch', max_length=255)
-    product_type = models.ForeignKey(ProductGroup, on_delete=models.PROTECT, 
+    product_group = models.ForeignKey(ProductGroup, on_delete=models.PROTECT, 
+        related_name='products', null=True)
+    product_type = models.ForeignKey(HierarchyTree, on_delete=models.PROTECT, 
         related_name='products', null=True)
 
     class Meta:
@@ -205,6 +218,11 @@ class Order(models.Model):
         related_name='orders', null=True)
     date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now)
     total = models.FloatField('Thành tiền', default=0)
+    status = models.CharField('Trạng thái', max_length=15, default="pending", choices=(
+        ('pending', 'Đang chờ'),
+        ('complete', 'Hoàn tất'),
+        ('cancel', 'Đã hủy đơn / hoàn trả')
+    ))
 
     class Meta:
         db_table = 'Order'
@@ -296,7 +314,6 @@ class WarehouseTransaction(models.Model):
         db_table = 'WarehouseTransaction'
 
 class Promotion(models.Model):
-    promotion_code = models.CharField('Mã khuyến mãi', max_length=15)
     title = models.CharField('Tiêu đề của chương trình khuyến mãi', max_length=255)
     image = models.CharField('Hình ảnh', max_length=255)
     
@@ -314,6 +331,7 @@ class Promotion(models.Model):
         db_table = 'Promotion'
 
 class PromotionProductVoucher(models.Model):
+    promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True)
     promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
     applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct')
     applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup')
@@ -324,6 +342,7 @@ class PromotionProductVoucher(models.Model):
         db_table = 'PromotionProductVoucher'
 
 class PromotionPercentVoucher(models.Model):
+    promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True)
     promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
     minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn')
     percent = models.FloatField('Phần trăm giảm giá')
@@ -333,6 +352,7 @@ class PromotionPercentVoucher(models.Model):
         db_table = 'PromotionPercentVoucher'
 
 class PromotionFixedVoucher(models.Model):
+    promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True)
     promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
     minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn')
     reduction_amount = models.FloatField('Số tiền được giảm')
@@ -351,6 +371,7 @@ class PromotionHistory(models.Model):
         ('Percent', 'Giảm số tiền theo % hóa đơn'),
         ('Fixed', 'Giảm số tiền được định trước'),
     ))
+    reduction_quantity = models.PositiveIntegerField('Số lượng sản phẩm được nhận', default=0)
     reduction_amount = models.FloatField('Số tiền được giảm', null=True)
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
 
