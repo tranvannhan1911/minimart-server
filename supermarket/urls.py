@@ -31,7 +31,7 @@ from management.api.staff import AddStaffView, DeleteStaffView, GetStaffView, Li
 schema_view = get_schema_view(
    openapi.Info(
       title="Quản lý siêu thị mini API",
-      default_version='v2',
+      default_version='v3',
       description="Quản lý siêu thị mini API",
    ),
    public=True,
