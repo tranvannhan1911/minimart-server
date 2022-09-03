@@ -190,6 +190,9 @@ class UnitExchange(models.Model):
         help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?')
     allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
         help_text='Cho phép bán hàng bằng đơn vị này không?')
+
+    class Meta:
+        db_table = 'UnitExchange'
     
 class PriceList(models.Model):
     price_list_id = models.AutoField('Mã bảng giá', primary_key=True)
@@ -390,3 +393,6 @@ class History(models.Model):
         ('DELETE', "Xóa"),
     ))
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, verbose_name="Người thực hiện")
+
+    class Meta:
+        db_table = 'History'
