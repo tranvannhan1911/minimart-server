@@ -13,12 +13,19 @@ class SwaggerUserSchema():
                     "code": 1,
                     "message": "success",
                     "data": {
-                        "customer_id": 36,
-                        "type": 2,
-                        "fullname": "Trần Văn Nhân",
-                        "gender": "U",
+                        "customer_id": 55,
+                        "customer_group": [
+                            {
+                                "id": 3,
+                                "name": "Khách hàng thân thiết",
+                                "description": "Khách hàng thân thiết",
+                                "note": "string"
+                            }
+                        ],
+                        "fullname": "Lê Dương",
+                        "gender": "M",
                         "note": "",
-                        "phone": "0987654344"
+                        "phone": "0987654342"
                     }
                 }
             }
@@ -34,12 +41,19 @@ class SwaggerUserSchema():
                         "count": 2,
                         "results": [
                         {
-                            "customer_id": 36,
-                            "type": None,
-                            "fullname": "Trần",
-                            "gender": "U",
+                            "customer_id": 55,
+                            "customer_group": [
+                                {
+                                    "id": 3,
+                                    "name": "Khách hàng thân thiết",
+                                    "description": "Khách hàng thân thiết",
+                                    "note": "string"
+                                }
+                            ],
+                            "fullname": "Lê Dương",
+                            "gender": "M",
                             "note": "",
-                            "phone": "0987654344"
+                            "phone": "0987654342"
                         },
                         {
                             "customer_id": 37,
@@ -137,6 +151,27 @@ class SwaggerUserSchema():
                     ]
                 }
             
+            }
+        }
+    )
+
+    get_info_account = openapi.Response(
+        description="Successful",
+        examples={
+            "application/json": {
+                "code": 1,
+                "message": "success",
+                "data": {
+                    "id": 2,
+                    "last_login": None,
+                    "is_superuser": True,
+                    "is_staff": True,
+                    "is_active": True,
+                    "date_joined": "2022-08-22T18:11:01.223032Z",
+                    "phone": "0369462308",
+                    "groups": [],
+                    "user_permissions": []
+                }
             }
         }
     )

@@ -7,7 +7,7 @@ from django.forms.models import model_to_dict
 from rest_framework import permissions
 from management import serializers
 
-from management.models import Customer
+from management.models import Customer, User
 
 from management.serializers.user import (
     CustomerSerializer, ReadCustomerSerializer, 
@@ -33,10 +33,12 @@ class AddCustomerView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        try:
-            serializer.save()
-        except Exception:
-            return Response(data = ApiCode.error(message={"phone": ["duplicated"]}), status = status.HTTP_200_OK)
+        if User.objects.filter(phone=serializer.validated_data["account"]["phone"]).exists():
+            return Response(data = ApiCode.error(message="Số điện thoại bị trùng"), status = status.HTTP_200_OK)
+        # try:
+        serializer.save()
+        # except Exception:
+        #     return Response(data = ApiCode.error(message={"phone": ["duplicated"]}), status = status.HTTP_200_OK)
 
         customer = Customer.objects.get(account__phone=serializer.data["phone"])
         response = ReadCustomerSerializer(customer)

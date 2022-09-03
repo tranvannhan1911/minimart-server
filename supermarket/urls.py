@@ -15,7 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from management.api.account import ChangePasswordView, ForgotPassword, ForgotPasswordVerify, MyTokenRefreshView, TokenLoginView
+from management.api.account import (
+    ChangePasswordView, ForgotPassword, 
+    ForgotPasswordVerify, MyTokenRefreshView, 
+    TokenLoginView, GetInfoView
+)
 from rest_framework_simplejwt.views import (
     TokenRefreshView, TokenObtainPairView
 )
@@ -53,6 +57,7 @@ urlpatterns = [
             path('forgot_password/', ForgotPassword.as_view(), name="forgot_password"),
             path('forgot_password/verify/', ForgotPasswordVerify.as_view(), name="forgot_password_verify"),
             path('change_password/', ChangePasswordView.as_view(), name='change_password'),
+            path('get_info/', GetInfoView.as_view(), name='get_info'),
         ])),
         path('customer/', include([
             path('', ListCustomerView.as_view(), name='get_customer'),

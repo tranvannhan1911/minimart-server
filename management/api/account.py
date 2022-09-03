@@ -1,6 +1,10 @@
 from management import serializers
 from management.models import User
-from management.serializers.user import ChangePasswordSerializer, PhoneSerializer, PhoneVerifySerializer, ResponseTokenAccessSerializer, ResponseTokenSerializer
+from management.serializers.user import (
+    ChangePasswordSerializer, PhoneSerializer, 
+    PhoneVerifySerializer, ResponseTokenAccessSerializer, 
+    ResponseTokenSerializer, AccountSerializer
+)
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -12,6 +16,8 @@ from rest_framework import status
 from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.settings import api_settings
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import permissions
 
 from management.utils.apicode import ApiCode
 from management.swagger import SwaggerSchema
@@ -145,3 +151,15 @@ class ChangePasswordView(generics.GenericAPIView):
         user.save()
 
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+
+class GetInfoView(generics.GenericAPIView):
+    # serializer_class = ChangePasswordSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (permissions.IsAdminUser,)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerSchema.success()})
+    def get(self, request):
+        respone = AccountSerializer(request.user)
+        return Response(data = ApiCode.success(data=respone.data), status = status.HTTP_200_OK)

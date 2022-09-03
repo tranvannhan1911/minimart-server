@@ -83,7 +83,7 @@ class CustomerGroup(models.Model):
 class Customer(models.Model):
     customer_id = models.AutoField('Mã khách hàng', primary_key=True)
     account = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-    type = models.ForeignKey(CustomerGroup, on_delete=models.PROTECT, null=True)
+    customer_group = models.ManyToManyField(CustomerGroup, db_table='CustomerGroupDetail')
     fullname = models.CharField('Tên khách hàng', max_length=30)
     gender = models.CharField('Giới tính', max_length=1, default='U', choices=(
         ('M', 'Nam'),
@@ -156,6 +156,15 @@ class HierarchyTree(models.Model):
     class Meta:
         db_table = 'HierarchyTree'
 
+
+class Unit(models.Model):
+    unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
+    unit_name = models.CharField('Tên đơn vị tính', max_length=30)    
+
+    class Meta:
+        db_table = 'Unit'
+
+
 class Product(models.Model):
     product_id = models.AutoField('Mã sản phẩm', primary_key=True)
     product_name = models.CharField('Tên sản phẩm', max_length=255)
@@ -167,29 +176,23 @@ class Product(models.Model):
         related_name='products', null=True)
     product_type = models.ForeignKey(HierarchyTree, on_delete=models.PROTECT, 
         related_name='products', null=True)
-
+    base_unit = models.ForeignKey(Unit, on_delete=models.CASCADE, verbose_name='Đơn vị cơ bản',
+        help_text='Đơn vị cơ bản', null=True)
     class Meta:
         db_table = 'Product'
 
-
-class Unit(models.Model):
-    unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
+class UnitExchange(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
-        related_name='units')
-    unit_name = models.CharField('Tên đơn vị tính', max_length=30)
+        related_name='unitexchanges')
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE,
+        related_name='unitexchanges')
     value = models.PositiveIntegerField('Giá trị quy đổi',
         help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?')
     allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
         help_text='Cho phép bán hàng bằng đơn vị này không?')
-    is_base_unit = models.BooleanField('Đơn vị cơ bản',
-        help_text='Có phải là đơn vị cơ bản hay không (đơn vị nhỏ nhất)')
-
-    class Meta:
-        db_table = 'Unit'
     
 class PriceList(models.Model):
     price_list_id = models.AutoField('Mã bảng giá', primary_key=True)
-    
     start_date = models.DateTimeField('Thời gian bắt đầu',
         help_text='Thời gian bắt đâu áp dụng bảng giá', default=timezone.now)
     end_date = models.DateTimeField('Thời gian kết thúc',
@@ -203,7 +206,7 @@ class PriceDetail(models.Model):
     pricelist = models.ForeignKey(PriceList, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, verbose_name='Sản phẩm', on_delete=models.CASCADE,
         related_name='pricedetails', null=True)
-    unit = models.ForeignKey(Unit, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
+    unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
         related_name='pricedetails', null=True)
     price = models.FloatField('Giá bán', default=0)
 
@@ -230,7 +233,7 @@ class Order(models.Model):
 class OrderDetail(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    unit = models.ForeignKey(Unit, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
+    unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
         null=True)
     price = models.ForeignKey(PriceDetail, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField('Số lượng')
@@ -267,7 +270,7 @@ class InventoryReceivingVoucher(models.Model):
 class InventoryReceivingVoucherDetail(models.Model):
     receiving_voucher = models.ForeignKey(InventoryReceivingVoucher, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    unit_exchange = models.ForeignKey(UnitExchange, on_delete=models.PROTECT, null=True)
     quantity = models.PositiveIntegerField('Số lượng')
     price = models.FloatField('Giá nhập')
     note = models.TextField('Ghi chú')
@@ -287,7 +290,7 @@ class InventoryVoucher(models.Model):
 class InventoryVoucherDetail(models.Model):
     inventory_voucher = models.ForeignKey(InventoryVoucher, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    unit_exchange = models.ForeignKey(UnitExchange, on_delete=models.PROTECT, null=True)
     quantity_before = models.PositiveIntegerField('Số lượng trước')
     quantity_after = models.PositiveIntegerField('Số lượng sau')
     note = models.TextField('Ghi chú')
@@ -297,7 +300,7 @@ class InventoryVoucherDetail(models.Model):
 
 class WarehouseTransaction(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, null=True)
+    UnitExchange = models.ForeignKey(UnitExchange, on_delete=models.PROTECT, null=True)
     order_detail = models.ForeignKey(OrderDetail, on_delete=models.PROTECT, null=True)
     inventory_receiving_detail = models.ForeignKey(InventoryReceivingVoucherDetail, on_delete=models.PROTECT, null=True)
     inventory_detail = models.ForeignKey(InventoryVoucherDetail, on_delete=models.PROTECT, null=True)
@@ -377,3 +380,13 @@ class PromotionHistory(models.Model):
 
     class Meta:
         db_table = 'PromotionHistory'
+
+class History(models.Model):
+    object_name = models.CharField('Tên đối tượng', max_length=50)
+    object_id = models.CharField('Mã đối tượng', max_length=50)
+    action = models.CharField('Hành động', max_length=15, choices=(
+        ('CREATE', "Tạo mới"),
+        ('UPDATE', "Cập nhật"),
+        ('DELETE', "Xóa"),
+    ))
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, verbose_name="Người thực hiện")

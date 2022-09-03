@@ -19,7 +19,7 @@ class CustomerSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(source='account.phone')
     class Meta:
         model = Customer
-        fields = ('customer_id', 'type', 'fullname', 'gender', 'note', 'phone')
+        fields = ('customer_id', 'customer_group', 'fullname', 'gender', 'note', 'phone', 'address')
         extra_kwargs = {
             'customer_id': {
                 'read_only': True
@@ -28,20 +28,24 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         account = User.objects.create(phone=validated_data["account"]["phone"])
+        customer_groups = validated_data["customer_group"]
         validated_data.pop("account")
+        validated_data.pop("customer_group")
         customer = Customer.objects.create(
             account=account,
             **validated_data
         )
+        for cg in customer_groups:
+            customer.customer_group.add(cg)
         return customer
 
 class UpdateCustomerSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(source='account.phone')
     class Meta:
         model = Customer
-        fields = ('type', 'fullname', 'gender', 'note', 'phone')
+        fields = ('customer_group', 'fullname', 'gender', 'note', 'phone', 'address')
         extra_kwargs = {
-            'type': {
+            'customer_group': {
                 'required': True
             },
             'fullname': {
@@ -53,7 +57,7 @@ class UpdateCustomerSerializer(serializers.ModelSerializer):
             'note': {
                 'required': True
             },
-            'phone': {
+            'address': {
                 'required': True
             },
         }
@@ -61,7 +65,7 @@ class UpdateCustomerSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         account = User.objects.get(phone=validated_data["account"]["phone"])
         # instance.account = account
-        instance.type = validated_data["type"]
+        instance.customer_group = validated_data["customer_group"]
         instance.fullname = validated_data["fullname"]
         instance.gender = validated_data["gender"]
         instance.note = validated_data["note"]
@@ -79,6 +83,10 @@ class CustomerGroupSerializer(serializers.ModelSerializer):
             }
         }
 
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password', )
 
 ############# response ################
 class TokenSerializer(serializers.Serializer):
@@ -94,11 +102,15 @@ class TokenAccessSerializer(serializers.Serializer):
 class ResponseTokenAccessSerializer(ResponeSerializer):
     data = TokenAccessSerializer()
 
+
+
 class ReadCustomerSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(source='account.phone')
+    customer_group = CustomerGroupSerializer(read_only=True, many=True)
+    # type = serializers.RelatedField(many=True)
     class Meta:
         model = Customer
-        fields = ('customer_id', 'type', 'fullname', 'gender', 'note', 'phone')
+        fields = ('customer_id', 'customer_group', 'fullname', 'gender', 'note', 'phone', 'address')
 
 class ResponseCustomerSerializer(ResponeSerializer):
     data = ReadCustomerSerializer()
