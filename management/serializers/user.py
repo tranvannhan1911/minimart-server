@@ -27,7 +27,7 @@ class CustomerSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        account = User.objects.create(phone=validated_data["account"]["phone"])
+        account = User.objects.create(phone=validated_data["account"]["phone"]) 
         customer_groups = validated_data["customer_group"]
         validated_data.pop("account")
         validated_data.pop("customer_group")
@@ -50,26 +50,22 @@ class UpdateCustomerSerializer(serializers.ModelSerializer):
             },
             'fullname': {
                 'required': True
-            },
-            'gender': {
-                'required': True
-            },
-            'note': {
-                'required': True
-            },
-            'address': {
-                'required': True
-            },
+            }
         }
 
     def update(self, instance, validated_data):
-        account = User.objects.get(phone=validated_data["account"]["phone"])
+        # account = User.objects.get(phone=validated_data["account"]["phone"])
         # instance.account = account
-        instance.customer_group = validated_data["customer_group"]
         instance.fullname = validated_data["fullname"]
-        instance.gender = validated_data["gender"]
-        instance.note = validated_data["note"]
+        instance.gender = validated_data["gender"] if "address" in validated_data.keys() else "U"
+        instance.address = validated_data["address"] if "address" in validated_data.keys() else ""
+        instance.note = validated_data["note"] if "note" in validated_data.keys() else ""
         instance.save()
+
+        customer_groups = validated_data["customer_group"]
+        instance.customer_group.clear()
+        for cg in customer_groups:
+            instance.customer_group.add(cg)
         return instance
 
 
@@ -107,10 +103,14 @@ class ResponseTokenAccessSerializer(ResponeSerializer):
 class ReadCustomerSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(source='account.phone')
     customer_group = CustomerGroupSerializer(read_only=True, many=True)
+    # gender = serializers.CharField(source='get_gender_display')
     # type = serializers.RelatedField(many=True)
     class Meta:
         model = Customer
         fields = ('customer_id', 'customer_group', 'fullname', 'gender', 'note', 'phone', 'address')
+
+    # def get_gender(self, obj):
+    #     return obj.get_gender_display()
 
 class ResponseCustomerSerializer(ResponeSerializer):
     data = ReadCustomerSerializer()

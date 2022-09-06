@@ -82,7 +82,7 @@ class CustomerGroup(models.Model):
 
 class Customer(models.Model):
     customer_id = models.AutoField('Mã khách hàng', primary_key=True)
-    account = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    account = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name='customer')
     customer_group = models.ManyToManyField(CustomerGroup, db_table='CustomerGroupDetail')
     fullname = models.CharField('Tên khách hàng', max_length=30)
     gender = models.CharField('Giới tính', max_length=1, default='U', choices=(

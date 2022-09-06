@@ -96,7 +96,11 @@ class DeleteCustomerView(generics.DestroyAPIView):
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
         customer = Customer.objects.get(customer_id=customer_id)
-        customer.delete()
+        account = User.objects.get(customer=customer)
+        try:
+            account.delete()
+        except:
+            return Response(data = ApiCode.error(message="Không thể xóa khách hàng này"), status = status.HTTP_200_OK)
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 
 
