@@ -41,6 +41,13 @@ class User(AbstractUser):
     ))
     address = models.CharField('Địa chỉ', max_length=255, null=True)
     note = models.TextField('Ghi chú', blank=True)
+    
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey("management.User", on_delete=models.PROTECT, 
+        null=True, related_name="users_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey("management.User", on_delete=models.PROTECT, 
+        null=True, related_name="users_updated")
 
     email = None
     username = None
@@ -86,7 +93,7 @@ class User(AbstractUser):
         return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
     class Meta:
-        db_table = 'NguoiDung'
+        db_table = 'User'
 
 
 class ProductGroup(models.Model):
@@ -96,18 +103,32 @@ class ProductGroup(models.Model):
         help_text='Mô tả của loại sản phẩm')
     note = models.TextField('Ghi chú', 
         help_text='Ghi chú nội bộ')
+    
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="product_group_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="product_group_updated")
 
     class Meta:
         db_table = 'ProductGroup'
 
 class Supplier(models.Model):
     supplier_id =  models.AutoField('Mã nhà cung cấp', primary_key=True)
-    supplier_name = models.CharField('Tên nhà cung cấp', max_length=100)
+    name = models.CharField('Tên nhà cung cấp', max_length=100)
     phone = models.CharField('Số điện thoại', max_length=15)
     email = models.CharField('Địa chỉ email', max_length=50)
     address = models.CharField('Địa chỉ', max_length=255)
     note = models.TextField('Ghi chú', 
         help_text='Ghi chú nội bộ')
+
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="suppliers_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="suppliers_updated")
 
     class Meta:
         db_table = 'Supplier'
@@ -120,16 +141,29 @@ class HierarchyTree(models.Model):
     ))
     parent = models.ForeignKey("management.HierarchyTree", on_delete=models.CASCADE, null=True)
 
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="hierarchy_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="hierarchy_updated")
+
     class Meta:
         db_table = 'HierarchyTree'
 
 
-class Unit(models.Model):
+class CalculationUnit(models.Model):
     unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
-    unit_name = models.CharField('Tên đơn vị tính', max_length=30)    
+    name = models.CharField('Tên đơn vị tính', max_length=50)    
 
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="units_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="units_updated")
     class Meta:
-        db_table = 'Unit'
+        db_table = 'CalculationUnit'
 
 
 class Product(models.Model):
@@ -139,29 +173,45 @@ class Product(models.Model):
     image = models.CharField('Hình ảnh sản phẩm', max_length=255, blank=True)
     barcode = models.CharField('Mã vạch', max_length=15)
     barcode_image = models.CharField('Ảnh mã vạch', max_length=255)
-    product_group = models.ForeignKey(ProductGroup, on_delete=models.PROTECT, 
+    product_groups = models.ManyToManyField(ProductGroup, related_name='products', 
+        db_table='ProductGroupDetail', null=True)
+    product_category = models.ForeignKey(HierarchyTree, on_delete=models.PROTECT, 
         related_name='products', null=True)
-    product_type = models.ForeignKey(HierarchyTree, on_delete=models.PROTECT, 
-        related_name='products', null=True)
-    base_unit = models.ForeignKey(Unit, on_delete=models.CASCADE, verbose_name='Đơn vị cơ bản',
+    base_unit = models.ForeignKey(CalculationUnit, on_delete=models.CASCADE, verbose_name='Đơn vị cơ bản',
         help_text='Đơn vị cơ bản', null=True)
+
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="products_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="products_updated")
+    
     class Meta:
         db_table = 'Product'
 
 class UnitExchange(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
         related_name='unitexchanges')
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE,
+    unit = models.ForeignKey(CalculationUnit, on_delete=models.CASCADE,
         related_name='unitexchanges')
     value = models.PositiveIntegerField('Giá trị quy đổi',
         help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?')
     allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
         help_text='Cho phép bán hàng bằng đơn vị này không?')
 
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="unit_exchange_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="unit_exchange_updated")
+
     class Meta:
         db_table = 'UnitExchange'
     
 class PriceList(models.Model):
+    name = models.CharField('Tên bảng giá', max_length=50, default="")    
     price_list_id = models.AutoField('Mã bảng giá', primary_key=True)
     start_date = models.DateTimeField('Thời gian bắt đầu',
         help_text='Thời gian bắt đâu áp dụng bảng giá', default=timezone.now)
@@ -169,6 +219,13 @@ class PriceList(models.Model):
         help_text='Thời gian kết thúc áp dụng bảng giá', default=timezone.now)
     status = models.BooleanField('Trạng thái', default=True)
 
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="pricelists_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="pricelists_updated")
+    
     class Meta:
         db_table = 'PriceList'
 
@@ -179,23 +236,30 @@ class PriceDetail(models.Model):
     unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
         related_name='pricedetails', null=True)
     price = models.FloatField('Giá bán', default=0)
+    start_date = models.DateTimeField('Thời gian bắt đầu', default=timezone.now)
+    end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
 
     class Meta:
         db_table = 'PriceDetail'
 
 class Order(models.Model):
     order_id = models.AutoField('Mã đơn hàng', primary_key=True)
-    staff = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú')
     customer = models.ForeignKey(User, on_delete=models.PROTECT,
         related_name='orders', null=True)
-    date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now)
     total = models.FloatField('Thành tiền', default=0)
     status = models.CharField('Trạng thái', max_length=15, default="pending", choices=(
         ('pending', 'Đang chờ'),
         ('complete', 'Hoàn tất'),
         ('cancel', 'Đã hủy đơn / hoàn trả')
     ))
+
+    date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="orders_created")
+    date_updated = models.DateTimeField('Ngày cập nhật hóa đơn', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="orders_updated")
 
     class Meta:
         db_table = 'Order'
@@ -213,15 +277,32 @@ class OrderDetail(models.Model):
     class Meta:
         db_table = 'OrderDetail'
 
-class Refund(models.Model):
+class OrderRefund(models.Model):
     refund_id = models.AutoField('Mã trả hàng', primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     staff = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú')
-    date_created = models.DateTimeField('Ngày trả hàng', default=timezone.now)
+
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="orders_refund_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="orders_refund_updated")
+    
+    class Meta:
+        db_table = 'OrderRefund'
+
+class OrderRefundDetail(models.Model):
+    order_refund = models.ForeignKey(OrderRefund, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
+        null=True)
+    quantity = models.PositiveIntegerField('Số lượng')
+    note = models.TextField('Ghi chú')
 
     class Meta:
-        db_table = 'Refund'
+        db_table = 'OrderRefundDetail'
 
 class InventoryReceivingVoucher(models.Model):
     voucher_id = models.AutoField('Mã phiếu nhập hàng', primary_key=True)
@@ -229,10 +310,17 @@ class InventoryReceivingVoucher(models.Model):
     status = models.CharField('Trạng thái', max_length=15, choices=(
         ("pending", "Chờ xác nhận"),
         ("complete", "Hoàn thành"),
+        ("cancel", "Hủy"),
     ))
     note = models.TextField('Ghi chú')
     total = models.FloatField('Thành tiền')
-    date_created = models.DateTimeField('Ngày nhập hàng', default=timezone.now)
+    
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="inventory_receiving_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="inventory_receiving_updated")
     
     class Meta:
         db_table = 'InventoryReceivingVoucher'
@@ -252,8 +340,14 @@ class InventoryVoucher(models.Model):
     voucher_id = models.AutoField('Mã phiếu kiểm kê', primary_key=True)
     # status = models.CharField('Trạng thái', max_length=15)
     note = models.TextField('Ghi chú')
-    date_created = models.DateTimeField('Ngày tạo phiếu kiểm kê', default=timezone.now)
-
+    
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="inventory_created")
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="inventory_updated")
+    
     class Meta:
         db_table = 'InventoryVoucher'
 
@@ -270,10 +364,9 @@ class InventoryVoucherDetail(models.Model):
 
 class WarehouseTransaction(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    UnitExchange = models.ForeignKey(UnitExchange, on_delete=models.PROTECT, null=True)
-    order_detail = models.ForeignKey(OrderDetail, on_delete=models.PROTECT, null=True)
-    inventory_receiving_detail = models.ForeignKey(InventoryReceivingVoucherDetail, on_delete=models.PROTECT, null=True)
-    inventory_detail = models.ForeignKey(InventoryVoucherDetail, on_delete=models.PROTECT, null=True)
+    unit_exchange = models.ForeignKey(UnitExchange, on_delete=models.PROTECT, null=True)
+    reference = models.CharField("Hóa đơn hoặc mã phiếu", max_length=30, null=True)
+
     change = models.IntegerField('Thay đổi')
     type = models.CharField("Loại biến động", max_length=30, choices=(
         ('order', 'Bán hàng'),
@@ -288,63 +381,61 @@ class WarehouseTransaction(models.Model):
 
 class Promotion(models.Model):
     title = models.CharField('Tiêu đề của chương trình khuyến mãi', max_length=255)
+    description = models.TextField('Mô tả chương trình khuyến mãi', default="")
     image = models.CharField('Hình ảnh', max_length=255)
     
-    applicable_customer_groups = models.ManyToManyField(CustomerGroup, db_table='ApplicableCustomerGroup')
+    applicable_customer_groups = models.ManyToManyField(CustomerGroup, db_table='ApplicableCustomerGroup', null=True)
 
     start_date = models.DateTimeField('Thời gian bắt đầu áp dụng', default=timezone.now)
     end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
 
     status = models.BooleanField('Trạng thái')
-    max_quantity = models.IntegerField('Số lần áp dụng tối đa')
-    max_quantity_per_customer = models.IntegerField('Số lần áp dụng tối đa trên khách hàng')
-    max_quantity_per_customer_per_day = models.IntegerField('Số lần áp dụng tối đa trên khách hàng trên 1 ngày')
 
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    user_created = models.ForeignKey(User, on_delete=models.PROTECT, related_name="promotions_created", 
+        null=True)
+    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+        null=True, related_name="promotions_updated")
+    
     class Meta:
         db_table = 'Promotion'
 
-class PromotionProductVoucher(models.Model):
+class PromotionDetail(models.Model):
     promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True)
     promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
-    applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct')
-    applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup')
-    quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua')
-    quantity_received = models.PositiveIntegerField('Số lượng sản phẩm được nhận')
+    type = models.CharField('Loại khuyến mãi', max_length=15, choices=(
+        ('Product', 'Khuyến mãi sản phẩm'),
+        ('Percent', 'Khuyến mãi theo phần trăm hóa đơn'),
+        ('Fixed', 'Khuyến mãi số tiền nhất định'),
+    ))
+    start_date = models.DateTimeField('Thời gian bắt đầu áp dụng', default=timezone.now)
+    end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
+    status = models.BooleanField('Trạng thái')
+    max_quantity = models.IntegerField('Số lần áp dụng tối đa', null=True)
+    max_quantity_per_customer = models.IntegerField('Số lần áp dụng tối đa trên khách hàng', null=True)
+    max_quantity_per_customer_per_day = models.IntegerField('Số lần áp dụng tối đa trên khách hàng trên 1 ngày', null=True)
+    # Product
+    applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct', null=True)
+    applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup', null=True)
+    quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua', null=True)
+    quantity_received = models.PositiveIntegerField('Số lượng sản phẩm được nhận', null=True)
+    # Percent
+    minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn', null=True)
+    percent = models.FloatField('Phần trăm giảm giá', null=True)
+    maximum_reduction_amount = models.FloatField('Số tiền được giảm tối đa', null=True)
+    # Fixed
+    reduction_amount = models.FloatField('Số tiền được giảm', null=True)
 
     class Meta:
-        db_table = 'PromotionProductVoucher'
-
-class PromotionPercentVoucher(models.Model):
-    promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True)
-    promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
-    minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn')
-    percent = models.FloatField('Phần trăm giảm giá')
-    maximum_reduction_amount = models.FloatField('Số tiền được giảm tối đa')
-
-    class Meta:
-        db_table = 'PromotionPercentVoucher'
-
-class PromotionFixedVoucher(models.Model):
-    promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True)
-    promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
-    minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn')
-    reduction_amount = models.FloatField('Số tiền được giảm')
-
-    class Meta:
-        db_table = 'PromotionFixedVoucher'
+        db_table = 'PromotionDetail'
 
 class PromotionHistory(models.Model):
-    product_voucher = models.ForeignKey(PromotionProductVoucher, on_delete=models.PROTECT, null=True)
-    percent_voucher = models.ForeignKey(PromotionPercentVoucher, on_delete=models.PROTECT, null=True)
-    fixed_voucher = models.ForeignKey(PromotionFixedVoucher, on_delete=models.PROTECT, null=True)
+    promotion_detail = models.ForeignKey(PromotionDetail, on_delete=models.PROTECT, null=True)
     order = models.ForeignKey(Order, on_delete=models.PROTECT, null=True)
     order_detail = models.ForeignKey(OrderDetail, on_delete=models.PROTECT, null=True)
-    type = models.CharField('Loại khuyến mãi', max_length=15, choices=(
-        ('Product', 'Tặng sản phẩm'),
-        ('Percent', 'Giảm số tiền theo % hóa đơn'),
-        ('Fixed', 'Giảm số tiền được định trước'),
-    ))
-    reduction_quantity = models.PositiveIntegerField('Số lượng sản phẩm được nhận', default=0)
+
+    reduction_quantity = models.PositiveIntegerField('Số lượng sản phẩm được nhận', default=0, null=True)
     reduction_amount = models.FloatField('Số tiền được giảm', null=True)
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
 
@@ -360,6 +451,7 @@ class History(models.Model):
         ('DELETE', "Xóa"),
     ))
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, verbose_name="Người thực hiện")
+    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
 
     class Meta:
         db_table = 'History'
