@@ -22,8 +22,25 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
         return self.create_user(phone, password, **extra_fields)
 
+class CustomerGroup(models.Model):
+    name = models.CharField('Tên nhóm khách hàng', max_length=50)
+    description = models.TextField('Mô tả nhóm khách hàng')
+    note = models.TextField('Ghi chú', blank=True)
+    
+    class Meta:
+        db_table = 'CustomerGroup'
+
 class User(AbstractUser):
     phone = models.CharField('Số điện thoại', max_length=15, unique=True)
+    customer_group = models.ManyToManyField(CustomerGroup, db_table='CustomerGroupDetail')
+    fullname = models.CharField('Tên khách hàng', max_length=30, null=True)
+    gender = models.CharField('Giới tính', max_length=1, default='U', choices=(
+        ('M', 'Nam'),
+        ('F', 'Nữ'),
+        ('U', 'Không xác định'),
+    ))
+    address = models.CharField('Địa chỉ', max_length=255, null=True)
+    note = models.TextField('Ghi chú', blank=True)
 
     email = None
     username = None
@@ -69,58 +86,8 @@ class User(AbstractUser):
         return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
     class Meta:
-        db_table = 'Account'
+        db_table = 'NguoiDung'
 
-class CustomerGroup(models.Model):
-    name = models.CharField('Tên nhóm khách hàng', max_length=50)
-    description = models.TextField('Mô tả nhóm khách hàng')
-    note = models.TextField('Ghi chú', blank=True)
-    
-    class Meta:
-        db_table = 'CustomerGroup'
-
-
-class Customer(models.Model):
-    customer_id = models.AutoField('Mã khách hàng', primary_key=True)
-    account = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name='customer')
-    customer_group = models.ManyToManyField(CustomerGroup, db_table='CustomerGroupDetail')
-    fullname = models.CharField('Tên khách hàng', max_length=30)
-    gender = models.CharField('Giới tính', max_length=1, default='U', choices=(
-        ('M', 'Nam'),
-        ('F', 'Nữ'),
-        ('U', 'Không xác định'),
-    ))
-    address = models.CharField('Địa chỉ', max_length=255, null=True)
-    note = models.TextField('Ghi chú', blank=True)
-
-    class Meta:
-        db_table = 'Customer'
-    
-    @property
-    def get_gender(self):
-        return self.get_gender_display()
-
-class Staff(models.Model):
-    staff_id = models.AutoField('Mã nhân viên', primary_key=True)
-    fullname = models.CharField('Tên nhân viên', max_length=30)
-    phone = models.CharField('Số điện thoại', max_length=15, unique=True)
-    cccd = models.CharField('Số căn cước công dân', max_length=15)
-    address = models.CharField('Địa chỉ', max_length=255)
-    gender = models.CharField(verbose_name='Giới tính', max_length=1, default='U', choices=(
-        ('M', 'Nam'),
-        ('F', 'Nữ'),
-        ('U', 'Không xác định'),
-    ))
-    day_of_birth = models.DateField('Ngày sinh', default='1900-01-01')
-    email = models.CharField('Địa chỉ email', max_length=50)
-    status = models.BooleanField('Trạng thái', default=True)
-
-    class Meta:
-        db_table = 'Staff'
-
-    @property
-    def get_gender(self):
-        return self.get_gender_display()
 
 class ProductGroup(models.Model):
     product_type_id = models.AutoField('Mã loại sản phẩm', primary_key=True)
@@ -218,9 +185,9 @@ class PriceDetail(models.Model):
 
 class Order(models.Model):
     order_id = models.AutoField('Mã đơn hàng', primary_key=True)
-    staff = models.ForeignKey(Staff, on_delete=models.PROTECT, null=True)
+    staff = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú')
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT,
+    customer = models.ForeignKey(User, on_delete=models.PROTECT,
         related_name='orders', null=True)
     date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now)
     total = models.FloatField('Thành tiền', default=0)
@@ -249,7 +216,7 @@ class OrderDetail(models.Model):
 class Refund(models.Model):
     refund_id = models.AutoField('Mã trả hàng', primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
-    staff = models.ForeignKey(Staff, on_delete=models.PROTECT, null=True)
+    staff = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú')
     date_created = models.DateTimeField('Ngày trả hàng', default=timezone.now)
 

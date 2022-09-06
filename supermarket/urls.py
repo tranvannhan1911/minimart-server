@@ -28,9 +28,9 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
 
-from management.api.customer import AddCustomerView, DeleteCustomerView, GetCustomerView, ListCustomerView, UpdateCustomerView
-from management.api.customer_group import AddCustomerGroupView, DeleteCustomerGroupView, GetCustomerGroupView, ListCustomerGroupView, UpdateCustomerGroupView
-from management.api.staff import AddStaffView, DeleteStaffView, GetStaffView, ListStaffView, UpdateStaffView
+# from management.api.customer import AddCustomerView, DeleteCustomerView, GetCustomerView, ListCustomerView, UpdateCustomerView
+# from management.api.customer_group import AddCustomerGroupView, DeleteCustomerGroupView, GetCustomerGroupView, ListCustomerGroupView, UpdateCustomerGroupView
+# from management.api.staff import AddStaffView, DeleteStaffView, GetStaffView, ListStaffView, UpdateStaffView
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -59,27 +59,27 @@ urlpatterns = [
             path('change_password/', ChangePasswordView.as_view(), name='change_password'),
             path('get_info/', GetInfoView.as_view(), name='get_info'),
         ])),
-        path('customer/', include([
-            path('', ListCustomerView.as_view(), name='get_customer'),
-            path('add/', AddCustomerView.as_view(), name='add_customer'),
-            path('<int:customer_id>/', GetCustomerView.as_view(), name='get_customer'),
-            path('<int:customer_id>/update/', UpdateCustomerView.as_view(), name='update_customer'),
-            path('<int:customer_id>/delete/', DeleteCustomerView.as_view(), name='delete_customer'),
-        ])),
-        path('customer-group/', include([
-            path('', ListCustomerGroupView.as_view(), name='get_customer_group'),
-            path('add/', AddCustomerGroupView.as_view(), name='add_customer_group'),
-            path('<int:id>/', GetCustomerGroupView.as_view(), name='get_customer_group'),
-            path('<int:id>/update/', UpdateCustomerGroupView.as_view(), name='update_customer_group'),
-            path('<int:id>/delete/', DeleteCustomerGroupView.as_view(), name='delete_customer_group'),
-        ])),
-        path('staff/', include([
-            path('', ListStaffView.as_view(), name='get_staff'),
-            path('add/', AddStaffView.as_view(), name='add_staff'),
-            path('<int:staff_id>/', GetStaffView.as_view(), name='get_staff'),
-            path('<int:staff_id>/update/', UpdateStaffView.as_view(), name='update_staff'),
-            path('<int:staff_id>/delete/', DeleteStaffView.as_view(), name='update_staff'),
-        ]))
+        # path('customer/', include([
+        #     path('', ListCustomerView.as_view(), name='get_customer'),
+        #     path('add/', AddCustomerView.as_view(), name='add_customer'),
+        #     path('<int:customer_id>/', GetCustomerView.as_view(), name='get_customer'),
+        #     path('<int:customer_id>/update/', UpdateCustomerView.as_view(), name='update_customer'),
+        #     path('<int:customer_id>/delete/', DeleteCustomerView.as_view(), name='delete_customer'),
+        # ])),
+        # path('customer-group/', include([
+        #     path('', ListCustomerGroupView.as_view(), name='get_customer_group'),
+        #     path('add/', AddCustomerGroupView.as_view(), name='add_customer_group'),
+        #     path('<int:id>/', GetCustomerGroupView.as_view(), name='get_customer_group'),
+        #     path('<int:id>/update/', UpdateCustomerGroupView.as_view(), name='update_customer_group'),
+        #     path('<int:id>/delete/', DeleteCustomerGroupView.as_view(), name='delete_customer_group'),
+        # ])),
+        # path('staff/', include([
+        #     path('', ListStaffView.as_view(), name='get_staff'),
+        #     path('add/', AddStaffView.as_view(), name='add_staff'),
+        #     path('<int:staff_id>/', GetStaffView.as_view(), name='get_staff'),
+        #     path('<int:staff_id>/update/', UpdateStaffView.as_view(), name='update_staff'),
+        #     path('<int:staff_id>/delete/', DeleteStaffView.as_view(), name='update_staff'),
+        # ]))
     ])),
 
 ]
