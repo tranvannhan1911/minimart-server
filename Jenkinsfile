@@ -4,7 +4,8 @@ pipeline {
     
     environment {
         GIT_REPOSITORY = "git@github.com:tranvannhan1911/minimart-server.git"
-        DOCKER_REPOSITORY = "tranvannhan1911/minimart"
+        DOCKER_REPOSITORY = "tranvannhan1911/minimart-server"
+        CONTAINER_NAME = "minimart-server"
         DOCKERHUB_CREDENTIAL = credentials('dockerhub')
     }
     
@@ -79,8 +80,8 @@ pipeline {
             steps {
                 script{
                     // sh 'echo $DOCKERHUB_CREDENTIAL_PSW | docker login -u $DOCKERHUB_CREDENTIAL_USR --password-stdin'
-                    sh 'docker stop minimart || true'
-                    sh 'docker rm minimart || true'
+                    sh 'docker stop $CONTAINER_NAME || true'
+                    sh 'docker rm $CONTAINER_NAME || true'
                     sh "docker rmi -f \$(docker images -a | grep '${DOCKER_REPOSITORY}' | awk '{print \$3}') || true"
                     sh '''docker run -d -p 8000:8000 \
                         -e MYSQL_NAME=$MYSQL_NAME \
@@ -89,14 +90,14 @@ pipeline {
                         -e MYSQL_HOST=$MYSQL_HOST \
                         -e MYSQL_PORT=$MYSQL_PORT \
                         --restart on-failure:5 \
-                        --name minimart \
+                        --name $CONTAINER_NAME \
                         $DOCKER_REPOSITORY_TAG'''
                 }
                 
             }
             post{
                 success{
-                    sh "docker exec minimart python3 manage.py migrate"
+                    sh "docker exec $CONTAINER_NAME python3 manage.py migrate"
                 }
             }
         }
