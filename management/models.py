@@ -42,12 +42,12 @@ class User(AbstractUser):
     address = models.CharField('Địa chỉ', max_length=255, null=True)
     note = models.TextField('Ghi chú', blank=True)
     
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey("management.User", on_delete=models.PROTECT, 
-        null=True, related_name="users_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey("management.User", on_delete=models.PROTECT, 
-        null=True, related_name="users_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey("management.User", on_delete=models.PROTECT, 
+    #     null=True, related_name="users_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey("management.User", on_delete=models.PROTECT, 
+    #     null=True, related_name="users_updated")
 
     email = None
     username = None
@@ -97,25 +97,25 @@ class User(AbstractUser):
 
 
 class ProductGroup(models.Model):
-    product_type_id = models.AutoField('Mã loại sản phẩm', primary_key=True)
-    product_type_name = models.CharField('Tên loại sản phẩm', max_length=255)
-    description = models.TextField('Mô tả loại sản phẩm', 
-        help_text='Mô tả của loại sản phẩm')
+    product_group_code = models.CharField('Mã nhóm sản phẩm', max_length=15, unique=True)
+    name = models.CharField('Tên nhóm sản phẩm', max_length=255)
+    description = models.TextField('Mô tả nhóm sản phẩm', 
+        help_text='Mô tả của nhóm sản phẩm')
     note = models.TextField('Ghi chú', 
         help_text='Ghi chú nội bộ')
     
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="product_group_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="product_group_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="product_group_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="product_group_updated")
 
     class Meta:
         db_table = 'ProductGroup'
 
 class Supplier(models.Model):
-    supplier_id =  models.AutoField('Mã nhà cung cấp', primary_key=True)
+    # supplier_id =  models.AutoField('Mã nhà cung cấp', primary_key=True)
     name = models.CharField('Tên nhà cung cấp', max_length=100)
     phone = models.CharField('Số điện thoại', max_length=15)
     email = models.CharField('Địa chỉ email', max_length=50)
@@ -123,12 +123,12 @@ class Supplier(models.Model):
     note = models.TextField('Ghi chú', 
         help_text='Ghi chú nội bộ')
 
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="suppliers_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="suppliers_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="suppliers_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="suppliers_updated")
 
     class Meta:
         db_table = 'Supplier'
@@ -141,34 +141,34 @@ class HierarchyTree(models.Model):
     ))
     parent = models.ForeignKey("management.HierarchyTree", on_delete=models.CASCADE, null=True)
 
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="hierarchy_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="hierarchy_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="hierarchy_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="hierarchy_updated")
 
     class Meta:
         db_table = 'HierarchyTree'
 
 
 class CalculationUnit(models.Model):
-    unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
-    name = models.CharField('Tên đơn vị tính', max_length=50)    
+    # unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
+    name = models.CharField('Tên đơn vị tính', max_length=50)
 
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="units_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="units_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="units_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="units_updated")
     class Meta:
         db_table = 'CalculationUnit'
 
 
 class Product(models.Model):
-    product_id = models.AutoField('Mã sản phẩm', primary_key=True)
-    product_name = models.CharField('Tên sản phẩm', max_length=255)
+    product_code = models.CharField('Mã sản phẩm', max_length=15, unique=True)
+    name = models.CharField('Tên sản phẩm', max_length=255)
     description = models.TextField('Mô tả sản phẩm')
     image = models.CharField('Hình ảnh sản phẩm', max_length=255, blank=True)
     barcode = models.CharField('Mã vạch', max_length=15)
@@ -180,12 +180,12 @@ class Product(models.Model):
     base_unit = models.ForeignKey(CalculationUnit, on_delete=models.CASCADE, verbose_name='Đơn vị cơ bản',
         help_text='Đơn vị cơ bản', null=True)
 
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="products_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="products_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="products_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="products_updated")
     
     class Meta:
         db_table = 'Product'
@@ -200,12 +200,12 @@ class UnitExchange(models.Model):
     allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
         help_text='Cho phép bán hàng bằng đơn vị này không?')
 
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="unit_exchange_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="unit_exchange_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="unit_exchange_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="unit_exchange_updated")
 
     class Meta:
         db_table = 'UnitExchange'
@@ -219,12 +219,12 @@ class PriceList(models.Model):
         help_text='Thời gian kết thúc áp dụng bảng giá', default=timezone.now)
     status = models.BooleanField('Trạng thái', default=True)
 
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="pricelists_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="pricelists_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="pricelists_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="pricelists_updated")
     
     class Meta:
         db_table = 'PriceList'
@@ -243,7 +243,7 @@ class PriceDetail(models.Model):
         db_table = 'PriceDetail'
 
 class Order(models.Model):
-    order_id = models.AutoField('Mã đơn hàng', primary_key=True)
+    # order_id = models.AutoField('Mã đơn hàng', primary_key=True)
     note = models.TextField('Ghi chú')
     customer = models.ForeignKey(User, on_delete=models.PROTECT,
         related_name='orders', null=True)
@@ -254,12 +254,12 @@ class Order(models.Model):
         ('cancel', 'Đã hủy đơn / hoàn trả')
     ))
 
-    date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="orders_created")
-    date_updated = models.DateTimeField('Ngày cập nhật hóa đơn', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="orders_updated")
+    # date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="orders_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật hóa đơn', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="orders_updated")
 
     class Meta:
         db_table = 'Order'
@@ -278,17 +278,17 @@ class OrderDetail(models.Model):
         db_table = 'OrderDetail'
 
 class OrderRefund(models.Model):
-    refund_id = models.AutoField('Mã trả hàng', primary_key=True)
+    # refund_id = models.AutoField('Mã trả hàng', primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     staff = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú')
 
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="orders_refund_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="orders_refund_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="orders_refund_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="orders_refund_updated")
     
     class Meta:
         db_table = 'OrderRefund'
@@ -305,7 +305,7 @@ class OrderRefundDetail(models.Model):
         db_table = 'OrderRefundDetail'
 
 class InventoryReceivingVoucher(models.Model):
-    voucher_id = models.AutoField('Mã phiếu nhập hàng', primary_key=True)
+    # voucher_id = models.AutoField('Mã phiếu nhập hàng', primary_key=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, null=True)
     status = models.CharField('Trạng thái', max_length=15, choices=(
         ("pending", "Chờ xác nhận"),
@@ -315,12 +315,12 @@ class InventoryReceivingVoucher(models.Model):
     note = models.TextField('Ghi chú')
     total = models.FloatField('Thành tiền')
     
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="inventory_receiving_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="inventory_receiving_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="inventory_receiving_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="inventory_receiving_updated")
     
     class Meta:
         db_table = 'InventoryReceivingVoucher'
@@ -337,16 +337,21 @@ class InventoryReceivingVoucherDetail(models.Model):
         db_table = 'InventoryReceivingVoucherDetail'
 
 class InventoryVoucher(models.Model):
-    voucher_id = models.AutoField('Mã phiếu kiểm kê', primary_key=True)
+    # voucher_id = models.AutoField('Mã phiếu kiểm kê', primary_key=True)
     # status = models.CharField('Trạng thái', max_length=15)
     note = models.TextField('Ghi chú')
+    status = models.CharField('Trạng thái', max_length=15, choices=(
+        ("pending", "Chờ xác nhận"),
+        ("complete", "Hoàn thành"),
+        ("cancel", "Hủy"),
+    ))
     
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="inventory_created")
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="inventory_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="inventory_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="inventory_updated")
     
     class Meta:
         db_table = 'InventoryVoucher'
@@ -391,18 +396,18 @@ class Promotion(models.Model):
 
     status = models.BooleanField('Trạng thái')
 
-    date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
-    user_created = models.ForeignKey(User, on_delete=models.PROTECT, related_name="promotions_created", 
-        null=True)
-    date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
-    user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
-        null=True, related_name="promotions_updated")
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey(User, on_delete=models.PROTECT, related_name="promotions_created", 
+    #     null=True)
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
+    #     null=True, related_name="promotions_updated")
     
     class Meta:
         db_table = 'Promotion'
 
 class PromotionDetail(models.Model):
-    promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True)
+    promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True, unique=True)
     promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
     type = models.CharField('Loại khuyến mãi', max_length=15, choices=(
         ('Product', 'Khuyến mãi sản phẩm'),
