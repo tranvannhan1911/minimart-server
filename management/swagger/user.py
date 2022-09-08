@@ -13,19 +13,27 @@ class SwaggerUserSchema():
                     "code": 1,
                     "message": "success",
                     "data": {
-                        "customer_id": 55,
+                        "id": 3,
                         "customer_group": [
                             {
-                                "id": 3,
-                                "name": "Khách hàng thân thiết",
-                                "description": "Khách hàng thân thiết",
-                                "note": "string"
+                                "id": 1,
+                                "name": "Khách hàng mới",
+                                "description": "Khách hàng mới",
+                                "note": "Không"
                             }
                         ],
-                        "fullname": "Lê Dương",
+                        "last_login": None,
+                        "is_superuser": False,
+                        "is_staff": False,
+                        "is_active": True,
+                        "date_joined": "2022-09-08T14:20:01.799695Z",
+                        "phone": "0987654343",
+                        "fullname": "Trần Văn Nhânnn",
                         "gender": "M",
-                        "note": "",
-                        "phone": "0987654342"
+                        "address": None,
+                        "note": "h",
+                        "groups": [],
+                        "user_permissions": []
                     }
                 }
             }
@@ -41,27 +49,27 @@ class SwaggerUserSchema():
                         "count": 2,
                         "results": [
                         {
-                            "customer_id": 55,
+                            "id": 3,
                             "customer_group": [
                                 {
-                                    "id": 3,
-                                    "name": "Khách hàng thân thiết",
-                                    "description": "Khách hàng thân thiết",
-                                    "note": "string"
+                                    "id": 1,
+                                    "name": "Khách hàng mới",
+                                    "description": "Khách hàng mới",
+                                    "note": "Không"
                                 }
                             ],
-                            "fullname": "Lê Dương",
+                            "last_login": None,
+                            "is_superuser": False,
+                            "is_staff": False,
+                            "is_active": True,
+                            "date_joined": "2022-09-08T14:20:01.799695Z",
+                            "phone": "0987654343",
+                            "fullname": "Trần Văn Nhânnn",
                             "gender": "M",
-                            "note": "",
-                            "phone": "0987654342"
-                        },
-                        {
-                            "customer_id": 37,
-                            "type": None,
-                            "fullname": "Nhân",
-                            "gender": "M",
-                            "note": "",
-                            "phone": "0987654321"
+                            "address": None,
+                            "note": "h",
+                            "groups": [],
+                            "user_permissions": []
                         }
                         ]
                     }
@@ -76,15 +84,20 @@ class SwaggerUserSchema():
                 "code": 1,
                 "message": "success",
                 "data": {
-                    "staff_id": 1,
-                    "phone": "0987654321",
-                    "fullname": "Nhân Trần",
-                    "cccd": "128912812892",
-                    "address": "Thủ Đức",
+                    "id": 3,
+                    "customer_group": [],
+                    "last_login": None,
+                    "is_superuser": False,
+                    "is_staff": True,
+                    "is_active": True,
+                    "date_joined": "2022-09-08T14:20:01.799695Z",
+                    "phone": "0987654343",
+                    "fullname": "Trần Văn Nhânnn",
                     "gender": "M",
-                    "day_of_birth": "2001-11-19",
-                    "email": "tranvannhan1911@gmail.com",
-                    "status": True
+                    "address": None,
+                    "note": "h",
+                    "groups": [],
+                    "user_permissions": []
                 }
             }
         }
@@ -100,15 +113,20 @@ class SwaggerUserSchema():
                     "count": 1,
                     "results": [
                     {
-                        "staff_id": 1,
-                        "phone": "0987654321",
-                        "fullname": "Nhân Trần",
-                        "cccd": "128912812892",
-                        "address": "Thủ Đức",
+                        "id": 3,
+                        "customer_group": [],
+                        "last_login": None,
+                        "is_superuser": False,
+                        "is_staff": True,
+                        "is_active": True,
+                        "date_joined": "2022-09-08T14:20:01.799695Z",
+                        "phone": "0987654343",
+                        "fullname": "Trần Văn Nhânnn",
                         "gender": "M",
-                        "day_of_birth": "2001-11-19",
-                        "email": "tranvannhan1911@gmail.com",
-                        "status": True
+                        "address": None,
+                        "note": "h",
+                        "groups": [],
+                        "user_permissions": []
                     }
                     ]
                 }
@@ -124,7 +142,7 @@ class SwaggerUserSchema():
                 "code": 1,
                 "message": "success",
                 "data": {
-                    "id": 2,
+                    "id": 1,
                     "name": "Khách hàng mới",
                     "description": "Khách hàng mới",
                     "note": ""
@@ -143,7 +161,7 @@ class SwaggerUserSchema():
                     "count": 1,
                     "results": [
                     {
-                        "id": 2,
+                        "id": 1,
                         "name": "Khách hàng mới",
                         "description": "Khách hàng mới",
                         "note": ""

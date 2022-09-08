@@ -37,7 +37,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "access": str(refresh.access_token)
             })
 
-
 class TokenLoginView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 

@@ -24,7 +24,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomerGroup(models.Model):
     name = models.CharField('Tên nhóm khách hàng', max_length=50)
-    description = models.TextField('Mô tả nhóm khách hàng')
+    description = models.TextField('Mô tả nhóm khách hàng', blank=True)
     note = models.TextField('Ghi chú', blank=True)
     
     class Meta:
@@ -32,7 +32,7 @@ class CustomerGroup(models.Model):
 
 class User(AbstractUser):
     phone = models.CharField('Số điện thoại', max_length=15, unique=True)
-    customer_group = models.ManyToManyField(CustomerGroup, db_table='CustomerGroupDetail')
+    customer_group = models.ManyToManyField(CustomerGroup, db_table='CustomerGroupDetail', blank=True)
     fullname = models.CharField('Tên khách hàng', max_length=30, null=True)
     gender = models.CharField('Giới tính', max_length=1, default='U', choices=(
         ('M', 'Nam'),
