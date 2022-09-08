@@ -174,7 +174,7 @@ class Product(models.Model):
     barcode = models.CharField('Mã vạch', max_length=15)
     barcode_image = models.CharField('Ảnh mã vạch', max_length=255)
     product_groups = models.ManyToManyField(ProductGroup, related_name='products', 
-        db_table='ProductGroupDetail', null=True)
+        db_table='ProductGroupDetail')
     product_category = models.ForeignKey(HierarchyTree, on_delete=models.PROTECT, 
         related_name='products', null=True)
     base_unit = models.ForeignKey(CalculationUnit, on_delete=models.CASCADE, verbose_name='Đơn vị cơ bản',
@@ -384,7 +384,7 @@ class Promotion(models.Model):
     description = models.TextField('Mô tả chương trình khuyến mãi', default="")
     image = models.CharField('Hình ảnh', max_length=255)
     
-    applicable_customer_groups = models.ManyToManyField(CustomerGroup, db_table='ApplicableCustomerGroup', null=True)
+    applicable_customer_groups = models.ManyToManyField(CustomerGroup, db_table='ApplicableCustomerGroup')
 
     start_date = models.DateTimeField('Thời gian bắt đầu áp dụng', default=timezone.now)
     end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
@@ -416,8 +416,8 @@ class PromotionDetail(models.Model):
     max_quantity_per_customer = models.IntegerField('Số lần áp dụng tối đa trên khách hàng', null=True)
     max_quantity_per_customer_per_day = models.IntegerField('Số lần áp dụng tối đa trên khách hàng trên 1 ngày', null=True)
     # Product
-    applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct', null=True)
-    applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup', null=True)
+    applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct')
+    applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup')
     quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua', null=True)
     quantity_received = models.PositiveIntegerField('Số lượng sản phẩm được nhận', null=True)
     # Percent
