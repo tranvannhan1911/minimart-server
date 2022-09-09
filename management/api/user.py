@@ -28,7 +28,7 @@ from rest_framework import exceptions
 
 class UserView(generics.GenericAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (perms.IsAdminUser,)
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
@@ -38,7 +38,6 @@ class UserView(generics.GenericAPIView):
         if(resolve(request.get_full_path()).url_name == "staff"):
             if not request.user.is_superuser:
                 raise exceptions.PermissionDenied
-
 
         serializer = AddUserSerializer(data=request.data)
         if serializer.is_valid() == False:
@@ -83,7 +82,7 @@ class UserIdView(generics.GenericAPIView):
         manual_parameters=[SwaggerSchema.token],
         request_body=UpdateUserSerializer,
         responses={200: SwaggerUserSchema.customer_info()})
-    @method_permission_classes((permissions.IsAdminUser, ))
+    @method_permission_classes((perms.IsAdminUser, ))
     def put(self, request, id):
         if(resolve(request.get_full_path()).url_name == "staff_id"):
             if not request.user.is_superuser:
@@ -115,7 +114,7 @@ class UserIdView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         responses={200: SwaggerSchema.success()})
-    @method_permission_classes((permissions.IsAdminUser, ))
+    @method_permission_classes((perms.IsAdminUser, ))
     def delete(self, request, id):
         if(resolve(request.get_full_path()).url_name == "staff_id"):
             if not request.user.is_superuser:

@@ -1,3 +1,4 @@
+from sqlite3 import IntegrityError
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
@@ -30,9 +31,14 @@ class CustomerGroup(models.Model):
     class Meta:
         db_table = 'CustomerGroup'
 
+    def delete(self, using=None, keep_parents=False):
+        if CustomerGroup.objects.filter(customer_group_detail=self.pk).exists():
+            raise IntegrityError
+        super().delete(using, keep_parents)
+
 class User(AbstractUser):
     phone = models.CharField('Số điện thoại', max_length=15, unique=True)
-    customer_group = models.ManyToManyField(CustomerGroup, db_table='CustomerGroupDetail', blank=True)
+    customer_group = models.ManyToManyField(CustomerGroup, db_table='CustomerGroupDetail', blank=True, related_name='customer_group_detail')
     fullname = models.CharField('Tên khách hàng', max_length=30, null=True)
     gender = models.CharField('Giới tính', max_length=1, default='U', choices=(
         ('M', 'Nam'),

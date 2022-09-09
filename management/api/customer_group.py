@@ -45,7 +45,6 @@ class CustomerGroupView(generics.GenericAPIView):
             "results": response.data
         }), status = status.HTTP_200_OK)
 
-
 class CustomerGroupIdView(generics.GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = (permissions.IsAdminUser,)
@@ -86,6 +85,9 @@ class CustomerGroupIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
         customer_group = CustomerGroup.objects.get(pk=id)
-        customer_group.delete()
+        try:
+            customer_group.delete()
+        except:
+            return Response(data = ApiCode.error(message="Không thể xóa nhóm khách hàng này"), status = status.HTTP_200_OK)
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 
