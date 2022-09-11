@@ -103,12 +103,12 @@ class User(AbstractUser):
 
 
 class ProductGroup(models.Model):
-    product_group_code = models.CharField('Mã nhóm sản phẩm', max_length=15, unique=True)
+    product_group_code = models.CharField('Mã nhóm sản phẩm', max_length=15)
     name = models.CharField('Tên nhóm sản phẩm', max_length=255)
     description = models.TextField('Mô tả nhóm sản phẩm', 
-        help_text='Mô tả của nhóm sản phẩm')
+        help_text='Mô tả của nhóm sản phẩm', null=True)
     note = models.TextField('Ghi chú', 
-        help_text='Ghi chú nội bộ')
+        help_text='Ghi chú nội bộ', null=True)
     
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
