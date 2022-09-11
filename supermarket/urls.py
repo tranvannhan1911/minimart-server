@@ -27,6 +27,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
+from management.api.supplier import SupplierIdView, SupplierView
 
 from management.api.user import (
     UserIdView, UserView,
@@ -74,6 +75,10 @@ urlpatterns = [
         path('staff/', include([
             path('', UserView.as_view(), name='staff'),
             path('<int:id>/', UserIdView.as_view(), name='staff_id'),
+        ])),
+        path('supplier/', include([
+            path('', SupplierView.as_view(), name='supplier'),
+            path('<int:id>/', SupplierIdView.as_view(), name='staff_id'),
         ]))
     ])),
 

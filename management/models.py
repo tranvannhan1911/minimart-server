@@ -124,10 +124,9 @@ class Supplier(models.Model):
     # supplier_id =  models.AutoField('Mã nhà cung cấp', primary_key=True)
     name = models.CharField('Tên nhà cung cấp', max_length=100)
     phone = models.CharField('Số điện thoại', max_length=15)
-    email = models.CharField('Địa chỉ email', max_length=50)
-    address = models.CharField('Địa chỉ', max_length=255)
-    note = models.TextField('Ghi chú', 
-        help_text='Ghi chú nội bộ')
+    email = models.CharField('Địa chỉ email', max_length=50, null=True)
+    address = models.CharField('Địa chỉ', max_length=255, null=True)
+    note = models.TextField('Ghi chú', help_text='Ghi chú nội bộ', null=True)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 

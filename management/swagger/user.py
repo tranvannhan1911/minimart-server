@@ -193,3 +193,45 @@ class SwaggerUserSchema():
             }
         }
     )
+
+    supplier_get = openapi.Response(
+        description="Successful",
+        examples={
+            "application/json": {
+                "code": 1,
+                "message": "success",
+                "data": {
+                    "id": 1,
+                    "name": "Aeon Gò Vấp",
+                    "phone": "0987654321",
+                    "email": None,
+                    "address": None,
+                    "note": None
+                }
+            }
+        }
+    )
+
+    supplier_list = openapi.Response(
+        description="Successful",
+        examples={
+            "application/json": {
+                "code": 1,
+                "message": "success",
+                "data": {
+                    "count": 1,
+                    "results": [
+                    {
+                        "id": 1,
+                        "name": "Aeon Gò Vấp",
+                        "phone": "0987654321",
+                        "email": None,
+                        "address": None,
+                        "note": None
+                    }
+                    ]
+                }
+            
+            }
+        }
+    )
