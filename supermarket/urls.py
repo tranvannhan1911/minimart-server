@@ -27,7 +27,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
-from management.api.product import ProductGroupIdView, ProductGroupView
+from management.api.product import CalculationUnitIdView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
 from management.api.supplier import SupplierIdView, SupplierView
 
 from management.api.user import (
@@ -84,6 +84,14 @@ urlpatterns = [
         path('product-group/', include([
             path('', ProductGroupView.as_view(), name='product_group'),
             path('<int:id>/', ProductGroupIdView.as_view(), name='staff_id'),
+        ])),
+        path('calculation-unit/', include([
+            path('', CalculationUnitView.as_view(), name='calculation_unit'),
+            path('<int:id>/', CalculationUnitIdView.as_view(), name='staff_id'),
+        ])),
+        path('product/', include([
+            path('', ProductView.as_view(), name='product'),
+            path('<int:id>/', ProductIdView.as_view(), name='staff_id'),
         ]))
     ])),
 

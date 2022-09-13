@@ -9,8 +9,8 @@ from django.forms.models import model_to_dict
 from rest_framework import permissions
 from management import serializers
 
-from management.models import ProductGroup, Supplier, User
-from management.serializers.product import ProductGroupSerializer
+from management.models import CalculationUnit, Product, ProductGroup, Supplier, User
+from management.serializers.product import CalculationUnitSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
 from management.utils import perms
 
 from management.serializers.user import (
@@ -106,4 +106,170 @@ class ProductGroupIdView(generics.GenericAPIView):
             product_group.delete()
         except:
             return Response(data = ApiCode.error(message="Không thể xóa nhóm sản phẩm này"), status = status.HTTP_200_OK)
+        return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+
+
+class CalculationUnitView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        request_body=CalculationUnitSerializer,
+        responses={200: SwaggerProductSchema.calculation_unit_get})
+    def post(self, request):
+        serializer = CalculationUnitSerializer(data=request.data)
+        if serializer.is_valid() == False:
+            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+        
+        serializer.save()
+        return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
+
+    def get_queryset(self):
+        return CalculationUnit.objects.all()
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerProductSchema.calculation_unit_list})
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        response = CalculationUnitSerializer(data=queryset, many=True)
+        response.is_valid()
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+class CalculationUnitIdView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        request_body=CalculationUnitSerializer,
+        responses={200: SwaggerProductSchema.calculation_unit_get})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def put(self, request, id):
+        if not CalculationUnit.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Đơn vị tính không tồn tại"), status = status.HTTP_200_OK)
+
+        unit = CalculationUnit.objects.get(pk = id)
+        serializer = CalculationUnitSerializer(unit, data=request.data)
+
+        if serializer.is_valid() == False:
+            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+
+        serializer.save()
+
+        return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerProductSchema.calculation_unit_get})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def get(self, request, id):
+        if not CalculationUnit.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Đơn vị tính không tồn tại"), status = status.HTTP_200_OK)
+
+        unit = CalculationUnit.objects.get(pk = id)
+        serializer = CalculationUnitSerializer(unit)
+        return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerSchema.success()})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def delete(self, request, id):
+        if not CalculationUnit.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Đơn vị tính không tồn tại"), status = status.HTTP_200_OK)
+
+        unit = CalculationUnit.objects.get(pk = id)
+
+        try:
+            unit.delete()
+        except:
+            return Response(data = ApiCode.error(message="Không thể xóa đơn vị tính này"), status = status.HTTP_200_OK)
+        return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+
+
+class ProductView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        request_body=ProductSerializer,
+        responses={200: SwaggerProductSchema.product_get})
+    def post(self, request):
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid() == False:
+            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+        
+        product = serializer.save()
+        response = ReadProductSerializer(product)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
+
+    def get_queryset(self):
+        return Product.objects.all()
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerProductSchema.product_list})
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        response = ReadProductSerializer(data=queryset, many=True)
+        response.is_valid()
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+class ProductIdView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        request_body=ProductSerializer,
+        responses={200: SwaggerProductSchema.product_get})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def put(self, request, id):
+        if not Product.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Sản phẩm không tồn tại"), status = status.HTTP_200_OK)
+
+        product = Product.objects.get(pk = id)
+        serializer = ProductSerializer(product, data=request.data)
+
+        if serializer.is_valid() == False:
+            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+
+        product = serializer.save()
+        response = ReadProductSerializer(product)
+
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerProductSchema.product_get})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def get(self, request, id):
+        if not Product.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Sản phẩm không tồn tại"), status = status.HTTP_200_OK)
+
+        product = Product.objects.get(pk = id)
+        serializer = ReadProductSerializer(product)
+        return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerSchema.success()})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def delete(self, request, id):
+        if not Product.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Sản phẩm không tồn tại"), status = status.HTTP_200_OK)
+
+        product = Product.objects.get(pk = id)
+
+        try:
+            product.delete()
+        except:
+            return Response(data = ApiCode.error(message="Không thể xóa sản phẩm này"), status = status.HTTP_200_OK)
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)

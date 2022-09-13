@@ -160,6 +160,7 @@ class HierarchyTree(models.Model):
 class CalculationUnit(models.Model):
     # unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
     name = models.CharField('Tên đơn vị tính', max_length=50)
+    note = models.TextField('Ghi chú', help_text='Ghi chú nội bộ', null=True)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -172,18 +173,20 @@ class CalculationUnit(models.Model):
 
 
 class Product(models.Model):
-    product_code = models.CharField('Mã sản phẩm', max_length=15, unique=True)
+    product_code = models.CharField('Mã sản phẩm', max_length=15)
     name = models.CharField('Tên sản phẩm', max_length=255)
-    description = models.TextField('Mô tả sản phẩm')
-    image = models.CharField('Hình ảnh sản phẩm', max_length=255, blank=True)
+    description = models.TextField('Mô tả sản phẩm', null=True)
+    image = models.CharField('Hình ảnh sản phẩm', max_length=255, null=True)
     barcode = models.CharField('Mã vạch', max_length=15)
     barcode_image = models.CharField('Ảnh mã vạch', max_length=255)
     product_groups = models.ManyToManyField(ProductGroup, related_name='products', 
-        db_table='ProductGroupDetail')
+        db_table='ProductGroupDetail', blank=True)
     product_category = models.ForeignKey(HierarchyTree, on_delete=models.PROTECT, 
         related_name='products', null=True)
     base_unit = models.ForeignKey(CalculationUnit, on_delete=models.CASCADE, verbose_name='Đơn vị cơ bản',
-        help_text='Đơn vị cơ bản', null=True)
+        help_text='Đơn vị cơ bản', null=True, related_name='products', )
+    units = models.ManyToManyField(CalculationUnit, through='management.UnitExchange',
+        blank=True)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -201,7 +204,7 @@ class UnitExchange(models.Model):
     unit = models.ForeignKey(CalculationUnit, on_delete=models.CASCADE,
         related_name='unitexchanges')
     value = models.PositiveIntegerField('Giá trị quy đổi',
-        help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?')
+        help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?', default=1)
     allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
         help_text='Cho phép bán hàng bằng đơn vị này không?')
 

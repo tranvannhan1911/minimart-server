@@ -1,0 +1,8 @@
+sudo service mysql start
+source venv/bin/activate
+export MYSQL_NAME=supermarket
+export MYSQL_USER=supermarket
+export MYSQL_PASSWORD=supermarket
+export MYSQL_HOST=127.0.0.1
+export MYSQL_PORT=3306
+python manage.py runserver
