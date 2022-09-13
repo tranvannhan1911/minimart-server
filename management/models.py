@@ -206,7 +206,7 @@ class UnitExchange(models.Model):
     value = models.PositiveIntegerField('Giá trị quy đổi',
         help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?', default=1)
     allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
-        help_text='Cho phép bán hàng bằng đơn vị này không?')
+        help_text='Cho phép bán hàng bằng đơn vị này không?', default=False)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 

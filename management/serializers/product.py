@@ -22,6 +22,11 @@ class CalculationUnitSerializer(serializers.ModelSerializer):
             }
         }
 
+class UnitExchangeAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UnitExchange
+        fields = '__all__'
+
 class UnitExchangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnitExchange
@@ -40,6 +45,18 @@ class ProductSerializer(serializers.ModelSerializer):
             unit["product"] = product
             UnitExchange.objects.create(**unit)
         return product
+
+    def update(self, instance, validated_data):
+        units = validated_data.pop('units')
+        instance = super().update(instance, validated_data)
+        instance.units.clear()
+        for unit in units:
+            unit["product"] = instance.pk
+            unit["unit"] = unit["unit"].pk
+            unit = UnitExchangeAllSerializer(data=unit)
+            unit.is_valid()
+            unit.save()
+        return instance
 
 class ReadProductSerializer(serializers.ModelSerializer):
     product_groups = ProductGroupSerializer(read_only=True, many=True, required=False)
