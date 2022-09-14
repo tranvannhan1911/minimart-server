@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from management.models import CalculationUnit, Product, ProductGroup, UnitExchange
+from management.models import CalculationUnit, PriceDetail, PriceList, Product, ProductGroup, UnitExchange
 
 class ProductGroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,3 +64,38 @@ class ReadProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         exclude = ('barcode_image', )
+
+class ReadProductSerializer(serializers.ModelSerializer):
+    product_groups = ProductGroupSerializer(read_only=True, many=True, required=False)
+    units = UnitExchangeSerializer(source="unitexchanges", read_only=True, many=True)
+    class Meta:
+        model = Product
+        exclude = ('barcode_image', )
+
+class PriceDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PriceDetail
+        exclude = ('pricelist', ) 
+        
+class PriceListSerializer(serializers.ModelSerializer):
+    pricedetails = PriceDetailSerializer(many=True)
+    class Meta:
+        model = PriceList
+        fields = '__all__'
+
+    def create(self, validated_data):
+        pricedetails = validated_data.pop('pricedetails')
+        pricelist = super().create(validated_data)
+        for detail in pricedetails:
+            detail["pricelist"] = pricelist
+            PriceDetail.objects.create(**detail)
+        return pricelist
+
+    def update(self, instance, validated_data):
+        pricedetails = validated_data.pop('pricedetails')
+        instance = super().update(instance, validated_data)
+        instance.pricedetails.clear()
+        for detail in pricedetails:
+            detail["pricelist"] = instance.pk
+            detail = PriceDetail(**detail)
+        return instance

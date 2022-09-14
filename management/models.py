@@ -184,7 +184,7 @@ class Product(models.Model):
     product_category = models.ForeignKey(HierarchyTree, on_delete=models.PROTECT, 
         related_name='products', null=True)
     base_unit = models.ForeignKey(CalculationUnit, on_delete=models.CASCADE, verbose_name='Đơn vị cơ bản',
-        help_text='Đơn vị cơ bản', null=True, related_name='products', )
+        help_text='Đơn vị cơ bản', related_name='products', )
     units = models.ManyToManyField(CalculationUnit, through='management.UnitExchange',
         blank=True)
 
@@ -219,13 +219,13 @@ class UnitExchange(models.Model):
         db_table = 'UnitExchange'
     
 class PriceList(models.Model):
-    name = models.CharField('Tên bảng giá', max_length=50, default="")    
     price_list_id = models.AutoField('Mã bảng giá', primary_key=True)
+    name = models.CharField('Tên bảng giá', max_length=50, default="")    
     start_date = models.DateTimeField('Thời gian bắt đầu',
         help_text='Thời gian bắt đâu áp dụng bảng giá', default=timezone.now)
     end_date = models.DateTimeField('Thời gian kết thúc',
         help_text='Thời gian kết thúc áp dụng bảng giá', default=timezone.now)
-    status = models.BooleanField('Trạng thái', default=True)
+    status = models.BooleanField('Trạng thái', default=False)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -238,9 +238,10 @@ class PriceList(models.Model):
         db_table = 'PriceList'
 
 class PriceDetail(models.Model):
-    pricelist = models.ForeignKey(PriceList, on_delete=models.CASCADE)
+    pricelist = models.ForeignKey(PriceList, on_delete=models.CASCADE, 
+        related_name='pricedetails')
     product = models.ForeignKey(Product, verbose_name='Sản phẩm', on_delete=models.CASCADE,
-        related_name='pricedetails', null=True)
+        related_name='pricedetails')
     unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
         related_name='pricedetails', null=True)
     price = models.FloatField('Giá bán', default=0)

@@ -124,3 +124,63 @@ class SwaggerProductSchema():
             }
         }
     )
+
+    pricelist_get = openapi.Response(
+        description="Successful",
+        examples={
+            "application/json": {
+                "code": 1,
+                "message": "success",
+                "data": {
+                    "price_list_id": 3,
+                    "pricedetails": [
+                        {
+                            "id": 2,
+                            "price": 15000.0,
+                            "start_date": "2022-09-14T00:26:10.434000Z",
+                            "end_date": "2022-10-01T00:26:10.434000Z",
+                            "product": 1,
+                            "unit_exchange": None
+                        }
+                    ],
+                    "name": "Bảng giá tháng 9",
+                    "start_date": "2022-09-14T00:26:10.434000Z",
+                    "end_date": "2022-10-01T00:26:10.434000Z",
+                    "status": True
+                },
+            }
+        }
+    )
+
+    pricelist_list = openapi.Response(
+        description="Successful",
+        examples={
+            "application/json": {
+                "code": 1,
+                "message": "success",
+                "data": {
+                    "count": 1,
+                    "results": [
+                    {
+                        "price_list_id": 3,
+                        "pricedetails": [
+                            {
+                                "id": 2,
+                                "price": 15000.0,
+                                "start_date": "2022-09-14T00:26:10.434000Z",
+                                "end_date": "2022-10-01T00:26:10.434000Z",
+                                "product": 1,
+                                "unit_exchange": None
+                            }
+                        ],
+                        "name": "Bảng giá tháng 9",
+                        "start_date": "2022-09-14T00:26:10.434000Z",
+                        "end_date": "2022-10-01T00:26:10.434000Z",
+                        "status": True
+                    }
+                    ]
+                }
+            
+            }
+        }
+    )

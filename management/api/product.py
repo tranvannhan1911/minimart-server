@@ -9,8 +9,8 @@ from django.forms.models import model_to_dict
 from rest_framework import permissions
 from management import serializers
 
-from management.models import CalculationUnit, Product, ProductGroup, Supplier, User
-from management.serializers.product import CalculationUnitSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
+from management.models import CalculationUnit, PriceList, Product, ProductGroup, Supplier, User
+from management.serializers.product import CalculationUnitSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
 from management.utils import perms
 
 from management.serializers.user import (
@@ -272,4 +272,87 @@ class ProductIdView(generics.GenericAPIView):
             product.delete()
         except:
             return Response(data = ApiCode.error(message="Không thể xóa sản phẩm này"), status = status.HTTP_200_OK)
+        return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+
+
+class PriceListView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        request_body=PriceListSerializer,
+        responses={200: SwaggerProductSchema.pricelist_get})
+    def post(self, request):
+        serializer = PriceListSerializer(data=request.data)
+        if serializer.is_valid() == False:
+            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+        
+        product = serializer.save()
+        response = PriceListSerializer(product)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
+
+    def get_queryset(self):
+        return PriceList.objects.all()
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerProductSchema.pricelist_list})
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        response = PriceListSerializer(data=queryset, many=True)
+        response.is_valid()
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+class PriceListIdView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        request_body=PriceListSerializer,
+        responses={200: SwaggerProductSchema.pricelist_get})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def put(self, request, id):
+        if not PriceList.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Bảng giá không tồn tại"), status = status.HTTP_200_OK)
+
+        pricelist = PriceList.objects.get(pk = id)
+        serializer = PriceListSerializer(pricelist, data=request.data)
+
+        if serializer.is_valid() == False:
+            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+
+        serializer.save()
+
+        return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerProductSchema.pricelist_get})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def get(self, request, id):
+        if not PriceList.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Bảng giá không tồn tại"), status = status.HTTP_200_OK)
+
+        pricelist = PriceList.objects.get(pk = id)
+        serializer = PriceListSerializer(pricelist)
+        return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerSchema.success()})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def delete(self, request, id):
+        if not PriceList.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Bảng giá không tồn tại"), status = status.HTTP_200_OK)
+
+        pricelist = PriceList.objects.get(pk = id)
+
+        try:
+            pricelist.delete()
+        except:
+            return Response(data = ApiCode.error(message="Không thể xóa bảng giá này"), status = status.HTTP_200_OK)
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
