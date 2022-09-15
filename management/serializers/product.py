@@ -30,7 +30,7 @@ class UnitExchangeAllSerializer(serializers.ModelSerializer):
 class UnitExchangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnitExchange
-        fields = ('unit', 'value', 'allow_sale')
+        exclude = ('product', )
         
 class ProductSerializer(serializers.ModelSerializer):
     units = UnitExchangeSerializer(many=True, required=False)
