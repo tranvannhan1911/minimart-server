@@ -84,15 +84,37 @@ class SwaggerProductSchema():
                 "code": 1,
                 "message": "success",
                 "data": {
-                    "id": 1,
+                    "id": 13,
+                    "product_groups": [
+                        {
+                            "id": 4,
+                            "product_group_code": "MIANLIEN",
+                            "name": "Mì ăn liền",
+                            "description": "Mì",
+                            "note": "Ăn liền"
+                        }
+                    ],
+                    "units": [
+                        {
+                            "id": 19,
+                            "value": 24,
+                            "allow_sale": True,
+                            "unit": 3
+                        },
+                        {
+                            "id": 20,
+                            "value": 6,
+                            "allow_sale": False,
+                            "unit": 7
+                        }
+                    ],
                     "product_code": "BIA333",
                     "name": "Bia 333",
                     "description": None,
                     "image": None,
                     "barcode": "8491992901299",
                     "product_category": None,
-                    "base_unit": None,
-                    "product_groups": []
+                    "base_unit": 4
                 }
             }
         }
@@ -108,15 +130,37 @@ class SwaggerProductSchema():
                     "count": 1,
                     "results": [
                     {
-                        "id": 1,
+                        "id": 13,
+                        "product_groups": [
+                            {
+                                "id": 4,
+                                "product_group_code": "MIANLIEN",
+                                "name": "Mì ăn liền",
+                                "description": "Mì",
+                                "note": "Ăn liền"
+                            }
+                        ],
+                        "units": [
+                            {
+                                "id": 19,
+                                "value": 24,
+                                "allow_sale": True,
+                                "unit": 3
+                            },
+                            {
+                                "id": 20,
+                                "value": 6,
+                                "allow_sale": False,
+                                "unit": 7
+                            }
+                        ],
                         "product_code": "BIA333",
                         "name": "Bia 333",
                         "description": None,
                         "image": None,
                         "barcode": "8491992901299",
                         "product_category": None,
-                        "base_unit": None,
-                        "product_groups": []
+                        "base_unit": 4
                     }
                     ]
                 }

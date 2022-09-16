@@ -23,11 +23,13 @@ class CalculationUnitSerializer(serializers.ModelSerializer):
         }
 
 class UnitExchangeAllSerializer(serializers.ModelSerializer):
+    unit_name = serializers.CharField(source="unit.name", read_only=True)
     class Meta:
         model = UnitExchange
         fields = '__all__'
 
 class UnitExchangeSerializer(serializers.ModelSerializer):
+    unit_name = serializers.CharField(source="unit.name", read_only=True)
     class Meta:
         model = UnitExchange
         exclude = ('product', )
