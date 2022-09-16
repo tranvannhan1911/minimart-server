@@ -5,4 +5,4 @@ export MYSQL_USER=supermarket
 export MYSQL_PASSWORD=supermarket
 export MYSQL_HOST=127.0.0.1
 export MYSQL_PORT=3306
-python manage.py runserver
+python manage.py runserver 0.0.0.0:8000

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+MINIMART_SERVER_HOME=/home/tranvannhan1911/Documents/minimart-server
+cloudflared tunnel --config $MINIMART_SERVER_HOME/.cloudflared/config.yml --url localhost:8000 run jenkins > $MINIMART_SERVER_HOME/logs/tunnel.log 2>&1 &
