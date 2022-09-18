@@ -1,3 +1,4 @@
+from pprint import pprint
 from rest_framework import serializers
 
 from management.models import CalculationUnit, PriceDetail, PriceList, Product, ProductGroup, UnitExchange
@@ -96,8 +97,8 @@ class PriceListSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         pricedetails = validated_data.pop('pricedetails')
         instance = super().update(instance, validated_data)
-        instance.pricedetails.clear()
+        instance.pricedetails.all().delete()
         for detail in pricedetails:
-            detail["pricelist"] = instance.pk
-            detail = PriceDetail(**detail)
+            detail["pricelist"] = instance
+            detail = PriceDetail.objects.create(**detail)
         return instance
