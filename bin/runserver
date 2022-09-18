@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 sudo service mysql start
 source venv/bin/activate
 export MYSQL_NAME=supermarket

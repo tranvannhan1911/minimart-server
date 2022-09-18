@@ -41,7 +41,7 @@ from management.api.customer_group import (
 schema_view = get_schema_view(
    openapi.Info(
       title="Quản lý siêu thị mini API",
-      default_version='v3',
+      default_version='v1',
       description="Quản lý siêu thị mini API",
    ),
    public=True,
