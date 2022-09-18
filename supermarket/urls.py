@@ -27,6 +27,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
+from management.api.inventory import InventoryRCIdView, InventoryRCView
 from management.api.product import CalculationUnitIdView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
 from management.api.supplier import SupplierIdView, SupplierView
 
@@ -96,6 +97,10 @@ urlpatterns = [
         path('price-list/', include([
             path('', PriceListView.as_view(), name='price_list'),
             path('<int:id>/', PriceListIdView.as_view(), name='price_list_id'),
+        ])),
+        path('inventory-receiving/', include([
+            path('', InventoryRCView.as_view(), name='inventory_receiving'),
+            path('<int:id>/', InventoryRCIdView.as_view(), name='inventory_receiving'),
         ]))
     ])),
 

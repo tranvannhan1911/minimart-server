@@ -322,7 +322,7 @@ class InventoryReceivingVoucher(models.Model):
         ("cancel", "Hủy"),
     ))
     note = models.TextField('Ghi chú')
-    total = models.FloatField('Thành tiền')
+    total = models.FloatField('Thành tiền', default=0)
     
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -335,7 +335,8 @@ class InventoryReceivingVoucher(models.Model):
         db_table = 'InventoryReceivingVoucher'
 
 class InventoryReceivingVoucherDetail(models.Model):
-    receiving_voucher = models.ForeignKey(InventoryReceivingVoucher, on_delete=models.CASCADE)
+    receiving_voucher = models.ForeignKey(InventoryReceivingVoucher, on_delete=models.CASCADE,
+        related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     unit_exchange = models.ForeignKey(UnitExchange, on_delete=models.PROTECT, null=True)
     quantity = models.PositiveIntegerField('Số lượng')
