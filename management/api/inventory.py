@@ -12,6 +12,7 @@ from management import serializers
 from management.models import InventoryReceivingVoucher, Supplier, User
 from management.serializers.inventory import InventoryRCSerializer, ResponseInventoryRCDetailSerializer, ResponseInventoryRCSerializer
 from management.serializers.supplier import SupplierSerializer
+from management.swagger.inventory import SwaggerInventorySchema
 from management.utils import perms
 
 from management.serializers.user import (
@@ -35,7 +36,7 @@ class InventoryRCView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=InventoryRCSerializer,
-        responses={200: SwaggerUserSchema.supplier_get})
+        responses={200: SwaggerInventorySchema.inventory_receiving_get})
     def post(self, request):
         serializer = InventoryRCSerializer(data=request.data)
         if serializer.is_valid() == False:
@@ -50,7 +51,7 @@ class InventoryRCView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerUserSchema.supplier_list})
+        responses={200: SwaggerInventorySchema.inventory_receiving_list})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         response = ResponseInventoryRCSerializer(data=queryset, many=True)
@@ -66,7 +67,7 @@ class InventoryRCIdView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=InventoryRCSerializer,
-        responses={200: SwaggerUserSchema.supplier_get})
+        responses={200: SwaggerInventorySchema.inventory_receiving_get})
     @method_permission_classes((perms.IsAdminUser, ))
     def put(self, request, id):
         if not InventoryReceivingVoucher.objects.filter(pk = id).exists():
@@ -85,7 +86,7 @@ class InventoryRCIdView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerUserSchema.supplier_get})
+        responses={200: SwaggerInventorySchema.inventory_receiving_get})
     @method_permission_classes((perms.IsOwnUserOrAdmin, ))
     def get(self, request, id):
         if not InventoryReceivingVoucher.objects.filter(pk = id).exists():
