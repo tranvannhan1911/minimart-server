@@ -52,13 +52,27 @@ class ProductSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         units = validated_data.pop('units')
         instance = super().update(instance, validated_data)
-        instance.units.clear()
+        # instance.units.clear()
+        for unit in instance.units.all():
+            _unit = UnitExchange.objects.get(product=instance.pk, unit=unit.pk)
+            try:
+                _unit.delete()
+            except:
+                pass
+
         for unit in units:
-            unit["product"] = instance.pk
-            unit["unit"] = unit["unit"].pk
-            unit = UnitExchangeAllSerializer(data=unit)
-            unit.is_valid()
-            unit.save()
+            if not UnitExchange.objects.filter(product=instance.pk, unit=unit["unit"].pk).exists():
+                unit["product"] = instance.pk
+                unit["unit"] = unit["unit"].pk
+                unit = UnitExchangeAllSerializer(data=unit)
+                unit.is_valid()
+                unit.save()
+            else:
+                _unit = UnitExchange.objects.get(product=instance.pk, unit=unit["unit"].pk)
+                _unit.value = unit["value"]
+                _unit.allow_sale = unit["allow_sale"]
+                _unit.save()
+            
         return instance
 
 class ReadProductSerializer(serializers.ModelSerializer):

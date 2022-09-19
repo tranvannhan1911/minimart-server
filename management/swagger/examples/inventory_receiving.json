@@ -1,0 +1,57 @@
+{
+    "id": 1,
+    "details": [
+        {
+            "id": 9,
+            "unit_exchange": {
+                "id": 1,
+                "unit_name": "Thùng",
+                "value": 24,
+                "allow_sale": true,
+                "unit": 2
+            },
+            "product": {
+                "id": 1,
+                "product_groups": [],
+                "units": [
+                    {
+                        "id": 1,
+                        "unit_name": "Thùng",
+                        "value": 24,
+                        "allow_sale": true,
+                        "unit": 2
+                    },
+                    {
+                        "id": 4,
+                        "unit_name": "Lốc",
+                        "value": 6,
+                        "allow_sale": true,
+                        "unit": 4
+                    }
+                ],
+                "product_code": "BIA333",
+                "name": "Bia 333",
+                "description": null,
+                "image": null,
+                "barcode": "8491992901299",
+                "status": false,
+                "product_category": null,
+                "base_unit": 1
+            },
+            "quantity": 25,
+            "price": 10000.0,
+            "note": "string"
+        }
+    ],
+    "supplier": {
+        "id": 1,
+        "name": "Aeon Gò Vấp",
+        "phone": "0987654321",
+        "email": null,
+        "address": null,
+        "note": null
+    },
+    "status": "complete",
+    "note": "Đang chờ giao hàng",
+    "total": 250000.0
+}

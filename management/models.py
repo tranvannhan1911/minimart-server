@@ -187,6 +187,7 @@ class Product(models.Model):
         help_text='Đơn vị cơ bản', related_name='products', )
     units = models.ManyToManyField(CalculationUnit, through='management.UnitExchange',
         blank=True)
+    status = models.BooleanField('Trạng thái', default=False)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -194,7 +195,14 @@ class Product(models.Model):
     # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
     # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
     #     null=True, related_name="products_updated")
-    
+    def stock(self):
+        transactions = WarehouseTransaction.objects.filter(product=self)
+        print(transactions)
+        ammount = 0
+        for tran in transactions:
+            ammount += tran.change
+        return ammount
+
     class Meta:
         db_table = 'Product'
 
@@ -214,6 +222,9 @@ class UnitExchange(models.Model):
     # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
     # user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
     #     null=True, related_name="unit_exchange_updated")
+
+    def get_number_of(self, ammount):
+        return self.value*ammount
 
     class Meta:
         db_table = 'UnitExchange'
@@ -338,7 +349,6 @@ class InventoryReceivingVoucherDetail(models.Model):
     receiving_voucher = models.ForeignKey(InventoryReceivingVoucher, on_delete=models.CASCADE,
         related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    unit_exchange = models.ForeignKey(UnitExchange, on_delete=models.PROTECT, null=True)
     quantity = models.PositiveIntegerField('Số lượng')
     price = models.FloatField('Giá nhập')
     note = models.TextField('Ghi chú')
@@ -367,26 +377,27 @@ class InventoryVoucher(models.Model):
         db_table = 'InventoryVoucher'
 
 class InventoryVoucherDetail(models.Model):
-    inventory_voucher = models.ForeignKey(InventoryVoucher, on_delete=models.CASCADE)
+    inventory_voucher = models.ForeignKey(InventoryVoucher, on_delete=models.CASCADE,
+        related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    unit_exchange = models.ForeignKey(UnitExchange, on_delete=models.PROTECT, null=True)
-    quantity_before = models.PositiveIntegerField('Số lượng trước')
+    quantity_before = models.PositiveIntegerField('Số lượng trước', null=True)
     quantity_after = models.PositiveIntegerField('Số lượng sau')
-    note = models.TextField('Ghi chú')
+    note = models.TextField('Ghi chú', null=True)
 
     class Meta:
         db_table = 'InventoryVoucherDetail'
 
 class WarehouseTransaction(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    unit_exchange = models.ForeignKey(UnitExchange, on_delete=models.PROTECT, null=True)
     reference = models.CharField("Hóa đơn hoặc mã phiếu", max_length=30, null=True)
 
     change = models.IntegerField('Thay đổi')
     type = models.CharField("Loại biến động", max_length=30, choices=(
         ('order', 'Bán hàng'),
         ('inventory', 'Kiểm kê'),
+        ('inventory_cancel', 'Hủy kiểm kê'),
         ('inventory_receiving', 'Nhập hàng'),
+        ('inventory_receiving_cancel', 'Hủy nhập hàng'),
         ('refund', 'Trả hàng'),
     ))
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
@@ -416,7 +427,7 @@ class Promotion(models.Model):
     class Meta:
         db_table = 'Promotion'
 
-class PromotionDetail(models.Model):
+class PromotionLine(models.Model):
     promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True, unique=True)
     promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
     type = models.CharField('Loại khuyến mãi', max_length=15, choices=(
@@ -430,6 +441,9 @@ class PromotionDetail(models.Model):
     max_quantity = models.IntegerField('Số lần áp dụng tối đa', null=True)
     max_quantity_per_customer = models.IntegerField('Số lần áp dụng tối đa trên khách hàng', null=True)
     max_quantity_per_customer_per_day = models.IntegerField('Số lần áp dụng tối đa trên khách hàng trên 1 ngày', null=True)
+
+class PromotionDetail(models.Model):
+    promotion_line = models.OneToOneField(PromotionLine, on_delete=models.CASCADE, null=True)
     # Product
     applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct')
     applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup')

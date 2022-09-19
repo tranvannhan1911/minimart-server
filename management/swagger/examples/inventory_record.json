@@ -1,0 +1,48 @@
+{
+    "id": 1,
+    "details": [
+        {
+            "id": 5,
+            "unit_exchange": {
+                "id": 1,
+                "unit_name": "Thùng",
+                "value": 24,
+                "allow_sale": true,
+                "unit": 2
+            },
+            "product": {
+                "id": 1,
+                "product_groups": [],
+                "units": [
+                    {
+                        "id": 1,
+                        "unit_name": "Thùng",
+                        "value": 24,
+                        "allow_sale": true,
+                        "unit": 2
+                    },
+                    {
+                        "id": 4,
+                        "unit_name": "Lốc",
+                        "value": 6,
+                        "allow_sale": true,
+                        "unit": 4
+                    }
+                ],
+                "product_code": "BIA333",
+                "name": "Bia 333",
+                "description": null,
+                "image": null,
+                "barcode": "8491992901299",
+                "status": false,
+                "product_category": null,
+                "base_unit": 1
+            },
+            "quantity_before": 20,
+            "quantity_after": 15,
+            "note": "hi"
+        }
+    ],
+    "note": "Không",
+    "status": "complete"
+}
