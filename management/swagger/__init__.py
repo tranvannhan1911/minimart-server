@@ -36,6 +36,7 @@ def get_example(name):
                     }),
     }
     
+category = get_example("category")
 inventory_receiving = get_example("inventory_receiving")
 inventory_record = get_example("inventory_record")
 warehouse_transaction = get_example("warehouse_transaction")

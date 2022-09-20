@@ -1,0 +1,34 @@
+{
+    "id": 1,
+    "childs": [
+        {
+            "id": 3,
+            "childs": [
+                {
+                    "id": 6,
+                    "childs": [],
+                    "name": "Áo polo",
+                    "level": 0,
+                    "type": "product",
+                    "parent": 3
+                }
+            ],
+            "name": "Áo nam",
+            "level": 0,
+            "type": "product",
+            "parent": 1
+        },
+        {
+            "id": 4,
+            "childs": [],
+            "name": "Áo nữ",
+            "level": 0,
+            "type": "product",
+            "parent": 1
+        }
+    ],
+    "name": "Thời trang",
+    "level": 0,
+    "type": "product",
+    "parent": null
+}

@@ -144,7 +144,8 @@ class HierarchyTree(models.Model):
     type = models.CharField('Loại', max_length=15, choices=(
         ("product", "Sản phẩm"),
     ))
-    parent = models.ForeignKey("management.HierarchyTree", on_delete=models.CASCADE, null=True)
+    parent = models.ForeignKey("management.HierarchyTree", 
+        on_delete=models.CASCADE, null=True, related_name='childs')
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 

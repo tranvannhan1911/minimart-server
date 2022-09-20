@@ -28,7 +28,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
 from management.api.inventory import InventoryRCIdView, InventoryRCView, InventoryRecordIdView, InventoryRecordView, WarehouseTransactionIdView, WarehouseTransactionView
-from management.api.product import CalculationUnitIdView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
+from management.api.product import CalculationUnitIdView, CategoryIdView, CategoryView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
 from management.api.supplier import SupplierIdView, SupplierView
 
 from management.api.user import (
@@ -109,6 +109,10 @@ urlpatterns = [
         path('warehouse-transaction/', include([
             path('', WarehouseTransactionView.as_view(), name='warehouse_transaction'),
             path('<int:id>/', WarehouseTransactionIdView.as_view(), name='warehouse_transaction_id'),
+        ])),
+        path('category/', include([
+            path('', CategoryView.as_view(), name='category'),
+            path('<int:id>/', CategoryIdView.as_view(), name='category_id'),
         ]))
     ])),
 

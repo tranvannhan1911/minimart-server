@@ -1,7 +1,7 @@
 from pprint import pprint
 from rest_framework import serializers
 
-from management.models import CalculationUnit, PriceDetail, PriceList, Product, ProductGroup, UnitExchange
+from management.models import CalculationUnit, HierarchyTree, PriceDetail, PriceList, Product, ProductGroup, UnitExchange
 
 class ProductGroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -116,3 +116,45 @@ class PriceListSerializer(serializers.ModelSerializer):
             detail["pricelist"] = instance
             detail = PriceDetail.objects.create(**detail)
         return instance
+
+####################
+
+class RecursiveField(serializers.Serializer):
+    def to_representation(self, value):
+        serializer = self.parent.parent.__class__(value, context=self.context)
+        return serializer.data
+
+class CategoryTreeSerializer(serializers.ModelSerializer):
+    childs = RecursiveField(many=True)
+    class Meta:
+        model = HierarchyTree
+        fields = '__all__'
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HierarchyTree
+        fields = '__all__'
+        read_only_fields = ('type', 'level')
+
+    def create(self, validated_data):
+        category = super().create(validated_data)
+        level = 0
+        if category.parent != None:
+            level = category.parent.level + 1
+        category.level = level
+        category.type = "product"
+        category.save()
+        return category
+
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        level = 0
+        if instance.parent != None:
+            level = instance.parent.level + 1
+        instance.level = level
+        instance.type = "product"
+        instance.save()
+        return instance
+
+    
