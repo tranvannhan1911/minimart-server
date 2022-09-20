@@ -2,6 +2,10 @@ from sqlite3 import IntegrityError
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
+from django.contrib.auth.hashers import (
+    check_password,
+    make_password,
+)
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password, **extra_fields):
@@ -38,8 +42,7 @@ class CustomerGroup(models.Model):
 
 class User(AbstractUser):
     phone = models.CharField('Số điện thoại', max_length=15, unique=True)
-    customer_group = models.ManyToManyField(CustomerGroup, db_table='CustomerGroupDetail', blank=True, related_name='customer_group_detail')
-    fullname = models.CharField('Tên khách hàng', max_length=30, null=True)
+    fullname = models.CharField('Tên nhân viên', max_length=30, null=True)
     gender = models.CharField('Giới tính', max_length=1, default='U', choices=(
         ('M', 'Nam'),
         ('F', 'Nữ'),
@@ -92,15 +95,71 @@ class User(AbstractUser):
                 phone = "0"+phone[3:]
         return phone
 
+    class Meta:
+        db_table = 'User'
+
+
+class Customer(models.Model):
+    phone = models.CharField('Số điện thoại', max_length=15, unique=True)
+    customer_group = models.ManyToManyField(CustomerGroup, 
+        db_table='CustomerGroupDetail', blank=True, 
+        related_name='customer_group_detail')
+    fullname = models.CharField('Tên khách hàng', max_length=30, null=True)
+    gender = models.CharField('Giới tính', max_length=1, default='U', choices=(
+        ('M', 'Nam'),
+        ('F', 'Nữ'),
+        ('U', 'Không xác định'),
+    ))
+    address = models.CharField('Địa chỉ', max_length=255, null=True)
+    note = models.TextField('Ghi chú', blank=True)
+    password = models.CharField("Mật khẩu", max_length=128, blank=True)
+    last_login = models.DateTimeField("Lần đăng nhập cuối cùng", blank=True, null=True)
+    is_active = models.BooleanField("Hoạt động", default=True)
+
+    # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    # user_created = models.ForeignKey("management.User", on_delete=models.PROTECT, 
+    #     null=True, related_name="users_created")
+    # date_updated = models.DateTimeField('Ngày cập nhật', default=timezone.now)
+    # user_updated = models.ForeignKey("management.User", on_delete=models.PROTECT, 
+    #     null=True, related_name="users_updated")
+
+    def __str__(self):
+        return self.phone
+
     @staticmethod
-    def random_password():
+    def check_exists(phone, is_active=None):
+        if is_active == None:
+            return Customer.objects.filter(phone=phone).exists()
+        return Customer.objects.filter(phone=phone, is_active=is_active).exists()
+    
+    def random_password(self):
         import string
         import random
         return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
-    class Meta:
-        db_table = 'User'
+    
+    def set_password(self, raw_password=None):
+        if not raw_password:
+            raw_password = self.random_password()
+        self.password = make_password(raw_password)
+        self._password = raw_password
 
+    def check_password(self, raw_password):
+        """
+        Return a boolean of whether the raw_password was correct. Handles
+        hashing formats behind the scenes.
+        """
+
+        def setter(raw_password):
+            self.set_password(raw_password)
+            # Password hash upgrades shouldn't be considered password changes.
+            self._password = None
+            self.save(update_fields=["password"])
+
+        return check_password(raw_password, self.password, setter)
+
+    class Meta:
+        db_table = 'Customer'
 
 class ProductGroup(models.Model):
     product_group_code = models.CharField('Mã nhóm sản phẩm', max_length=15)
@@ -266,7 +325,7 @@ class PriceDetail(models.Model):
 class Order(models.Model):
     # order_id = models.AutoField('Mã đơn hàng', primary_key=True)
     note = models.TextField('Ghi chú')
-    customer = models.ForeignKey(User, on_delete=models.PROTECT,
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT,
         related_name='orders', null=True)
     total = models.FloatField('Thành tiền', default=0)
     status = models.CharField('Trạng thái', max_length=15, default="pending", choices=(
@@ -409,14 +468,15 @@ class WarehouseTransaction(models.Model):
 class Promotion(models.Model):
     title = models.CharField('Tiêu đề của chương trình khuyến mãi', max_length=255)
     description = models.TextField('Mô tả chương trình khuyến mãi', default="")
-    image = models.CharField('Hình ảnh', max_length=255)
+    image = models.CharField('Hình ảnh', max_length=255, null=True)
     
-    applicable_customer_groups = models.ManyToManyField(CustomerGroup, db_table='ApplicableCustomerGroup')
+    applicable_customer_groups = models.ManyToManyField(CustomerGroup, 
+        db_table='ApplicableCustomerGroup', null=True)
 
     start_date = models.DateTimeField('Thời gian bắt đầu áp dụng', default=timezone.now)
     end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
 
-    status = models.BooleanField('Trạng thái')
+    status = models.BooleanField('Trạng thái', default=False)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, related_name="promotions_created", 

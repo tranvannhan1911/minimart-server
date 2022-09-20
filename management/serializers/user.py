@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt import serializers as serializers_jwt
-from management.models import CustomerGroup, User
+from management.models import Customer, CustomerGroup, User
 from management.serializers import ResponeSerializer
 
 class PhoneSerializer(serializers.Serializer):
@@ -18,7 +18,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('customer_group', 'fullname', 'gender', 'note', 'phone', 'address')
+        fields = ('fullname', 'gender', 'note', 'phone', 'address')
         extra_kwargs = {
             'fullname': {
                 'required': True
@@ -31,7 +31,7 @@ class AddUserSerializer(serializers.ModelSerializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('customer_group', 'fullname', 'gender', 'note', 'address')
+        fields = ('fullname', 'gender', 'note', 'address')
         extra_kwargs = {
             'fullname': {
                 'required': True
@@ -73,5 +73,25 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ('password', )
-    # def get_gender(self, obj):
-    #     return obj.get_gender_display()
+
+##########################
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ('customer_group', 'fullname', 'gender', 'note', 'phone', 'address')
+        extra_kwargs = {
+            'fullname': {
+                'required': True
+            },
+            'phone': {
+                'required': True
+            }
+        }
+
+
+class ResponseCustomerSerializer(serializers.ModelSerializer):
+    customer_group = CustomerGroupSerializer(read_only=True, many=True)
+    class Meta:
+        model = Customer
+        exclude = ('password', )

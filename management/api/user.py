@@ -8,12 +8,13 @@ from rest_framework import status
 from django.forms.models import model_to_dict
 from rest_framework import permissions
 from management import serializers
+from management import swagger
 
-from management.models import User
+from management.models import Customer, User
 from management.utils import perms
 
 from management.serializers.user import (
-    AddUserSerializer, UpdateUserSerializer, UserSerializer, 
+    AddUserSerializer, CustomerSerializer, ResponseCustomerSerializer, UpdateUserSerializer, UserSerializer, 
     # ResponseCustomerSerializer, UpdateCustomerSerializer
 )
 from management.utils.apicode import ApiCode
@@ -26,7 +27,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from management.utils.perms import method_permission_classes
 from rest_framework import exceptions
 
-class UserView(generics.GenericAPIView):
+class StaffView(generics.GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = (perms.IsAdminUser,)
 
@@ -35,10 +36,6 @@ class UserView(generics.GenericAPIView):
         request_body=AddUserSerializer,
         responses={200: SwaggerUserSchema.customer_info()})
     def post(self, request):
-        if(resolve(request.get_full_path()).url_name == "staff"):
-            if not request.user.is_superuser:
-                raise exceptions.PermissionDenied
-
         serializer = AddUserSerializer(data=request.data)
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
@@ -47,26 +44,20 @@ class UserView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Số điện thoại bị trùng"), status = status.HTTP_200_OK)
 
         user = serializer.save()
-        if(resolve(request.get_full_path()).url_name == "staff"):
-            user.is_staff = True
-            user.save()
+        user.is_staff = True
+        user.save()
 
         response = UserSerializer(user)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return User.objects.all()
+        return User.objects.filter(is_staff=True)
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         responses={200: SwaggerUserSchema.customer_list})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        
-        if(resolve(request.get_full_path()).url_name == "customer"):
-            queryset = queryset.filter(is_staff=False).filter(is_superuser=False)
-        else:
-            queryset = queryset.filter(is_staff=True)
 
         response = UserSerializer(data=queryset, many=True)
         response.is_valid()
@@ -75,7 +66,7 @@ class UserView(generics.GenericAPIView):
             "results": response.data
         }), status = status.HTTP_200_OK)
 
-class UserIdView(generics.GenericAPIView):
+class StaffIdView(generics.GenericAPIView):
     authentication_classes = [JWTAuthentication]
 
     @swagger_auto_schema(
@@ -84,9 +75,6 @@ class UserIdView(generics.GenericAPIView):
         responses={200: SwaggerUserSchema.customer_info()})
     @method_permission_classes((perms.IsAdminUser, ))
     def put(self, request, id):
-        if(resolve(request.get_full_path()).url_name == "staff_id"):
-            if not request.user.is_superuser:
-                raise exceptions.PermissionDenied
 
         user = get_object_or_404(User, id=id)
         serializer = UpdateUserSerializer(user, data=request.data)
@@ -116,10 +104,6 @@ class UserIdView(generics.GenericAPIView):
         responses={200: SwaggerSchema.success()})
     @method_permission_classes((perms.IsAdminUser, ))
     def delete(self, request, id):
-        if(resolve(request.get_full_path()).url_name == "staff_id"):
-            if not request.user.is_superuser:
-                raise exceptions.PermissionDenied
-                
         if not User.objects.filter(pk=id).exists():
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
 
@@ -128,4 +112,93 @@ class UserIdView(generics.GenericAPIView):
             user.delete()
         except:
             return Response(data = ApiCode.error(message="Không thể xóa người dùng này"), status = status.HTTP_200_OK)
+        return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+
+#########################################
+
+class CustomerView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        request_body=CustomerSerializer,
+        responses={200: swagger.customer["get"]})
+    def post(self, request):
+        serializer = CustomerSerializer(data=request.data)
+        if serializer.is_valid() == False:
+            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+        
+        if Customer.objects.filter(phone=serializer.validated_data["phone"]).exists():
+            return Response(data = ApiCode.error(message="Số điện thoại bị trùng"), status = status.HTTP_200_OK)
+
+        customer = serializer.save()
+        customer.set_password()
+        customer.save()
+
+        response = ResponseCustomerSerializer(customer)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
+
+    def get_queryset(self):
+        return Customer.objects.all()
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: swagger.customer["list"]})
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        response = ResponseCustomerSerializer(data=queryset, many=True)
+        response.is_valid()
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+class CustomerIdView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        request_body=CustomerSerializer,
+        responses={200: swagger.customer["get"]})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def put(self, request, id):
+
+        user = get_object_or_404(User, id=id)
+        serializer = CustomerSerializer(user, data=request.data)
+
+        if serializer.is_valid() == False:
+            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+
+        user = serializer.save()
+
+        response = ResponseCustomerSerializer(user)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: swagger.customer["get"]})
+    @method_permission_classes((perms.IsOwnUserOrAdmin, ))
+    def get(self, request, id):
+        if not Customer.objects.filter(id=id).exists():
+            return Response(data = ApiCode.error(message="Khách hàng không tồn tại"), status = status.HTTP_200_OK)
+
+        customer = Customer.objects.get(id=id)
+        response = ResponseCustomerSerializer(customer)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerSchema.success()})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def delete(self, request, id):
+        if not Customer.objects.filter(pk=id).exists():
+            return Response(data = ApiCode.error(message="Khách hàng không tồn tại"), status = status.HTTP_200_OK)
+
+        user = Customer.objects.get(pk=id)
+        try:
+            user.delete()
+        except:
+            return Response(data = ApiCode.error(message="Không thể xóa khách hàng này"), status = status.HTTP_200_OK)
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)

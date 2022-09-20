@@ -29,10 +29,11 @@ from drf_yasg import openapi
 from django_twilio.views import sms
 from management.api.inventory import InventoryRCIdView, InventoryRCView, InventoryRecordIdView, InventoryRecordView, WarehouseTransactionIdView, WarehouseTransactionView
 from management.api.product import CalculationUnitIdView, CategoryIdView, CategoryView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
+from management.api.promotion import PromotionView
 from management.api.supplier import SupplierIdView, SupplierView
 
 from management.api.user import (
-    UserIdView, UserView,
+    CustomerIdView, CustomerView, StaffIdView, StaffView, 
 )
 
 from management.api.customer_group import (
@@ -67,16 +68,16 @@ urlpatterns = [
             path('get_info/', GetInfoView.as_view(), name='get_info'),
         ])),
         path('customer/', include([
-            path('', UserView.as_view(), name='customer'),
-            path('<int:id>/', UserIdView.as_view(), name='customer_id'),
+            path('', CustomerView.as_view(), name='customer'),
+            path('<int:id>/', CustomerIdView.as_view(), name='customer_id'),
         ])),
         path('customer-group/', include([
             path('', CustomerGroupView.as_view(), name='customer_group'),
             path('<int:id>/', CustomerGroupIdView.as_view(), name='customer_group_id'),
         ])),
         path('staff/', include([
-            path('', UserView.as_view(), name='staff'),
-            path('<int:id>/', UserIdView.as_view(), name='staff_id'),
+            path('', StaffView.as_view(), name='staff'),
+            path('<int:id>/', StaffIdView.as_view(), name='staff_id'),
         ])),
         path('supplier/', include([
             path('', SupplierView.as_view(), name='supplier'),
@@ -113,6 +114,10 @@ urlpatterns = [
         path('category/', include([
             path('', CategoryView.as_view(), name='category'),
             path('<int:id>/', CategoryIdView.as_view(), name='category_id'),
+        ])),
+        path('promotion/', include([
+            path('', PromotionView.as_view(), name='promotion'),
+            # path('<int:id>/', CategoryIdView.as_view(), name='category_id'),
         ]))
     ])),
 

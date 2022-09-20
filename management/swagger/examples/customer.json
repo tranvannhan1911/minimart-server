@@ -1,0 +1,18 @@
+{
+    "id": 3,
+    "customer_group": [
+        {
+            "id": 1,
+            "name": "Khách hàng thân thiết",
+            "description": "",
+            "note": ""
+        }
+    ],
+    "phone": "0987654002",
+    "fullname": "Lê Bút",
+    "gender": "M",
+    "address": null,
+    "note": "",
+    "last_login": null,
+    "is_active": true
+}
