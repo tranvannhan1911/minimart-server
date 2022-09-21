@@ -13,4 +13,5 @@ ssh -i "~/.ssh/minimart.pem" ubuntu@13.214.169.137 '''/bin/bash -c "cd /home/ubu
             --restart on-failure:5 \
             --name minimart-server \
             --network="host" \
-            tranvannhan1911/minimart-server "'''
+            tranvannhan1911/minimart-server \
+        && docker exec minimart-server python3 manage.py migrate "'''

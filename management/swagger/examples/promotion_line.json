@@ -1,0 +1,26 @@
+{
+    "id": 1,
+    "detail": {
+        "id": 1,
+        "quantity_buy": null,
+        "quantity_received": null,
+        "minimum_total": 120000.0,
+        "percent": null,
+        "maximum_reduction_amount": null,
+        "reduction_amount": 10000.0,
+        "promotion_line": 1,
+        "applicable_products": [],
+        "applicable_product_groups": []
+    },
+    "title": "Khuyến mãi 20%",
+    "description": "Đây là khuyến mãi 20%",
+    "promotion_code": "791792711221",
+    "type": "Fixed",
+    "start_date": "2022-09-21T00:00:00Z",
+    "end_date": "2022-09-25T00:00:00Z",
+    "status": false,
+    "max_quantity": 120,
+    "max_quantity_per_customer": null,
+    "max_quantity_per_customer_per_day": null,
+    "promotion": 2
+}

@@ -382,7 +382,7 @@ class CategoryView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: swagger.category["get"]})
+        responses={200: swagger.category["list"]})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         response = CategoryTreeSerializer(data=queryset, many=True)

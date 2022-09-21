@@ -489,8 +489,10 @@ class Promotion(models.Model):
         db_table = 'Promotion'
 
 class PromotionLine(models.Model):
+    title = models.CharField('Tiêu đề của khuyến mãi', max_length=255, default="")
+    description = models.TextField('Mô tả khuyến mãi', default="")
     promotion_code = models.CharField('Mã khuyến mãi', max_length=15, null=True, unique=True)
-    promotion = models.OneToOneField(Promotion, on_delete=models.CASCADE)
+    promotion = models.ForeignKey(Promotion, on_delete=models.CASCADE, related_name='lines')
     type = models.CharField('Loại khuyến mãi', max_length=15, choices=(
         ('Product', 'Khuyến mãi sản phẩm'),
         ('Percent', 'Khuyến mãi theo phần trăm hóa đơn'),
@@ -504,10 +506,10 @@ class PromotionLine(models.Model):
     max_quantity_per_customer_per_day = models.IntegerField('Số lần áp dụng tối đa trên khách hàng trên 1 ngày', null=True)
 
 class PromotionDetail(models.Model):
-    promotion_line = models.OneToOneField(PromotionLine, on_delete=models.CASCADE, null=True)
+    promotion_line = models.OneToOneField(PromotionLine, on_delete=models.CASCADE, null=True, related_name='detail')
     # Product
-    applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct')
-    applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup')
+    applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct', null=True)
+    applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup', null=True)
     quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua', null=True)
     quantity_received = models.PositiveIntegerField('Số lượng sản phẩm được nhận', null=True)
     # Percent
