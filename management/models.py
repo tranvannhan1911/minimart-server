@@ -30,7 +30,7 @@ class CustomUserManager(BaseUserManager):
 class CustomerGroup(models.Model):
     name = models.CharField('Tên nhóm khách hàng', max_length=50)
     description = models.TextField('Mô tả nhóm khách hàng', blank=True)
-    note = models.TextField('Ghi chú', blank=True)
+    note = models.TextField('Ghi chú', null=True)
     
     class Meta:
         db_table = 'CustomerGroup'
@@ -49,7 +49,7 @@ class User(AbstractUser):
         ('U', 'Không xác định'),
     ))
     address = models.CharField('Địa chỉ', max_length=255, null=True)
-    note = models.TextField('Ghi chú', blank=True)
+    note = models.TextField('Ghi chú', null=True)
     
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey("management.User", on_delete=models.PROTECT, 
@@ -111,7 +111,7 @@ class Customer(models.Model):
         ('U', 'Không xác định'),
     ))
     address = models.CharField('Địa chỉ', max_length=255, null=True)
-    note = models.TextField('Ghi chú', blank=True)
+    note = models.TextField('Ghi chú', null=True)
     password = models.CharField("Mật khẩu", max_length=128, blank=True)
     last_login = models.DateTimeField("Lần đăng nhập cuối cùng", blank=True, null=True)
     is_active = models.BooleanField("Hoạt động", default=True)
@@ -166,8 +166,7 @@ class ProductGroup(models.Model):
     name = models.CharField('Tên nhóm sản phẩm', max_length=255)
     description = models.TextField('Mô tả nhóm sản phẩm', 
         help_text='Mô tả của nhóm sản phẩm', null=True)
-    note = models.TextField('Ghi chú', 
-        help_text='Ghi chú nội bộ', null=True)
+    note = models.TextField('Ghi chú', null=True)
     
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -185,7 +184,7 @@ class Supplier(models.Model):
     phone = models.CharField('Số điện thoại', max_length=15)
     email = models.CharField('Địa chỉ email', max_length=50, null=True)
     address = models.CharField('Địa chỉ', max_length=255, null=True)
-    note = models.TextField('Ghi chú', help_text='Ghi chú nội bộ', null=True)
+    note = models.TextField('Ghi chú', null=True)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -205,6 +204,7 @@ class HierarchyTree(models.Model):
     ))
     parent = models.ForeignKey("management.HierarchyTree", 
         on_delete=models.CASCADE, null=True, related_name='childs')
+    note = models.TextField('Ghi chú', null=True)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -248,6 +248,7 @@ class Product(models.Model):
     units = models.ManyToManyField(CalculationUnit, through='management.UnitExchange',
         blank=True)
     status = models.BooleanField('Trạng thái', default=False)
+    note = models.TextField('Ghi chú', null=True)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -297,6 +298,7 @@ class PriceList(models.Model):
     end_date = models.DateTimeField('Thời gian kết thúc',
         help_text='Thời gian kết thúc áp dụng bảng giá', default=timezone.now)
     status = models.BooleanField('Trạng thái', default=False)
+    note = models.TextField('Ghi chú', null=True)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -318,13 +320,14 @@ class PriceDetail(models.Model):
     price = models.FloatField('Giá bán', default=0)
     start_date = models.DateTimeField('Thời gian bắt đầu', default=timezone.now)
     end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
+    note = models.TextField('Ghi chú', null=True)
 
     class Meta:
         db_table = 'PriceDetail'
 
 class Order(models.Model):
     # order_id = models.AutoField('Mã đơn hàng', primary_key=True)
-    note = models.TextField('Ghi chú')
+    note = models.TextField('Ghi chú', null=True)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT,
         related_name='orders', null=True)
     total = models.FloatField('Thành tiền', default=0)
@@ -352,7 +355,7 @@ class OrderDetail(models.Model):
     price = models.ForeignKey(PriceDetail, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField('Số lượng')
     total = models.FloatField('Thành tiền', default=0)
-    note = models.TextField('Ghi chú')
+    note = models.TextField('Ghi chú', null=True)
 
     class Meta:
         db_table = 'OrderDetail'
@@ -361,7 +364,7 @@ class OrderRefund(models.Model):
     # refund_id = models.AutoField('Mã trả hàng', primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     staff = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
-    note = models.TextField('Ghi chú')
+    note = models.TextField('Ghi chú', null=True)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -379,7 +382,7 @@ class OrderRefundDetail(models.Model):
     unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
         null=True)
     quantity = models.PositiveIntegerField('Số lượng')
-    note = models.TextField('Ghi chú')
+    note = models.TextField('Ghi chú', null=True)
 
     class Meta:
         db_table = 'OrderRefundDetail'
@@ -392,7 +395,7 @@ class InventoryReceivingVoucher(models.Model):
         ("complete", "Hoàn thành"),
         ("cancel", "Hủy"),
     ))
-    note = models.TextField('Ghi chú')
+    note = models.TextField('Ghi chú', null=True)
     total = models.FloatField('Thành tiền', default=0)
     
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
@@ -411,7 +414,7 @@ class InventoryReceivingVoucherDetail(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField('Số lượng')
     price = models.FloatField('Giá nhập')
-    note = models.TextField('Ghi chú')
+    note = models.TextField('Ghi chú', null=True)
 
     class Meta:
         db_table = 'InventoryReceivingVoucherDetail'
@@ -419,7 +422,7 @@ class InventoryReceivingVoucherDetail(models.Model):
 class InventoryVoucher(models.Model):
     # voucher_id = models.AutoField('Mã phiếu kiểm kê', primary_key=True)
     # status = models.CharField('Trạng thái', max_length=15)
-    note = models.TextField('Ghi chú')
+    note = models.TextField('Ghi chú', null=True)
     status = models.CharField('Trạng thái', max_length=15, choices=(
         ("pending", "Chờ xác nhận"),
         ("complete", "Hoàn thành"),
@@ -461,6 +464,7 @@ class WarehouseTransaction(models.Model):
         ('refund', 'Trả hàng'),
     ))
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    note = models.TextField('Ghi chú', null=True)
 
     class Meta:
         db_table = 'WarehouseTransaction'
@@ -477,6 +481,7 @@ class Promotion(models.Model):
     end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
 
     status = models.BooleanField('Trạng thái', default=False)
+    note = models.TextField('Ghi chú', null=True)
 
     # date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, related_name="promotions_created", 
@@ -504,12 +509,15 @@ class PromotionLine(models.Model):
     max_quantity = models.IntegerField('Số lần áp dụng tối đa', null=True)
     max_quantity_per_customer = models.IntegerField('Số lần áp dụng tối đa trên khách hàng', null=True)
     max_quantity_per_customer_per_day = models.IntegerField('Số lần áp dụng tối đa trên khách hàng trên 1 ngày', null=True)
+    note = models.TextField('Ghi chú', null=True)
 
 class PromotionDetail(models.Model):
     promotion_line = models.OneToOneField(PromotionLine, on_delete=models.CASCADE, null=True, related_name='detail')
     # Product
     applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct', null=True)
     applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup', null=True)
+    product_received = models.ForeignKey(Product, null=True,
+        on_delete=models.CASCADE, related_name="promotion_receive")
     quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua', null=True)
     quantity_received = models.PositiveIntegerField('Số lượng sản phẩm được nhận', null=True)
     # Percent
@@ -530,6 +538,7 @@ class PromotionHistory(models.Model):
     reduction_quantity = models.PositiveIntegerField('Số lượng sản phẩm được nhận', default=0, null=True)
     reduction_amount = models.FloatField('Số tiền được giảm', null=True)
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    note = models.TextField('Ghi chú', null=True)
 
     class Meta:
         db_table = 'PromotionHistory'
@@ -544,6 +553,7 @@ class History(models.Model):
     ))
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, verbose_name="Người thực hiện")
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
+    note = models.TextField('Ghi chú', null=True)
 
     class Meta:
         db_table = 'History'

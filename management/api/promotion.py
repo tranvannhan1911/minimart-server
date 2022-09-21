@@ -124,6 +124,13 @@ class PromotionLineView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
+        # if serializer.data["type"] == "Product":
+        #     if serializer.data["detail"]["applicable_products"]
+        # elif serializer.data["type"] == "Percent":
+        #     pass
+        # elif serializer.data["type"] == "Fixed":
+        #     pass
+        
         promotion = serializer.save()
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
