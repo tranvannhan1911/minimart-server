@@ -22,7 +22,6 @@ from management.utils.apicode import ApiCode
 from drf_yasg.utils import swagger_auto_schema
 
 from management.swagger import SwaggerSchema
-from management.swagger.product import  SwaggerProductSchema
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from management.utils.perms import method_permission_classes

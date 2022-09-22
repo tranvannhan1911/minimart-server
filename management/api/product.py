@@ -22,7 +22,6 @@ from management.utils.apicode import ApiCode
 from drf_yasg.utils import swagger_auto_schema
 
 from management.swagger import SwaggerSchema
-from management.swagger.product import  SwaggerProductSchema
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from management.utils.perms import method_permission_classes
@@ -35,7 +34,7 @@ class ProductGroupView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=ProductGroupSerializer,
-        responses={200: SwaggerProductSchema.product_group_get})
+        responses={200: swagger.product_group["get"]})
     def post(self, request):
         serializer = ProductGroupSerializer(data=request.data)
         if serializer.is_valid() == False:
@@ -49,7 +48,7 @@ class ProductGroupView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerProductSchema.product_group_list})
+        responses={200: swagger.product_group["list"]})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         response = ProductGroupSerializer(data=queryset, many=True)
@@ -65,7 +64,7 @@ class ProductGroupIdView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=ProductGroupSerializer,
-        responses={200: SwaggerProductSchema.product_group_get})
+        responses={200: swagger.product_group["get"]})
     @method_permission_classes((perms.IsAdminUser, ))
     def put(self, request, id):
         if not ProductGroup.objects.filter(pk = id).exists():
@@ -83,7 +82,7 @@ class ProductGroupIdView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerProductSchema.product_group_get})
+        responses={200: swagger.product_group["get"]})
     @method_permission_classes((perms.IsAdminUser, ))
     def get(self, request, id):
         if not ProductGroup.objects.filter(pk = id).exists():
@@ -117,7 +116,7 @@ class CalculationUnitView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=CalculationUnitSerializer,
-        responses={200: SwaggerProductSchema.calculation_unit_get})
+        responses={200: swagger.unit["get"]})
     def post(self, request):
         serializer = CalculationUnitSerializer(data=request.data)
         if serializer.is_valid() == False:
@@ -131,7 +130,7 @@ class CalculationUnitView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerProductSchema.calculation_unit_list})
+        responses={200: swagger.unit["list"]})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         response = CalculationUnitSerializer(data=queryset, many=True)
@@ -147,7 +146,7 @@ class CalculationUnitIdView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=CalculationUnitSerializer,
-        responses={200: SwaggerProductSchema.calculation_unit_get})
+        responses={200: swagger.unit["get"]})
     @method_permission_classes((perms.IsAdminUser, ))
     def put(self, request, id):
         if not CalculationUnit.objects.filter(pk = id).exists():
@@ -165,7 +164,7 @@ class CalculationUnitIdView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerProductSchema.calculation_unit_get})
+        responses={200: swagger.unit["get"]})
     @method_permission_classes((perms.IsAdminUser, ))
     def get(self, request, id):
         if not CalculationUnit.objects.filter(pk = id).exists():
@@ -199,7 +198,7 @@ class ProductView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=ProductSerializer,
-        responses={200: SwaggerProductSchema.product_get})
+        responses={200: swagger.product["get"]})
     def post(self, request):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid() == False:
@@ -214,7 +213,7 @@ class ProductView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerProductSchema.product_list})
+        responses={200: swagger.product["list"]})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         response = ReadProductSerializer(data=queryset, many=True)
@@ -230,7 +229,7 @@ class ProductIdView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=ProductSerializer,
-        responses={200: SwaggerProductSchema.product_get})
+        responses={200: swagger.product["get"]})
     @method_permission_classes((perms.IsAdminUser, ))
     def put(self, request, id):
         if not Product.objects.filter(pk = id).exists():
@@ -249,7 +248,7 @@ class ProductIdView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerProductSchema.product_get})
+        responses={200: swagger.product["get"]})
     @method_permission_classes((perms.IsAdminUser, ))
     def get(self, request, id):
         if not Product.objects.filter(pk = id).exists():
@@ -283,7 +282,7 @@ class PriceListView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=PriceListSerializer,
-        responses={200: SwaggerProductSchema.pricelist_get})
+        responses={200: swagger.pricelist["get"]})
     def post(self, request):
         serializer = PriceListSerializer(data=request.data)
         if serializer.is_valid() == False:
@@ -298,7 +297,7 @@ class PriceListView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerProductSchema.pricelist_list})
+        responses={200: swagger.pricelist["list"]})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         response = ResponsePriceListSerializer(data=queryset, many=True)
@@ -314,7 +313,7 @@ class PriceListIdView(generics.GenericAPIView):
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
         request_body=PriceListSerializer,
-        responses={200: SwaggerProductSchema.pricelist_get})
+        responses={200: swagger.pricelist["get"]})
     @method_permission_classes((perms.IsAdminUser, ))
     def put(self, request, id):
         if not PriceList.objects.filter(pk = id).exists():
@@ -333,7 +332,7 @@ class PriceListIdView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
-        responses={200: SwaggerProductSchema.pricelist_get})
+        responses={200: swagger.pricelist["get"]})
     @method_permission_classes((perms.IsAdminUser, ))
     def get(self, request, id):
         if not PriceList.objects.filter(pk = id).exists():

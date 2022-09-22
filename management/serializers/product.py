@@ -42,10 +42,14 @@ class UnitExchangeSerializer(serializers.ModelSerializer):
 ##############################    
 class ProductSerializer(serializers.ModelSerializer):
     units = UnitExchangeSerializer(many=True, required=False)
+    stock = serializers.IntegerField(read_only=True)
     class Meta:
         model = Product
         exclude = ('barcode_image', )
         read_only_fields = ('date_created', )
+
+    def get_stock(self, obj):
+        return obj.stock()
 
     def create(self, validated_data):
         units = validated_data.pop('units')
@@ -84,10 +88,14 @@ class ProductSerializer(serializers.ModelSerializer):
 class ReadProductSerializer(serializers.ModelSerializer):
     product_groups = ProductGroupSerializer(read_only=True, many=True, required=False)
     units = UnitExchangeSerializer(source="unitexchanges", read_only=True, many=True)
+    stock = serializers.IntegerField(read_only=True)
     class Meta:
         model = Product
         exclude = ('barcode_image', )
         read_only_fields = ('date_created', )
+        
+    def get_stock(self, obj):
+        return obj.stock()
 
 ####################### 
 class PriceDetailSerializer(serializers.ModelSerializer):

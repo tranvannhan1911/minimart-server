@@ -1,0 +1,63 @@
+{
+    "price_list_id": 1,
+    "pricedetails": [
+        {
+            "id": 7,
+            "product": {
+                "id": 1,
+                "product_groups": [],
+                "units": [
+                    {
+                        "id": 1,
+                        "unit_name": "Thùng",
+                        "value": 24,
+                        "allow_sale": true,
+                        "is_base_unit": false,
+                        "date_created": "2022-09-22T03:01:07.678401Z",
+                        "unit": 2
+                    },
+                    {
+                        "id": 4,
+                        "unit_name": "Lốc",
+                        "value": 6,
+                        "allow_sale": true,
+                        "is_base_unit": false,
+                        "date_created": "2022-09-22T03:01:07.678401Z",
+                        "unit": 4
+                    }
+                ],
+                "stock": 35,
+                "product_code": "BIA333",
+                "name": "Bia 333",
+                "description": null,
+                "image": null,
+                "barcode": "8491992901299",
+                "status": false,
+                "note": null,
+                "date_created": "2022-09-22T03:01:07.294832Z",
+                "product_category": null
+            },
+            "unit_exchange": {
+                "id": 1,
+                "unit_name": "Thùng",
+                "value": 24,
+                "allow_sale": true,
+                "is_base_unit": false,
+                "date_created": "2022-09-22T03:01:07.678401Z",
+                "product": 1,
+                "unit": 2
+            },
+            "price": 16000.0,
+            "start_date": "2022-09-14T00:26:10.434000Z",
+            "end_date": "2022-10-01T00:26:10.434000Z",
+            "note": null,
+            "pricelist": 1
+        }
+    ],
+    "name": "Bảng giá tháng 9",
+    "start_date": "2022-09-14T00:26:10.434000Z",
+    "end_date": "2022-10-01T00:26:10.434000Z",
+    "status": true,
+    "note": null,
+    "date_created": "2022-09-22T03:01:07.229815Z"
+}

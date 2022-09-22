@@ -1,9 +1,8 @@
 django
-django_rest_framework
-django-cors-headers
-djangorestframework-simplejwt
-drf-yasg
-mysqlclient
-django-twilio
-django-otp-twilio
-tzdata
+django_rest_framework==3.13.1
+django-cors-headers==3.13.0
+djangorestframework-simplejwt==5.2.0
+drf-yasg==1.21.3
+mysqlclient==2.1.1
+django-twilio==0.14.0
+django-otp-twilio==1.0.1

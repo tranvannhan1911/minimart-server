@@ -20,9 +20,9 @@ class SwaggerSchema():
         )
 
 def get_example(name):
-    print(dir_path)
     f = open(dir_path+'/examples/'+name+'.json')
     data = json.load(f)
+    # print(data)
     return {
         "get": openapi.Response(
                 description="Successful",
@@ -43,3 +43,7 @@ inventory_record = get_example("inventory_record")
 warehouse_transaction = get_example("warehouse_transaction")
 promotion_line = get_example("promotion_line")
 promotion = get_example("promotion")
+product = get_example("product")
+product_group = get_example("product_group")
+unit = get_example("unit")
+pricelist = get_example("pricelist")
