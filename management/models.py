@@ -244,8 +244,8 @@ class Product(models.Model):
         db_table='ProductGroupDetail', blank=True)
     product_category = models.ForeignKey(HierarchyTree, on_delete=models.PROTECT, 
         related_name='products', null=True)
-    base_unit = models.ForeignKey(CalculationUnit, on_delete=models.CASCADE, verbose_name='Đơn vị cơ bản',
-        help_text='Đơn vị cơ bản', related_name='products', )
+    # base_unit = models.ForeignKey(CalculationUnit, on_delete=models.CASCADE, verbose_name='Đơn vị cơ bản',
+    #     help_text='Đơn vị cơ bản', related_name='products', )
     units = models.ManyToManyField(CalculationUnit, through='management.UnitExchange',
         blank=True)
     status = models.BooleanField('Trạng thái', default=False)
@@ -277,6 +277,7 @@ class UnitExchange(models.Model):
         help_text='Đơn vị này bằng bao nhiêu đơn vị mặc định?', default=1)
     allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
         help_text='Cho phép bán hàng bằng đơn vị này không?', default=False)
+    is_base_unit = models.BooleanField('Đơn vị cơ bản', default=False)
 
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     # user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
