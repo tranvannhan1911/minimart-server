@@ -1,5 +1,5 @@
 django
-django_rest_framework==3.13.1
+djangorestframework==3.13.1
 django-cors-headers==3.13.0
 djangorestframework-simplejwt==5.2.0
 drf-yasg==1.21.3
