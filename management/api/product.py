@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 from pprint import pprint
 from django.shortcuts import get_object_or_404
@@ -10,7 +11,7 @@ from rest_framework import permissions
 from management import serializers
 from management import swagger
 
-from management.models import CalculationUnit, HierarchyTree, PriceList, Product, ProductGroup, Supplier, User
+from management.models import CalculationUnit, HierarchyTree, PriceList, Product, ProductGroup, Supplier, User, created_updated
 from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer, ResponsePriceListSerializer
 from management.utils import perms
 
@@ -40,7 +41,9 @@ class ProductGroupView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
+        
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -76,7 +79,8 @@ class ProductGroupIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
-        serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
 
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
@@ -122,7 +126,8 @@ class CalculationUnitView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -159,6 +164,7 @@ class CalculationUnitIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
         serializer.save()
+        created_updated(unit, request)
 
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
@@ -205,6 +211,7 @@ class ProductView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
         product = serializer.save()
+        created_updated(product, request)
         response = ReadProductSerializer(product)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
@@ -242,6 +249,7 @@ class ProductIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
         product = serializer.save()
+        created_updated(product, request)
         response = ReadProductSerializer(product)
 
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
@@ -288,8 +296,9 @@ class PriceListView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        product = serializer.save()
-        response = ResponsePriceListSerializer(product)
+        obj = serializer.save()
+        created_updated(obj, request)
+        response = ResponsePriceListSerializer(obj)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -325,8 +334,9 @@ class PriceListIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
-        pricelist = serializer.save()
-        response = ResponsePriceListSerializer(pricelist)
+        obj = serializer.save()
+        created_updated(obj, request)
+        response = ResponsePriceListSerializer(obj)
 
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
@@ -374,6 +384,7 @@ class CategoryView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
         product = serializer.save()
+        created_updated(product, request)
         response = CategorySerializer(product)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
@@ -411,6 +422,7 @@ class CategoryIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
         catergory = serializer.save()
+        created_updated(catergory, request)
         response = CategoryTreeSerializer(catergory)
 
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)

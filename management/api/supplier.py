@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from rest_framework import permissions
 from management import serializers
 
-from management.models import Supplier, User
+from management.models import Supplier, User, created_updated
 from management.serializers.supplier import SupplierSerializer
 from management.utils import perms
 
@@ -40,7 +40,8 @@ class SupplierView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        supplier = serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -76,7 +77,8 @@ class SupplierIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
-        supplier = serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
 
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 

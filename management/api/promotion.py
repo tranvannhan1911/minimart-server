@@ -10,7 +10,7 @@ from rest_framework import permissions
 from management import serializers
 from management import swagger
 
-from management.models import CalculationUnit, HierarchyTree, PriceList, Product, ProductGroup, Promotion, PromotionLine, Supplier, User
+from management.models import CalculationUnit, HierarchyTree, PriceList, Product, ProductGroup, Promotion, PromotionLine, Supplier, User, created_updated
 from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
 from management.serializers.promotion import PromitionSerializer, PromotionLineSerializer
 from management.utils import perms
@@ -40,7 +40,8 @@ class PromotionView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        promotion = serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -76,7 +77,8 @@ class PromotionIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
-        catergory = serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
 
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
@@ -130,7 +132,9 @@ class PromotionLineView(generics.GenericAPIView):
         # elif serializer.data["type"] == "Fixed":
         #     pass
         
-        promotion = serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
+        created_updated(obj.promotion, request)
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -166,7 +170,9 @@ class PromotionLineIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
-        catergory = serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
+        created_updated(obj.promotion, request)
 
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 

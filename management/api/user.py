@@ -10,7 +10,7 @@ from rest_framework import permissions
 from management import serializers
 from management import swagger
 
-from management.models import Customer, User
+from management.models import Customer, User, created_updated
 from management.utils import perms
 
 from management.serializers.user import (
@@ -46,6 +46,7 @@ class StaffView(generics.GenericAPIView):
         user = serializer.save()
         user.is_staff = True
         user.save()
+        created_updated(user, request)
 
         response = UserSerializer(user)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
@@ -83,6 +84,7 @@ class StaffIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
         user = serializer.save()
+        created_updated(user, request)
 
         response = UserSerializer(user)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
@@ -135,6 +137,7 @@ class CustomerView(generics.GenericAPIView):
         customer = serializer.save()
         customer.set_password()
         customer.save()
+        created_updated(customer, request)
 
         response = ResponseCustomerSerializer(customer)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
@@ -172,6 +175,7 @@ class CustomerIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
         user = serializer.save()
+        created_updated(user, request)
 
         response = ResponseCustomerSerializer(user)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)

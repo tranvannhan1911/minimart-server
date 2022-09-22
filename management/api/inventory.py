@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from rest_framework import permissions
 from management import serializers
 
-from management.models import InventoryReceivingVoucher, InventoryVoucher, Supplier, User, WarehouseTransaction
+from management.models import InventoryReceivingVoucher, InventoryVoucher, Supplier, User, WarehouseTransaction, created_updated
 from management.serializers.inventory import InventoryRCSerializer, InventoryRecordSerializer, ResponseInventoryRCSerializer, ResponseInventoryRecordSerializer, ResponseWarehouseTransactionSerializer
 from management.utils import perms
 from management import swagger
@@ -41,8 +41,9 @@ class InventoryRCView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        voucher = serializer.save()
-        response = ResponseInventoryRCSerializer(voucher)
+        obj = serializer.save()
+        created_updated(obj, request)
+        response = ResponseInventoryRCSerializer(obj)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -78,8 +79,9 @@ class InventoryRCIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
-        voucher = serializer.save()
-        response = ResponseInventoryRCSerializer(voucher)
+        obj = serializer.save()
+        created_updated(obj, request)
+        response = ResponseInventoryRCSerializer(obj)
 
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
@@ -125,8 +127,9 @@ class InventoryRecordView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        voucher = serializer.save()
-        response = ResponseInventoryRecordSerializer(voucher)
+        obj = serializer.save()
+        created_updated(obj, request)
+        response = ResponseInventoryRecordSerializer(obj)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -162,8 +165,9 @@ class InventoryRecordIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
-        voucher = serializer.save()
-        response = ResponseInventoryRecordSerializer(voucher)
+        obj = serializer.save()
+        created_updated(obj, request)
+        response = ResponseInventoryRecordSerializer(obj)
 
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 

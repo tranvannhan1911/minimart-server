@@ -7,18 +7,15 @@ class ProductGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductGroup
         fields = '__all__'
-        read_only_fields = ('date_created', )
-        extra_kwargs = {
-            'id': {
-                'read_only': True
-            }
-        }
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 class CalculationUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = CalculationUnit
         fields = '__all__'
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
         extra_kwargs = {
             'id': {
                 'read_only': True
@@ -30,14 +27,16 @@ class UnitExchangeAllSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnitExchange
         fields = '__all__'
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 class UnitExchangeSerializer(serializers.ModelSerializer):
     unit_name = serializers.CharField(source="unit.name", read_only=True)
     class Meta:
         model = UnitExchange
         exclude = ('product', )
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 ##############################    
 class ProductSerializer(serializers.ModelSerializer):
@@ -46,7 +45,8 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         exclude = ('barcode_image', )
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
     def get_stock(self, obj):
         return obj.stock()
@@ -92,8 +92,9 @@ class ReadProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         exclude = ('barcode_image', )
-        read_only_fields = ('date_created', )
-        
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
+
     def get_stock(self, obj):
         return obj.stock()
 
@@ -108,7 +109,8 @@ class PriceListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceList
         fields = '__all__'
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
     def create(self, validated_data):
         pricedetails = validated_data.pop('pricedetails')
@@ -140,7 +142,8 @@ class ResponsePriceListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceList
         fields = '__all__'
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 ####################
 
 class RecursiveField(serializers.Serializer):
@@ -158,7 +161,8 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = HierarchyTree
         fields = '__all__'
-        read_only_fields = ('type', 'level', 'date_created')
+        read_only_fields = ('type', 'level', 'date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
     def create(self, validated_data):
         category = super().create(validated_data)

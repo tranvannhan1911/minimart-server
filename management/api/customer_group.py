@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 
-from management.models import CustomerGroup
+from management.models import CustomerGroup, created_updated
 from management.serializers.user import CustomerGroupSerializer
 from management.utils.apicode import ApiCode
 from drf_yasg.utils import swagger_auto_schema
@@ -27,7 +27,8 @@ class CustomerGroupView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
-        serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -63,7 +64,8 @@ class CustomerGroupIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
-        serializer.save()
+        obj = serializer.save()
+        created_updated(obj, request)
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     @swagger_auto_schema(
