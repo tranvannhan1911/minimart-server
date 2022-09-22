@@ -11,7 +11,7 @@ from management import serializers
 from management import swagger
 
 from management.models import CalculationUnit, HierarchyTree, PriceList, Product, ProductGroup, Supplier, User
-from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
+from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer, ResponsePriceListSerializer
 from management.utils import perms
 
 from management.serializers.user import (
@@ -290,7 +290,7 @@ class PriceListView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
         product = serializer.save()
-        response = PriceListSerializer(product)
+        response = ResponsePriceListSerializer(product)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
@@ -301,7 +301,7 @@ class PriceListView(generics.GenericAPIView):
         responses={200: SwaggerProductSchema.pricelist_list})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        response = PriceListSerializer(data=queryset, many=True)
+        response = ResponsePriceListSerializer(data=queryset, many=True)
         response.is_valid()
         return Response(data = ApiCode.success(data={
             "count": len(response.data),
@@ -326,9 +326,10 @@ class PriceListIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
-        serializer.save()
+        pricelist = serializer.save()
+        response = ResponsePriceListSerializer(pricelist)
 
-        return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
@@ -339,7 +340,7 @@ class PriceListIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Bảng giá không tồn tại"), status = status.HTTP_200_OK)
 
         pricelist = PriceList.objects.get(pk = id)
-        serializer = PriceListSerializer(pricelist)
+        serializer = ResponsePriceListSerializer(pricelist)
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     @swagger_auto_schema(

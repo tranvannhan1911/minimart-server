@@ -22,7 +22,7 @@ class CalculationUnitSerializer(serializers.ModelSerializer):
                 'read_only': True
             }
         }
-
+###############################
 class UnitExchangeAllSerializer(serializers.ModelSerializer):
     unit_name = serializers.CharField(source="unit.name", read_only=True)
     class Meta:
@@ -34,7 +34,8 @@ class UnitExchangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnitExchange
         exclude = ('product', )
-        
+
+##############################    
 class ProductSerializer(serializers.ModelSerializer):
     units = UnitExchangeSerializer(many=True, required=False)
     class Meta:
@@ -82,13 +83,7 @@ class ReadProductSerializer(serializers.ModelSerializer):
         model = Product
         exclude = ('barcode_image', )
 
-class ReadProductSerializer(serializers.ModelSerializer):
-    product_groups = ProductGroupSerializer(read_only=True, many=True, required=False)
-    units = UnitExchangeSerializer(source="unitexchanges", read_only=True, many=True)
-    class Meta:
-        model = Product
-        exclude = ('barcode_image', )
-
+####################### 
 class PriceDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceDetail
@@ -117,6 +112,19 @@ class PriceListSerializer(serializers.ModelSerializer):
             detail = PriceDetail.objects.create(**detail)
         return instance
 
+
+class ResponsePriceDetailSerializer(serializers.ModelSerializer):
+    product = ReadProductSerializer()
+    unit_exchange = UnitExchangeAllSerializer()
+    class Meta:
+        model = PriceDetail
+        fields = '__all__'
+        
+class ResponsePriceListSerializer(serializers.ModelSerializer):
+    pricedetails = ResponsePriceDetailSerializer(many=True)
+    class Meta:
+        model = PriceList
+        fields = '__all__'
 ####################
 
 class RecursiveField(serializers.Serializer):

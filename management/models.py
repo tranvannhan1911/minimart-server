@@ -475,7 +475,7 @@ class Promotion(models.Model):
     image = models.CharField('Hình ảnh', max_length=255, null=True)
     
     applicable_customer_groups = models.ManyToManyField(CustomerGroup, 
-        db_table='ApplicableCustomerGroup', null=True)
+        db_table='ApplicableCustomerGroup', blank=True)
 
     start_date = models.DateTimeField('Thời gian bắt đầu áp dụng', default=timezone.now)
     end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
@@ -514,8 +514,8 @@ class PromotionLine(models.Model):
 class PromotionDetail(models.Model):
     promotion_line = models.OneToOneField(PromotionLine, on_delete=models.CASCADE, null=True, related_name='detail')
     # Product
-    applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct', null=True)
-    applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup', null=True)
+    applicable_products = models.ManyToManyField(Product, db_table='ApplicableProduct', blank=True)
+    applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup', blank=True)
     product_received = models.ForeignKey(Product, null=True,
         on_delete=models.CASCADE, related_name="promotion_receive")
     quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua', null=True)
