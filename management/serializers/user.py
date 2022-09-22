@@ -18,7 +18,8 @@ class ChangePasswordSerializer(serializers.Serializer):
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('fullname', 'gender', 'note', 'phone', 'address')
+        fields = ('fullname', 'gender', 'note', 'phone', 'address', 'date_created')
+        read_only_fields = ('date_created', )
         extra_kwargs = {
             'fullname': {
                 'required': True
@@ -31,7 +32,8 @@ class AddUserSerializer(serializers.ModelSerializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('fullname', 'gender', 'note', 'address')
+        fields = ('fullname', 'gender', 'note', 'address', 'date_created')
+        read_only_fields = ('date_created', )
         extra_kwargs = {
             'fullname': {
                 'required': True
@@ -42,7 +44,8 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 class CustomerGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerGroup
-        fields = ('id', 'name', 'description', 'note')
+        fields = '__all__'
+        read_only_fields = ('date_created', )
         extra_kwargs = {
             'id': {
                 'read_only': True
@@ -53,6 +56,7 @@ class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ('password', )
+        read_only_fields = ('date_created', )
 
 ############# response ################
 class TokenSerializer(serializers.Serializer):
@@ -73,13 +77,15 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ('password', )
+        read_only_fields = ('date_created', )
 
 ##########################
 
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ('customer_group', 'fullname', 'gender', 'note', 'phone', 'address')
+        exclude = ('password', )
+        read_only_fields = ('date_created', 'last_login')
         extra_kwargs = {
             'fullname': {
                 'required': True

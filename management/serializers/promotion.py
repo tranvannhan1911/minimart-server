@@ -13,6 +13,7 @@ class PromotionLineSerializer(serializers.ModelSerializer):
     class Meta:
         model = PromotionLine
         fields = '__all__'
+        read_only_fields = ('date_created', )
 
 
     def create(self, validated_data):
@@ -36,3 +37,4 @@ class PromitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promotion
         fields = '__all__'
+        read_only_fields = ('date_created', )

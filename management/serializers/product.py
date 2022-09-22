@@ -7,6 +7,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductGroup
         fields = '__all__'
+        read_only_fields = ('date_created', )
         extra_kwargs = {
             'id': {
                 'read_only': True
@@ -17,6 +18,7 @@ class CalculationUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = CalculationUnit
         fields = '__all__'
+        read_only_fields = ('date_created', )
         extra_kwargs = {
             'id': {
                 'read_only': True
@@ -28,12 +30,14 @@ class UnitExchangeAllSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnitExchange
         fields = '__all__'
+        read_only_fields = ('date_created', )
 
 class UnitExchangeSerializer(serializers.ModelSerializer):
     unit_name = serializers.CharField(source="unit.name", read_only=True)
     class Meta:
         model = UnitExchange
         exclude = ('product', )
+        read_only_fields = ('date_created', )
 
 ##############################    
 class ProductSerializer(serializers.ModelSerializer):
@@ -41,6 +45,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         exclude = ('barcode_image', )
+        read_only_fields = ('date_created', )
 
     def create(self, validated_data):
         units = validated_data.pop('units')
@@ -82,6 +87,7 @@ class ReadProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         exclude = ('barcode_image', )
+        read_only_fields = ('date_created', )
 
 ####################### 
 class PriceDetailSerializer(serializers.ModelSerializer):
@@ -94,6 +100,7 @@ class PriceListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceList
         fields = '__all__'
+        read_only_fields = ('date_created', )
 
     def create(self, validated_data):
         pricedetails = validated_data.pop('pricedetails')
@@ -125,6 +132,7 @@ class ResponsePriceListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceList
         fields = '__all__'
+        read_only_fields = ('date_created', )
 ####################
 
 class RecursiveField(serializers.Serializer):
@@ -142,7 +150,7 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = HierarchyTree
         fields = '__all__'
-        read_only_fields = ('type', 'level')
+        read_only_fields = ('type', 'level', 'date_created')
 
     def create(self, validated_data):
         category = super().create(validated_data)
