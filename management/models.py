@@ -1,4 +1,5 @@
 from datetime import datetime
+from itertools import product
 from sqlite3 import IntegrityError
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
@@ -280,6 +281,12 @@ class Product(models.Model):
             ammount += tran.change
         return ammount
 
+    def get_base_unit(self):
+        return self.units.filter(unitexchanges__product=self, unitexchanges__is_base_unit=True).first()
+
+    def remain(self):
+        return str(self.stock())+" "+self.get_base_unit().name
+
     class Meta:
         db_table = 'Product'
 
@@ -374,14 +381,20 @@ class OrderDetail(models.Model):
     total = models.FloatField('Thành tiền', default=0)
     note = models.TextField('Ghi chú', null=True)
 
+    def get_quantity_dvtcb(self):
+        return self.quantity*self.unit_exchange.value
     class Meta:
         db_table = 'OrderDetail'
 
 class OrderRefund(models.Model):
     # refund_id = models.AutoField('Mã trả hàng', primary_key=True)
-    order = models.ForeignKey(Order, on_delete=models.PROTECT)
-    staff = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+    order = models.ForeignKey(Order, on_delete=models.PROTECT,
+        related_name='refund')
     note = models.TextField('Ghi chú', null=True)
+    status = models.CharField('Trạng thái', max_length=15, default="pending", choices=(
+        ('complete', 'Hoàn tất'),
+        ('cancel', 'Hủy')
+    ))
 
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -394,12 +407,16 @@ class OrderRefund(models.Model):
         db_table = 'OrderRefund'
 
 class OrderRefundDetail(models.Model):
-    order_refund = models.ForeignKey(OrderRefund, on_delete=models.CASCADE)
+    order_refund = models.ForeignKey(OrderRefund, on_delete=models.CASCADE,
+        related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
-        null=True)
+    unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', 
+        on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField('Số lượng')
     note = models.TextField('Ghi chú', null=True)
+
+    def get_quantity_dvtcb(self):
+        return self.quantity*self.unit_exchange.value
 
     class Meta:
         db_table = 'OrderRefundDetail'

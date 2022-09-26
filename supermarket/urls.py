@@ -30,7 +30,7 @@ from django_twilio.views import sms
 from management.api.inventory import InventoryRCIdView, InventoryRCView, InventoryRecordIdView, InventoryRecordView, WarehouseTransactionIdView, WarehouseTransactionView
 from management.api.product import CalculationUnitIdView, CategoryIdView, CategoryView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
 from management.api.promotion import PromotionIdView, PromotionLineIdView, PromotionLineView, PromotionView
-from management.api.sell import OrderIdView, OrderView
+from management.api.sell import OrderIdView, OrderRefundIdView, OrderRefundView, OrderView
 from management.api.supplier import SupplierIdView, SupplierView
 
 from management.api.user import (
@@ -127,6 +127,10 @@ urlpatterns = [
         path('order/', include([
             path('', OrderView.as_view(), name='order'),
             path('<int:id>/', OrderIdView.as_view(), name='order_id'),
+        ])),
+        path('refund/', include([
+            path('', OrderRefundView.as_view(), name='order_refund'),
+            path('<int:id>/', OrderRefundIdView.as_view(), name='order_refund_id'),
         ]))
     ])),
 
