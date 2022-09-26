@@ -365,7 +365,8 @@ class Order(models.Model):
         db_table = 'Order'
 
 class OrderDetail(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, 
+        related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
         null=True)

@@ -18,7 +18,8 @@ class ResponseInventoryRCSerializer(serializers.ModelSerializer):
     class Meta:
         model = InventoryReceivingVoucher
         fields = '__all__'
-        read_only_fiels = ('total', )
+        read_only_fiels = ('total', 'date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 class InventoryRCDetailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,7 +31,8 @@ class InventoryRCSerializer(serializers.ModelSerializer):
     class Meta:
         model = InventoryReceivingVoucher
         fields = '__all__'
-        read_only_fiels = ('total', 'date_created')
+        read_only_fiels = ('total', 'date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
     def create(self, validated_data):
         details = validated_data.pop('details')
@@ -116,7 +118,8 @@ class InventoryRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = InventoryVoucher
         fields = '__all__'
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
     def create(self, validated_data):
         details = validated_data.pop('details')

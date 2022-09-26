@@ -19,7 +19,8 @@ class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('fullname', 'gender', 'note', 'phone', 'address', 'date_created')
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
         extra_kwargs = {
             'fullname': {
                 'required': True
@@ -33,7 +34,8 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('fullname', 'gender', 'note', 'address', 'date_created')
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
         extra_kwargs = {
             'fullname': {
                 'required': True
@@ -45,7 +47,8 @@ class CustomerGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerGroup
         fields = '__all__'
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
         extra_kwargs = {
             'id': {
                 'read_only': True
@@ -56,7 +59,8 @@ class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ('password', )
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 ############# response ################
 class TokenSerializer(serializers.Serializer):
@@ -77,7 +81,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ('password', )
-        read_only_fields = ('date_created', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 ##########################
 
@@ -85,7 +90,8 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         exclude = ('password', )
-        read_only_fields = ('date_created', 'last_login')
+        read_only_fields = ('last_login', 'date_created', 'user_created', 
+            'date_updated', 'user_updated')
         extra_kwargs = {
             'fullname': {
                 'required': True
