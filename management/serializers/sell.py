@@ -1,40 +1,55 @@
 from rest_framework import serializers
 
 from management.models import Order, OrderDetail, Promotion, PromotionDetail, PromotionLine
-
-# class PromotionDetailSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = PromotionDetail
-#         fields = '__all__'
-
+from management.serializers.product import PriceDetailSerializer, ReadProductSerializer, UnitExchangeSerializer
 
 class OrderDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderDetail
         exclude = ('order', )
         read_only_fields = ('total', )
-#         read_only_fields = ('date_created', 'user_created', 
-#             'date_updated', 'user_updated')
 
-
-    # def create(self, validated_data):
-    #     detail = validated_data.pop('detail')
-    #     obj = super().create(validated_data)
-    #     detail = PromotionDetail.objects.create(
-    #         promotion_line=obj.pk,
-    #         **detail)
-    #     return obj
-
-    # def update(self, instance, validated_data):
-    #     detail = validated_data.pop('detail')
-    #     instance = super().update(instance, validated_data)
-    #     detail_serializer = PromotionDetailSerializer(instance.detail, data=detail)
-    #     detail_serializer.is_valid()
-    #     detail_serializer.save()
-    #     return instance
 
 class OrderSerializer(serializers.ModelSerializer):
     details = OrderDetailSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = '__all__'
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
+
+    def create(self, validated_data):
+        details = validated_data.pop('details')
+        obj = super().create(validated_data)
+        total = 0
+        for detail in details:
+            detail["order"] = obj
+            detail["total"] = detail["quantity"]*detail["price"].price
+            detail = OrderDetail.objects.create(**detail)
+            total += detail.quantity*detail.price.price
+        obj.total = total
+        obj.save()
+        return obj
+        
+    def update(self, instance, validated_data):
+        details = validated_data.pop('details')
+        # instance = super().update(instance, validated_data)
+        instance.note = validated_data["note"] if "note" in validated_data else instance.note
+        if instance.status == "pending" or (instance.status == "complete" and validated_data["status"] != "pending"):
+            instance.status = validated_data["status"] if "status" in validated_data else instance.status
+        instance.save()
+        return instance
+
+class ResponseOrderDetailSerializer(serializers.ModelSerializer):
+    product = ReadProductSerializer(read_only=True)
+    unit_exchange = UnitExchangeSerializer(read_only=True)
+    price = PriceDetailSerializer()
+    class Meta:
+        model = OrderDetail
+        fields = '__all__'
+
+class ResponseOrderSerializer(serializers.ModelSerializer):
+    details = ResponseOrderDetailSerializer(many=True)
     class Meta:
         model = Order
         fields = '__all__'

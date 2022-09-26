@@ -1,0 +1,84 @@
+{
+    "id": 10,
+    "details": [
+        {
+            "id": 5,
+            "product": {
+                "id": 1,
+                "product_groups": [],
+                "units": [
+                    {
+                        "id": 1,
+                        "unit_name": "Thùng",
+                        "value": 24,
+                        "allow_sale": true,
+                        "is_base_unit": false,
+                        "date_created": "2022-09-22T03:01:07.678401Z",
+                        "date_updated": null,
+                        "unit": 2,
+                        "user_created": null,
+                        "user_updated": null
+                    },
+                    {
+                        "id": 4,
+                        "unit_name": "Lon 2",
+                        "value": 6,
+                        "allow_sale": true,
+                        "is_base_unit": false,
+                        "date_created": "2022-09-22T03:01:07.678401Z",
+                        "date_updated": null,
+                        "unit": 4,
+                        "user_created": null,
+                        "user_updated": null
+                    }
+                ],
+                "stock": 35,
+                "product_code": "BIA333",
+                "name": "Bia 333",
+                "description": null,
+                "image": null,
+                "barcode": "8491992901299",
+                "status": false,
+                "note": null,
+                "date_created": "2022-09-22T03:01:07.294832Z",
+                "date_updated": null,
+                "product_category": null,
+                "user_created": null,
+                "user_updated": null
+            },
+            "unit_exchange": {
+                "id": 1,
+                "unit_name": "Thùng",
+                "value": 24,
+                "allow_sale": true,
+                "is_base_unit": false,
+                "date_created": "2022-09-22T03:01:07.678401Z",
+                "date_updated": null,
+                "unit": 2,
+                "user_created": null,
+                "user_updated": null
+            },
+            "price": {
+                "id": 7,
+                "price": 16000.0,
+                "start_date": "2022-09-14T00:26:10.434000Z",
+                "end_date": "2022-10-01T00:26:10.434000Z",
+                "note": null,
+                "product": 1,
+                "unit_exchange": 1
+            },
+            "quantity": 1,
+            "total": 16000.0,
+            "note": null,
+            "order": 10
+        }
+    ],
+    "note": null,
+    "total": 16000.0,
+    "status": "pending",
+    "date_created": "2022-09-26T15:46:11.123947Z",
+    "date_updated": "2022-09-26T15:46:11.123961Z",
+    "customer": 3,
+    "user_created": 1,
+    "user_updated": null
+}

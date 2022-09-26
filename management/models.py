@@ -346,7 +346,7 @@ class Order(models.Model):
     # order_id = models.AutoField('Mã đơn hàng', primary_key=True)
     note = models.TextField('Ghi chú', null=True)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT,
-        related_name='orders', null=True)
+        related_name='orders')
     total = models.FloatField('Thành tiền', default=0)
     status = models.CharField('Trạng thái', max_length=15, default="pending", choices=(
         ('pending', 'Đang chờ'),
@@ -368,8 +368,7 @@ class OrderDetail(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, 
         related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
-        null=True)
+    unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE)
     price = models.ForeignKey(PriceDetail, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField('Số lượng')
     total = models.FloatField('Thành tiền', default=0)
