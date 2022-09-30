@@ -85,10 +85,19 @@ class ProductSerializer(serializers.ModelSerializer):
             
         return instance
 
+####################### 
+class PriceDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PriceDetail
+        fields = '__all__'
+        read_only_fields = ('pricelist', )
+        
 class ReadProductSerializer(serializers.ModelSerializer):
     product_groups = ProductGroupSerializer(read_only=True, many=True, required=False)
     units = UnitExchangeSerializer(source="unitexchanges", read_only=True, many=True)
     stock = serializers.IntegerField(read_only=True)
+    base_unit = CalculationUnitSerializer(source="get_base_unit")
+    price_detail = PriceDetailSerializer(source="get_price_detail")
     class Meta:
         model = Product
         exclude = ('barcode_image', )
@@ -98,11 +107,6 @@ class ReadProductSerializer(serializers.ModelSerializer):
     def get_stock(self, obj):
         return obj.stock()
 
-####################### 
-class PriceDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PriceDetail
-        exclude = ('pricelist', ) 
         
 class PriceListSerializer(serializers.ModelSerializer):
     pricedetails = PriceDetailSerializer(many=True)

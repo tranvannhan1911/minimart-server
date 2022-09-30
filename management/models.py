@@ -4,6 +4,7 @@ from sqlite3 import IntegrityError
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
+from django.db.models import Q
 from django.contrib.auth.hashers import (
     check_password,
     make_password,
@@ -284,8 +285,15 @@ class Product(models.Model):
     def get_base_unit(self):
         return self.units.filter(unitexchanges__product=self, unitexchanges__is_base_unit=True).first()
 
+    def get_price_detail(self):
+        return self.pricedetails.filter(
+            start_date__lte=timezone.now(),
+            end_date__gte=timezone.now(),
+        ).first()
+
     def remain(self):
         return str(self.stock())+" "+self.get_base_unit().name
+
 
     class Meta:
         db_table = 'Product'
@@ -552,6 +560,71 @@ class PromotionLine(models.Model):
     user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
         null=True, related_name="promotion_lines_updated")
 
+    # def get_used(self):
+    #     count = 0
+    #     PromotionHistory.objects.filter()
+
+    # @property
+    def benefit(self, amount):
+        if self.type == "Product":
+            return -1
+        if self.detail.minimum_total > amount:
+            return -1
+
+        if self.type == "Percent":
+            return min(self.detail.maximum_reduction_amount,
+                self.detail.percent*amount)
+        if self.type == "Fixed":
+            return self.detail.reduction_amount
+        return -1
+
+    @staticmethod
+    def sort_benefit(promotion_lines, amount):
+        promotion_lines = sorted(promotion_lines, 
+            key=lambda t: -t.benefit(amount))
+        return promotion_lines
+        
+
+    @staticmethod
+    def filter_customer(promotion_lines, customer):
+        # trả về các khuyến mãi không tồn tại nhóm khách hàng áp dụng
+        # hoặc khách hàng thuộc nhóm khách hàng được áp dụng
+        print(customer.customer_group.all())
+        promotion_lines = promotion_lines.filter(
+            Q(promotion__applicable_customer_groups__in = customer.customer_group.all()) |
+            Q(promotion__applicable_customer_groups = None)
+        )
+        return promotion_lines
+
+    @staticmethod
+    def get_by_order(amount, status=True):
+        # trả về các khuyến mãi theo số tiền hóa đơn
+        promotion_lines = PromotionLine.objects.filter(
+            status=status,
+            start_date__lte=timezone.now(),
+            end_date__gte=timezone.now(),
+            detail__minimum_total__lte=amount
+        )
+        promotion_lines = promotion_lines.filter(
+            Q(type="Percent") | Q(type="Fixed")
+        )
+        return promotion_lines
+
+    @staticmethod
+    def get_by_product(product, status=True):
+        promotion_line = PromotionLine.objects.filter(
+            status=status,
+            start_date__lte=timezone.now(),
+            end_date__gte=timezone.now(),
+            type="Product"
+        )
+        promotion_line = promotion_line.filter(
+            Q(detail__applicable_products = product) |
+            Q(detail__applicable_product_groups__products = product)
+        )
+        return promotion_line
+
+
 class PromotionDetail(models.Model):
     promotion_line = models.OneToOneField(PromotionLine, on_delete=models.CASCADE, null=True, related_name='detail')
     # Product
@@ -572,7 +645,7 @@ class PromotionDetail(models.Model):
         db_table = 'PromotionDetail'
 
 class PromotionHistory(models.Model):
-    promotion_detail = models.ForeignKey(PromotionDetail, on_delete=models.PROTECT, null=True)
+    promotion_line = models.ForeignKey(PromotionLine, on_delete=models.PROTECT, null=True)
     order = models.ForeignKey(Order, on_delete=models.PROTECT, null=True)
     order_detail = models.ForeignKey(OrderDetail, on_delete=models.PROTECT, null=True)
 

@@ -9,10 +9,11 @@ from django.forms.models import model_to_dict
 from rest_framework import permissions
 from management import serializers
 from management import swagger
+from django.utils import timezone
 
-from management.models import CalculationUnit, HierarchyTree, PriceList, Product, ProductGroup, Promotion, PromotionLine, Supplier, User, created_updated
+from management.models import CalculationUnit, Customer, HierarchyTree, PriceList, Product, ProductGroup, Promotion, PromotionLine, Supplier, User, created_updated
 from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
-from management.serializers.promotion import PromitionSerializer, PromotionLineSerializer
+from management.serializers.promotion import PromitionByOrderSerializer, PromitionByProductSerializer, PromitionSerializer, PromotionLineSerializer
 from management.utils import perms
 from management.serializers.user import (
     AddUserSerializer, UpdateUserSerializer, UserSerializer, 
@@ -204,3 +205,69 @@ class PromotionLineIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Không thể xóa khuyến mãi này"), status = status.HTTP_200_OK)
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
         
+###
+# api promotion product lấy danh sách các khuyến mãi có thể áp dụng 
+# cho sản phẩm, không kiểm tra số lượng tồn kho
+# - nếu tồn tại user thì 
+#       với các Promotion tồn tại applicable_customer_groups
+#       bỏ các promotion mà user k được áp dụng
+class PromotionProductIdView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        query_serializer=PromitionByProductSerializer,
+        responses={200: swagger.promotion_line["get"]})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def get(self, request):
+        product_id = int(request.query_params.get('product_id'))
+        customer_id = request.query_params.get('customer_id')
+        if not Product.objects.filter(pk = product_id).exists():
+            return Response(data = ApiCode.error(message="Sản phẩm không tồn tại"), status = status.HTTP_200_OK)
+        
+        product = Product.objects.get(pk = product_id)
+        promotion_lines = PromotionLine.get_by_product(product)
+
+        if customer_id:
+            if not Customer.objects.filter(pk = customer_id).exists():
+                return Response(data = ApiCode.error(message="Khách hàng không tồn tại"), status = status.HTTP_200_OK)
+        
+            customer = Customer.objects.get(pk = customer_id)
+            promotion_lines = PromotionLine.filter_customer(promotion_lines, customer)
+        else:
+            promotion_lines = promotion_lines.filter(
+                    promotion__applicable_customer_groups=None)
+        
+        response = PromotionLineSerializer(promotion_lines, many=True)
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+
+class PromotionByOrderView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        query_serializer=PromitionByOrderSerializer,
+        responses={200: swagger.promotion_line["get"]})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def get(self, request):
+        amount = int(request.query_params.get('amount'))
+        customer_id = request.query_params.get('customer_id')
+
+        promotion_lines = PromotionLine.get_by_order(amount)
+        
+        if customer_id:
+            if not Customer.objects.filter(pk = customer_id).exists():
+                return Response(data = ApiCode.error(message="Khách hàng không tồn tại"), status = status.HTTP_200_OK)
+            customer = Customer.objects.get(pk = customer_id)
+            promotion_lines = PromotionLine.filter_customer(promotion_lines, customer)
+
+        promotion_lines = PromotionLine.sort_benefit(promotion_lines, amount)
+        response = PromotionLineSerializer(promotion_lines, many=True)
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)

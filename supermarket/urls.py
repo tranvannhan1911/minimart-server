@@ -29,7 +29,7 @@ from drf_yasg import openapi
 from django_twilio.views import sms
 from management.api.inventory import InventoryRCIdView, InventoryRCView, InventoryRecordIdView, InventoryRecordView, WarehouseTransactionIdView, WarehouseTransactionView
 from management.api.product import CalculationUnitIdView, CategoryIdView, CategoryView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
-from management.api.promotion import PromotionIdView, PromotionLineIdView, PromotionLineView, PromotionView
+from management.api.promotion import PromotionByOrderView, PromotionIdView, PromotionLineIdView, PromotionLineView, PromotionProductIdView, PromotionView
 from management.api.sell import OrderIdView, OrderRefundIdView, OrderRefundView, OrderView
 from management.api.supplier import SupplierIdView, SupplierView
 
@@ -123,6 +123,8 @@ urlpatterns = [
         path('promotion-line/', include([
             path('', PromotionLineView.as_view(), name='promotion_line'),
             path('<int:id>/', PromotionLineIdView.as_view(), name='promotion_line_id'),
+            path('by_product/', PromotionProductIdView.as_view(), name='promotion_product_id'),
+            path('by_order/', PromotionByOrderView.as_view()),
         ])),
         path('order/', include([
             path('', OrderView.as_view(), name='order'),
