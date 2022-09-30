@@ -52,6 +52,8 @@ class PromotionLineSerializer(serializers.ModelSerializer):
         applicable_products = []
         _applicable_products = []
         product_received = None
+        unit_buy = None
+        unit_received = None
         if "applicable_product_groups" in detail.keys():
             applicable_product_groups = detail.pop("applicable_product_groups")
             for x in applicable_product_groups:
@@ -65,12 +67,20 @@ class PromotionLineSerializer(serializers.ModelSerializer):
         if "product_received" in detail.keys():
             product_received = detail.pop("product_received")
 
+        if "unit_buy" in detail.keys():
+            unit_buy = detail.pop("unit_buy")
+            
+        if "unit_received" in detail.keys():
+            unit_received = detail.pop("unit_received")
+
         detail_serializer = PromotionDetailSerializer(instance.detail, data=detail)
         detail_serializer.is_valid()
         detail = detail_serializer.save()
         detail.applicable_product_groups.set(_applicable_product_groups)
         detail.applicable_products.set(_applicable_products)
         detail.product_received = product_received
+        detail.unit_buy = unit_buy
+        detail.unit_received = unit_received
         detail.save()
         return instance
 

@@ -632,8 +632,14 @@ class PromotionDetail(models.Model):
     applicable_product_groups = models.ManyToManyField(ProductGroup, db_table='ApplicableProductGroup', blank=True)
     product_received = models.ForeignKey(Product, null=True,
         on_delete=models.CASCADE, related_name="promotion_receive")
+
+    unit_buy = models.ForeignKey(UnitExchange, null=True,
+        on_delete=models.CASCADE, related_name="promotion_unit_buy")
     quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua', null=True)
+
     quantity_received = models.PositiveIntegerField('Số lượng sản phẩm được nhận', null=True)
+    unit_received = models.ForeignKey(UnitExchange, null=True,
+        on_delete=models.CASCADE, related_name="promotion_unit_received")
     # Percent
     minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn', null=True)
     percent = models.FloatField('Phần trăm giảm giá', null=True)
