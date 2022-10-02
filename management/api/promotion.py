@@ -268,7 +268,10 @@ class PromotionByOrderView(generics.GenericAPIView):
             customer = Customer.objects.get(pk = customer_id)
             promotion_lines = PromotionLine.filter_customer(promotion_lines, customer)
 
-        promotion_lines = PromotionLine.sort_benefit(promotion_lines, amount)
+        promotion_lines = PromotionLine.sort_benefit_order(promotion_lines, amount)
+        for pl in promotion_lines:
+            pl.get_remain_today(customer)
+            pl.get_remain_customer(customer)
         response = PromotionLineSerializer(promotion_lines, many=True)
         return Response(data = ApiCode.success(data={
             "count": len(response.data),

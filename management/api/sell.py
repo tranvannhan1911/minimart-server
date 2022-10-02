@@ -42,7 +42,6 @@ class OrderView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
         for detail in request.data["details"]:
-            pricedetail = PriceDetail.objects.get(pk=detail["price"])
             unit_exchange = UnitExchange.objects.get(pk=detail["unit_exchange"])
             product = Product.objects.get(pk=detail["product"])
             quantity = detail["quantity"]*unit_exchange.value

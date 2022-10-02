@@ -326,7 +326,18 @@ class Product(models.Model):
             unit_exchange=unit_exchange,
             start_date__lte=timezone.now(),
             end_date__gte=timezone.now(),
-        ).first()
+        ).order_by("-id").first()
+
+    def get_price_detail_by_unit(self, unit=None):
+        if unit == None:
+            unit = self.get_base_unit()
+        unit_exchange = self.get_unit_exchange(unit)
+        return self.get_price_detail(unit_exchange)
+
+    def _have_price(self):
+        if self.get_price_detail() == None:
+            return False
+        return True
 
     def remain(self):
         return str(self.stock())+" "+self.get_base_unit().name
@@ -399,7 +410,8 @@ class Order(models.Model):
     note = models.TextField('Ghi chú', null=True)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT,
         related_name='orders')
-    total = models.FloatField('Thành tiền', default=0)
+    total = models.FloatField('Tổng tiền', default=0)
+    final_total = models.FloatField('Thành tiền', default=0)
     status = models.CharField('Trạng thái', max_length=15, default="pending", choices=(
         ('pending', 'Đang chờ'),
         ('complete', 'Hoàn tất'),
@@ -686,7 +698,7 @@ class PromotionLine(models.Model):
             key=lambda t: -t.benefit_product(product, quantity, customer))
         return promotion_lines
 
-    def benefit_order(self, amount, customer=None):
+    def benefit_order(self, amount):
         if self.detail.minimum_total > amount:
             return -1
 
@@ -703,6 +715,17 @@ class PromotionLine(models.Model):
             key=lambda t: -t.benefit_order(amount))
         return promotion_lines
         
+    
+    @staticmethod
+    def get_best_benefit_order(promotion_lines, amount):
+        promotion_line = None
+        benefit = 0
+        for pl in promotion_lines:
+            b = pl.benefit_order(amount)
+            if benefit < b:
+                benefit = b
+                promotion_line = pl
+        return promotion_line, benefit
 
     @staticmethod
     def filter_customer(promotion_lines, customer):
@@ -754,15 +777,11 @@ class PromotionDetail(models.Model):
     product_received = models.ForeignKey(Product, null=True,
         on_delete=models.CASCADE, related_name="promotion_receive")
 
-    # unit_buy = models.ForeignKey(UnitExchange, null=True,
-    #     on_delete=models.CASCADE, related_name="promotion_unit_buy")
     quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua', null=True)
-
     quantity_received = models.PositiveIntegerField('Số lượng sản phẩm được nhận', null=True)
-    # unit_received = models.ForeignKey(UnitExchange, null=True,
-    #     on_delete=models.CASCADE, related_name="promotion_unit_received")
-    # Percent
+    # Percent & fixed
     minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn', null=True)
+    # Percent
     percent = models.FloatField('Phần trăm giảm giá', null=True)
     maximum_reduction_amount = models.FloatField('Số tiền được giảm tối đa', null=True)
     # Fixed

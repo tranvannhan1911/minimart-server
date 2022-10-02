@@ -7,7 +7,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderDetail
         exclude = ('order', )
-        read_only_fields = ('total', )
+        read_only_fields = ('total', 'price')
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -15,8 +15,8 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
-        read_only_fields = ('date_created', 'user_created', 
-            'date_updated', 'user_updated')
+        read_only_fields = ('total', 'final_total', 'date_created', 
+            'user_created', 'date_updated', 'user_updated')
 
     def create(self, validated_data):
         details = validated_data.pop('details')
@@ -56,6 +56,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     type="promotion"
                 )
 
+            detail["price"] = detail["product"].get_price_detail(detail["unit_exchange"])
             detail["total"] = detail["quantity"]*detail["price"].price
             detail = OrderDetail.objects.create(**detail)
             total += detail.total
@@ -76,7 +77,22 @@ class OrderSerializer(serializers.ModelSerializer):
                     amount=benefit,
                     note=promotion_line.title
                 )
+        promotion_lines_order = PromotionLine.get_by_order(total)
+        best_promotion_order, benefit = PromotionLine.get_best_benefit_order(promotion_lines_order, total)
+        final_total = total
+        if best_promotion_order != None:
+            final_total -= benefit
+            PromotionHistory.objects.create(
+                promotion_line=best_promotion_order,
+                type="Order",
+                order=obj,
+                quantity=1,
+                amount=benefit,
+                note=best_promotion_order.title
+            )
+
         obj.total = total
+        obj.final_total = final_total
         obj.save()
         return obj
         

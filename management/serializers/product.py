@@ -1,5 +1,6 @@
 from pprint import pprint
 from rest_framework import serializers
+from django.utils import timezone
 
 from management.models import CalculationUnit, HierarchyTree, PriceDetail, PriceList, Product, ProductGroup, UnitExchange
 
@@ -98,6 +99,7 @@ class ReadProductSerializer(serializers.ModelSerializer):
     stock = serializers.IntegerField(read_only=True)
     base_unit = CalculationUnitSerializer(source="get_base_unit")
     price_detail = PriceDetailSerializer(source="get_price_detail")
+    have_price = serializers.BooleanField(source="_have_price")
     class Meta:
         model = Product
         exclude = ('barcode_image', )
@@ -119,18 +121,42 @@ class PriceListSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         pricedetails = validated_data.pop('pricedetails')
         pricelist = super().create(validated_data)
+        products = []
         for detail in pricedetails:
             detail["pricelist"] = pricelist
-            PriceDetail.objects.create(**detail)
+            pricelist_base_unit = detail["product"].get_price_detail()
+            detail = PriceDetail.objects.create(**detail)
+            products.append(detail.product)
+
+        products = set(products)
+        for product in products:
+            price_base_unit = product.get_price_detail()
+            for unit in product.units.all():
+                unit_exchange = product.get_unit_exchange(unit)
+                if PriceDetail.objects.filter(
+                        unit_exchange=unit_exchange,
+                        product=product,
+                        start_date__lte=timezone.now(),
+                        end_date__gte=timezone.now(),
+                    ).count() == 0:
+                    PriceDetail.objects.create(
+                        pricelist=pricelist,
+                        unit_exchange=unit_exchange,
+                        price=price_base_unit.price*unit_exchange.value,
+                        product=product,
+                        start_date=price_base_unit.start_date,
+                        end_date=price_base_unit.end_date,
+                    )
+                    
         return pricelist
 
     def update(self, instance, validated_data):
         pricedetails = validated_data.pop('pricedetails')
         instance = super().update(instance, validated_data)
-        instance.pricedetails.all().delete()
-        for detail in pricedetails:
-            detail["pricelist"] = instance
-            detail = PriceDetail.objects.create(**detail)
+        # instance.pricedetails.all().delete()
+        # for detail in pricedetails:
+        #     detail["pricelist"] = instance
+        #     detail = PriceDetail.objects.create(**detail)
         return instance
 
 
