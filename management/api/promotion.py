@@ -11,9 +11,9 @@ from management import serializers
 from management import swagger
 from django.utils import timezone
 
-from management.models import CalculationUnit, Customer, HierarchyTree, PriceList, Product, ProductGroup, Promotion, PromotionLine, Supplier, User, created_updated
+from management.models import CalculationUnit, Customer, HierarchyTree, PriceList, Product, ProductGroup, Promotion, PromotionHistory, PromotionLine, Supplier, User, created_updated
 from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
-from management.serializers.promotion import PromitionByOrderSerializer, PromitionByProductSerializer, PromitionSerializer, PromotionLineSerializer
+from management.serializers.promotion import PromitionByOrderSerializer, PromitionByProductSerializer, PromitionSerializer, PromotionHistorySerializer, PromotionLineSerializer
 from management.utils import perms
 from management.serializers.user import (
     AddUserSerializer, UpdateUserSerializer, UserSerializer, 
@@ -277,3 +277,38 @@ class PromotionByOrderView(generics.GenericAPIView):
             "count": len(response.data),
             "results": response.data
         }), status = status.HTTP_200_OK)
+
+###################
+
+class PromotionHistoryView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    def get_queryset(self):
+        return PromotionHistory.objects.filter().order_by("-id")
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: swagger.promotion_history["list"]})
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        response = PromotionHistorySerializer(data=queryset, many=True)
+        response.is_valid()
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+class PromotionHistoryIdView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: swagger.promotion_history["get"]})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def get(self, request, id):
+        if not PromotionHistory.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Lịch sử sử dụng khuyến mãi không tồn tại"), status = status.HTTP_200_OK)
+
+        object = PromotionHistory.objects.get(pk = id)
+        serializer = PromotionHistorySerializer(object)
+        return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)

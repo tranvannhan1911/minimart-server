@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from management.models import Promotion, PromotionDetail, PromotionLine
+from management.models import Promotion, PromotionDetail, PromotionHistory, PromotionLine
 
 class PromotionDetailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -95,3 +95,9 @@ class PromitionByProductSerializer(serializers.Serializer):
 class PromitionByOrderSerializer(serializers.Serializer):
     amount = serializers.IntegerField()
     customer_id = serializers.IntegerField()
+
+###############
+class PromotionHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PromotionHistory
+        fields = '__all__'

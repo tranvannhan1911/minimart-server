@@ -1,0 +1,12 @@
+{
+    "id": 5,
+    "type": "Order",
+    "quantity": 1,
+    "amount": 10000.0,
+    "date_created": "2022-10-02T04:31:15.409407Z",
+    "note": "Mua 100k giảm 10k",
+    "promotion_line": 2,
+    "order": 24,
+    "buy_order_detail": null,
+    "received_order_detail": null
+}
