@@ -1,5 +1,6 @@
-from datetime import datetime
+import datetime
 from itertools import product
+from secrets import choice
 from sqlite3 import IntegrityError
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
@@ -17,6 +18,28 @@ def created_updated(obj, request):
         obj.date_updated = timezone.now()
         obj.user_updated = request.user
     obj.save()
+
+def filter_date(queryset, start_of_date, end_of_date):
+    # queryset = queryset.filter(
+    #     Q(date_created__year__gt=start_of_date.year | 
+    #         Q(date_created__year=start_of_date.year) & 
+    #         Q(date_created__month__gt=start_of_date.month) |
+    #             Q(date_created__month=start_of_date.month) & Q(date_created__day_gte=start_of_date.day)
+    #         ))
+    #     )
+    # )
+    
+    queryset = queryset.filter(date_created__gte=start_of_date)
+    queryset = queryset.filter(date_created__lt=end_of_date+datetime.timedelta(days=1))
+    # queryset = queryset.filter(
+    #     Q(date_created__year__lt=end_of_date.year | 
+    #         (Q(date_created__year=end_of_date.year) & 
+    #         (Q(date_created__month__lt=end_of_date.month) |
+    #             Q(date_created__month=end_of_date.month) & 
+    #             Q(date_created__day_lte=end_of_date.day)))
+    #     )
+    # )
+    return queryset
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password, **extra_fields):
@@ -283,10 +306,24 @@ class Product(models.Model):
         return ammount
 
     def get_base_unit(self):
-        return self.units.filter(unitexchanges__product=self, unitexchanges__is_base_unit=True).first()
+        return self.units.filter(
+            unitexchanges__product=self, 
+            unitexchanges__is_base_unit=True
+            ).first()
 
-    def get_price_detail(self):
+    def get_unit_exchange(self, unit=None):
+        if unit == None:
+            unit = self.get_base_unit()
+        return UnitExchange.objects.filter(
+            product=self, 
+            unit=unit
+            ).first()
+
+    def get_price_detail(self, unit_exchange=None):
+        if unit_exchange == None:
+            unit_exchange = self.get_unit_exchange(self.get_base_unit())
         return self.pricedetails.filter(
+            unit_exchange=unit_exchange,
             start_date__lte=timezone.now(),
             end_date__gte=timezone.now(),
         ).first()
@@ -384,7 +421,7 @@ class OrderDetail(models.Model):
         related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE)
-    price = models.ForeignKey(PriceDetail, on_delete=models.PROTECT)
+    price = models.ForeignKey(PriceDetail, on_delete=models.PROTECT, null=True)
     quantity = models.PositiveIntegerField('Số lượng')
     total = models.FloatField('Thành tiền', default=0)
     note = models.TextField('Ghi chú', null=True)
@@ -499,6 +536,7 @@ class WarehouseTransaction(models.Model):
     change = models.IntegerField('Thay đổi')
     type = models.CharField("Loại biến động", max_length=30, choices=(
         ('order', 'Bán hàng'),
+        ('promotion', 'Khuyến mãi'),
         ('inventory', 'Kiểm kê'),
         ('inventory_cancel', 'Hủy kiểm kê'),
         ('inventory_receiving', 'Nhập hàng'),
@@ -548,7 +586,8 @@ class PromotionLine(models.Model):
     start_date = models.DateTimeField('Thời gian bắt đầu áp dụng', default=timezone.now)
     end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
     status = models.BooleanField('Trạng thái')
-    max_quantity = models.IntegerField('Số lần áp dụng tối đa', null=True)
+    # None: Không giới hạn
+    max_quantity = models.IntegerField('Số lần áp dụng tối đa', null=True) 
     max_quantity_per_customer = models.IntegerField('Số lần áp dụng tối đa trên khách hàng', null=True)
     max_quantity_per_customer_per_day = models.IntegerField('Số lần áp dụng tối đa trên khách hàng trên 1 ngày', null=True)
     note = models.TextField('Ghi chú', null=True)
@@ -559,15 +598,95 @@ class PromotionLine(models.Model):
     date_updated = models.DateTimeField('Ngày cập nhật', null=True)
     user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
         null=True, related_name="promotion_lines_updated")
+    
+    def get_used(self):
+        count = 0
+        for history in self.histories.all():
+            count += history.quantity
+        return count
 
-    # def get_used(self):
-    #     count = 0
-    #     PromotionHistory.objects.filter()
+    def get_remain(self):
+        if self.max_quantity == None or self.max_quantity == 0:
+            return -1 # unlimited
+        return self.max_quantity - self.get_used()
 
-    # @property
-    def benefit(self, amount):
-        if self.type == "Product":
-            return -1
+    __remain_today = -1
+
+    @property
+    def remain_today(self):
+        return self.__remain_today
+
+    def get_remain_today(self, customer):
+        remain = self.get_remain()
+        self.__remain_today = remain
+        if self.max_quantity_per_customer_per_day == None or self.max_quantity_per_customer_per_day <= 0:
+            return remain
+
+        queryset = self.histories.filter(
+            order__customer=customer,
+            )
+        queryset = filter_date(queryset, timezone.now().date(), timezone.now().date())
+        remain_today = min(remain, self.max_quantity_per_customer_per_day - queryset.count())
+        self.__remain_today = remain_today
+        return remain_today
+
+    __remain_customer = -1
+    @property
+    def remain_customer(self):
+        return self.__remain_customer
+
+    def get_remain_customer(self, customer):
+        remain = self.get_remain()
+        self.__remain_customer = remain
+        # print(self.__remain_customer)
+        if self.max_quantity_per_customer == None or self.max_quantity_per_customer <= 0:
+            return remain
+
+        queryset = self.histories.filter(
+            order__customer=customer,
+            )
+        remain_customer = min(remain, self.max_quantity_per_customer - queryset.count())
+        self.__remain_customer = remain_customer
+        return remain_customer
+
+    def quantity_base_actual_received(self, product, quantity_base_unit, customer):
+        remain_today = self.get_remain_today(customer)
+        
+        quantity_buy_p1 = self.detail.quantity_buy
+        quantity_received_p1 = self.detail.quantity_received
+        
+        product_remain = product.stock()
+        product_remain -= quantity_base_unit
+
+        number_of_voucher_use = min(remain_today, quantity_base_unit // quantity_buy_p1)
+        number_of_voucher_use = min(number_of_voucher_use, product_remain//quantity_received_p1)
+        quantity_base_actual_received = number_of_voucher_use*quantity_received_p1
+        return quantity_base_actual_received
+
+    def benefit_product(self, product, quantity_base_unit, customer):
+        quantity_base_actual_received = self.quantity_base_actual_received(product, quantity_base_unit, customer)
+        price = product.get_price_detail().price
+        benefit = quantity_base_actual_received*price
+        return benefit
+
+    @staticmethod
+    def get_best_benefit_product(promotion_lines, product, quantity_base_unit, customer):
+        promotion_line = None
+        benefit = 0
+        for pl in promotion_lines:
+            b = pl.benefit_product(product, quantity_base_unit, customer)
+            if benefit < b:
+                benefit = b
+                promotion_line = pl
+        return promotion_line, benefit
+
+    @staticmethod
+    def sort_benefit_product(promotion_lines, product, quantity, customer):
+        promotion_lines = sorted(promotion_lines, 
+            key=lambda t: -t.benefit_product(product, quantity, customer))
+        return promotion_lines
+
+    def benefit_order(self, amount, customer=None):
         if self.detail.minimum_total > amount:
             return -1
 
@@ -579,9 +698,9 @@ class PromotionLine(models.Model):
         return -1
 
     @staticmethod
-    def sort_benefit(promotion_lines, amount):
+    def sort_benefit_order(promotion_lines, amount):
         promotion_lines = sorted(promotion_lines, 
-            key=lambda t: -t.benefit(amount))
+            key=lambda t: -t.benefit_order(amount))
         return promotion_lines
         
 
@@ -624,6 +743,8 @@ class PromotionLine(models.Model):
         )
         return promotion_line
 
+    class Meta:
+        db_table = 'PromotionLine'
 
 class PromotionDetail(models.Model):
     promotion_line = models.OneToOneField(PromotionLine, on_delete=models.CASCADE, null=True, related_name='detail')
@@ -633,13 +754,13 @@ class PromotionDetail(models.Model):
     product_received = models.ForeignKey(Product, null=True,
         on_delete=models.CASCADE, related_name="promotion_receive")
 
-    unit_buy = models.ForeignKey(UnitExchange, null=True,
-        on_delete=models.CASCADE, related_name="promotion_unit_buy")
+    # unit_buy = models.ForeignKey(UnitExchange, null=True,
+    #     on_delete=models.CASCADE, related_name="promotion_unit_buy")
     quantity_buy = models.PositiveIntegerField('Số lượng sản phẩm cần mua', null=True)
 
     quantity_received = models.PositiveIntegerField('Số lượng sản phẩm được nhận', null=True)
-    unit_received = models.ForeignKey(UnitExchange, null=True,
-        on_delete=models.CASCADE, related_name="promotion_unit_received")
+    # unit_received = models.ForeignKey(UnitExchange, null=True,
+    #     on_delete=models.CASCADE, related_name="promotion_unit_received")
     # Percent
     minimum_total = models.FloatField('Số tiền tối thiểu trên hóa đơn', null=True)
     percent = models.FloatField('Phần trăm giảm giá', null=True)
@@ -651,12 +772,22 @@ class PromotionDetail(models.Model):
         db_table = 'PromotionDetail'
 
 class PromotionHistory(models.Model):
-    promotion_line = models.ForeignKey(PromotionLine, on_delete=models.PROTECT, null=True)
+    promotion_line = models.ForeignKey(PromotionLine, 
+        on_delete=models.PROTECT, null=True, related_name="histories")
+    type = models.CharField("Loại", max_length=15,choices=(
+        ("Order", "Hóa đơn"),
+        ("Product", "Sản phẩm"),
+    ))
+    # order & product
     order = models.ForeignKey(Order, on_delete=models.PROTECT, null=True)
-    order_detail = models.ForeignKey(OrderDetail, on_delete=models.PROTECT, null=True)
-
-    reduction_quantity = models.PositiveIntegerField('Số lượng sản phẩm được nhận', default=0, null=True)
-    reduction_amount = models.FloatField('Số tiền được giảm', null=True)
+    # product
+    buy_order_detail = models.ForeignKey(OrderDetail, on_delete=models.PROTECT, null=True,
+        related_name="buy_order_detail")
+    received_order_detail = models.ForeignKey(OrderDetail, on_delete=models.PROTECT, null=True,
+        related_name="received_order_detail")
+    ###
+    quantity = models.PositiveIntegerField('Số lượng khuyến mãi', default=0, null=True)
+    amount = models.FloatField('Số tiền được giảm', null=True)
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     note = models.TextField('Ghi chú', null=True)
 

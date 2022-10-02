@@ -234,6 +234,9 @@ class PromotionProductIdView(generics.GenericAPIView):
         
             customer = Customer.objects.get(pk = customer_id)
             promotion_lines = PromotionLine.filter_customer(promotion_lines, customer)
+            for pl in promotion_lines:
+                pl.get_remain_today(customer)
+                pl.get_remain_customer(customer)
         else:
             promotion_lines = promotion_lines.filter(
                     promotion__applicable_customer_groups=None)
