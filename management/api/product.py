@@ -12,7 +12,7 @@ from management import serializers
 from management import swagger
 
 from management.models import CalculationUnit, HierarchyTree, PriceList, Product, ProductGroup, Supplier, User, created_updated
-from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer, ResponsePriceListSerializer
+from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer, ResponsePriceListSerializer, SellableSerializer
 from management.utils import perms
 
 from management.serializers.user import (
@@ -220,9 +220,16 @@ class ProductView(generics.GenericAPIView):
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
+        query_serializer=SellableSerializer,
         responses={200: swagger.product["list"]})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+
+        sellable = request.query_params.get('sellable')
+        if sellable:
+            queryset = queryset.filter(status=True)
+            queryset = [x for x in queryset if x._have_price()]
+            
         response = ReadProductSerializer(data=queryset, many=True)
         response.is_valid()
         return Response(data = ApiCode.success(data={

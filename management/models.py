@@ -338,7 +338,7 @@ class Product(models.Model):
         if self.get_price_detail() == None:
             return False
         return True
-
+    
     def remain(self):
         return str(self.stock())+" "+self.get_base_unit().name
 

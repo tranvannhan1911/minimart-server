@@ -87,6 +87,10 @@ class ProductSerializer(serializers.ModelSerializer):
         return instance
 
 ####################### 
+
+class SellableSerializer(serializers.Serializer):
+    sellable = serializers.BooleanField(required=False)
+
 class PriceDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceDetail
@@ -215,4 +219,3 @@ class CategorySerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    
