@@ -13,7 +13,7 @@ from django.utils import timezone
 
 from management.models import CalculationUnit, Customer, HierarchyTree, PriceList, Product, ProductGroup, Promotion, PromotionHistory, PromotionLine, Supplier, User, created_updated
 from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
-from management.serializers.promotion import PromitionByOrderSerializer, PromitionByProductSerializer, PromitionSerializer, PromotionHistorySerializer, PromotionLineSerializer
+from management.serializers.promotion import PromitionByOrderSerializer, PromitionByProductSerializer, PromitionByTypeSerializer, PromitionSerializer, PromotionHistorySerializer, PromotionLineSerializer
 from management.utils import perms
 from management.serializers.user import (
     AddUserSerializer, UpdateUserSerializer, UserSerializer, 
@@ -278,6 +278,37 @@ class PromotionByOrderView(generics.GenericAPIView):
             "results": response.data
         }), status = status.HTTP_200_OK)
 
+
+class PromotionByTypeView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        query_serializer=PromitionByTypeSerializer,
+        responses={200: swagger.promotion_line["get"]})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def get(self, request):
+        type = request.query_params.get('type')
+        customer_id = request.query_params.get('customer_id')
+        amount = int(request.query_params.get('amount', 0))
+
+        promotion_lines = PromotionLine.get_by_type(type)
+
+        if customer_id:
+            if not Customer.objects.filter(pk = customer_id).exists():
+                return Response(data = ApiCode.error(message="Khách hàng không tồn tại"), status = status.HTTP_200_OK)
+            customer = Customer.objects.get(pk = customer_id)
+            promotion_lines = PromotionLine.filter_customer(promotion_lines, customer)
+
+            promotion_lines = PromotionLine.sort_benefit_order(promotion_lines, amount)
+            for pl in promotion_lines:
+                pl.get_remain_today(customer)
+                pl.get_remain_customer(customer)
+        response = PromotionLineSerializer(promotion_lines, many=True)
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
 ###################
 
 class PromotionHistoryView(generics.GenericAPIView):

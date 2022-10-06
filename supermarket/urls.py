@@ -27,9 +27,10 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
+from management.api.customer.account import CustomerForgotPassword, CustomerLoginView
 from management.api.inventory import InventoryRCIdView, InventoryRCView, InventoryRecordIdView, InventoryRecordView, WarehouseTransactionIdView, WarehouseTransactionView
 from management.api.product import CalculationUnitIdView, CategoryIdView, CategoryView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
-from management.api.promotion import PromotionByOrderView, PromotionHistoryIdView, PromotionHistoryView, PromotionIdView, PromotionLineIdView, PromotionLineView, PromotionProductIdView, PromotionView
+from management.api.promotion import PromotionByOrderView, PromotionByTypeView, PromotionHistoryIdView, PromotionHistoryView, PromotionIdView, PromotionLineIdView, PromotionLineView, PromotionProductIdView, PromotionView
 from management.api.sell import OrderIdView, OrderRefundIdView, OrderRefundView, OrderView
 from management.api.supplier import SupplierIdView, SupplierView
 
@@ -67,6 +68,11 @@ urlpatterns = [
             path('forgot_password/verify/', ForgotPasswordVerify.as_view(), name="forgot_password_verify"),
             path('change_password/', ChangePasswordView.as_view(), name='change_password'),
             path('get_info/', GetInfoView.as_view(), name='get_info'),
+
+            # customer
+            
+            path('login-customer/', CustomerLoginView.as_view()),
+            path('forgot-password-customer/', CustomerForgotPassword.as_view()),
         ])),
         path('customer/', include([
             path('', CustomerView.as_view(), name='customer'),
@@ -125,6 +131,7 @@ urlpatterns = [
             path('<int:id>/', PromotionLineIdView.as_view(), name='promotion_line_id'),
             path('by_product/', PromotionProductIdView.as_view(), name='promotion_product_id'),
             path('by_order/', PromotionByOrderView.as_view()),
+            path('by_type/', PromotionByTypeView.as_view()),
         ])),
         path('promotion-history/', include([
             path('', PromotionHistoryView.as_view()),

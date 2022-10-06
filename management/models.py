@@ -185,18 +185,11 @@ class Customer(models.Model):
         self._password = raw_password
 
     def check_password(self, raw_password):
-        """
-        Return a boolean of whether the raw_password was correct. Handles
-        hashing formats behind the scenes.
-        """
-
-        def setter(raw_password):
-            self.set_password(raw_password)
-            # Password hash upgrades shouldn't be considered password changes.
-            self._password = None
-            self.save(update_fields=["password"])
-
-        return check_password(raw_password, self.password, setter)
+        salt = self.password.split("$")[2]
+        password = make_password(raw_password, salt)
+        if password == self.password:
+            return True
+        return False
 
     class Meta:
         db_table = 'Customer'
@@ -661,6 +654,11 @@ class PromotionLine(models.Model):
         self.__remain_customer = remain_customer
         return remain_customer
 
+    __benefit = 0
+    @property
+    def benefit(self):
+        return self.__benefit
+
     def quantity_base_actual_received(self, product, quantity_base_unit, customer):
         remain_today = self.get_remain_today(customer)
         
@@ -679,6 +677,7 @@ class PromotionLine(models.Model):
         quantity_base_actual_received = self.quantity_base_actual_received(product, quantity_base_unit, customer)
         price = product.get_price_detail().price
         benefit = quantity_base_actual_received*price
+        self.__benefit = benefit
         return benefit
 
     @staticmethod
@@ -699,15 +698,20 @@ class PromotionLine(models.Model):
         return promotion_lines
 
     def benefit_order(self, amount):
-        if self.detail.minimum_total > amount:
-            return -1
-
-        if self.type == "Percent":
-            return min(self.detail.maximum_reduction_amount,
-                self.detail.percent*amount)
-        if self.type == "Fixed":
-            return self.detail.reduction_amount
-        return -1
+        benefit = 0
+        if amount < self.detail.minimum_total:
+            benefit = 0
+        elif self.type == "Percent":
+            if self.detail.maximum_reduction_amount:
+                benefit = min(self.detail.maximum_reduction_amount,
+                    self.detail.percent*amount/100)
+            else:
+                benefit = self.detail.percent*amount/100
+        elif self.type == "Fixed":
+            benefit = self.detail.reduction_amount
+            
+        self.__benefit = benefit
+        return benefit
 
     @staticmethod
     def sort_benefit_order(promotion_lines, amount):
@@ -742,6 +746,7 @@ class PromotionLine(models.Model):
     def get_by_order(amount, status=True):
         # trả về các khuyến mãi theo số tiền hóa đơn
         promotion_lines = PromotionLine.objects.filter(
+            promotion__status=status,
             status=status,
             start_date__lte=timezone.now(),
             end_date__gte=timezone.now(),
@@ -755,6 +760,7 @@ class PromotionLine(models.Model):
     @staticmethod
     def get_by_product(product, status=True):
         promotion_line = PromotionLine.objects.filter(
+            promotion__status=status,
             status=status,
             start_date__lte=timezone.now(),
             end_date__gte=timezone.now(),
@@ -765,6 +771,31 @@ class PromotionLine(models.Model):
             Q(detail__applicable_product_groups__products = product)
         )
         return promotion_line
+
+    @staticmethod
+    def get_by_type(type, status=True):
+        if type:
+            if type == "Order":
+                return PromotionLine.objects.filter(
+                    promotion__status=status,
+                    status=status,
+                    start_date__lte=timezone.now(),
+                    end_date__gte=timezone.now(),
+                ).exclude(type="Product")
+            return PromotionLine.objects.filter(
+                promotion__status=status,
+                status=status,
+                start_date__lte=timezone.now(),
+                end_date__gte=timezone.now(),
+                type=type
+            )
+        return PromotionLine.objects.filter(
+            promotion__status=status,
+            status=status,
+            start_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        )
+
 
     class Meta:
         db_table = 'PromotionLine'

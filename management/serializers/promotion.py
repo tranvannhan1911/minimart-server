@@ -19,6 +19,7 @@ class PromotionLineSerializer(serializers.ModelSerializer):
     remain = serializers.IntegerField(source="get_remain", read_only=True)
     remain_today = serializers.IntegerField(read_only=True)
     remain_customer = serializers.IntegerField(read_only=True)
+    benefit = serializers.IntegerField(read_only=True)
     class Meta:
         model = PromotionLine
         fields = '__all__'
@@ -95,6 +96,9 @@ class PromitionByProductSerializer(serializers.Serializer):
 class PromitionByOrderSerializer(serializers.Serializer):
     amount = serializers.IntegerField()
     customer_id = serializers.IntegerField()
+    
+class PromitionByTypeSerializer(serializers.Serializer):
+    type = serializers.CharField()
 
 ###############
 class PromotionHistorySerializer(serializers.ModelSerializer):

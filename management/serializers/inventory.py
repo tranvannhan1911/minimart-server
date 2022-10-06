@@ -59,7 +59,7 @@ class InventoryRCSerializer(serializers.ModelSerializer):
 
         details = validated_data.pop('details')
         instance = super().update(instance, validated_data)
-        if validated_data["status"] == "cancel":
+        if instance.status != "cancel" and validated_data["status"] == "cancel":
             for detail in instance.details.all():
                 WarehouseTransaction.objects.create(
                     product=detail.product,
@@ -72,20 +72,20 @@ class InventoryRCSerializer(serializers.ModelSerializer):
         if already_complete:
             return instance
 
-        instance.details.all().delete()
-        total = 0
-        for detail in details:
-            detail["receiving_voucher"] = instance
-            total += detail["quantity"]*detail["price"]
-            irvd = InventoryReceivingVoucherDetail.objects.create(**detail)
-            if instance.status == "complete":
-                WarehouseTransaction.objects.create(
-                    product=detail["product"],
-                    reference=irvd.pk,
-                    change=detail["quantity"],
-                    type="inventory_receiving"
-                )
-        instance.total = total
+        # instance.details.all().delete()
+        # total = 0
+        # for detail in details:
+        #     detail["receiving_voucher"] = instance
+        #     total += detail["quantity"]*detail["price"]
+        #     irvd = InventoryReceivingVoucherDetail.objects.create(**detail)
+        #     if instance.status == "complete":
+        #         WarehouseTransaction.objects.create(
+        #             product=detail["product"],
+        #             reference=irvd.pk,
+        #             change=detail["quantity"],
+        #             type="inventory_receiving"
+        #         )
+        # instance.total = total
         instance.save()
         return instance
 
