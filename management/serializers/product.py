@@ -57,6 +57,8 @@ class ProductSerializer(serializers.ModelSerializer):
         product = super().create(validated_data)
         for unit in units:
             unit["product"] = product
+            # if unit["value"] == 1:
+            #     unit["is_base_unit"] = True
             UnitExchange.objects.create(**unit)
         return product
 
@@ -129,6 +131,8 @@ class PriceListSerializer(serializers.ModelSerializer):
         for detail in pricedetails:
             detail["pricelist"] = pricelist
             pricelist_base_unit = detail["product"].get_price_detail()
+            detail["start_date"] = pricelist.start_date
+            detail["end_date"] = pricelist.end_date
             detail = PriceDetail.objects.create(**detail)
             products.append(detail.product)
 

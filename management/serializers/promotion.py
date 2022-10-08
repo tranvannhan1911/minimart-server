@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from management.models import Promotion, PromotionDetail, PromotionHistory, PromotionLine
+from management.serializers.product import ReadProductSerializer
 
 class PromotionDetailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,6 +21,7 @@ class PromotionLineSerializer(serializers.ModelSerializer):
     remain_today = serializers.IntegerField(read_only=True)
     remain_customer = serializers.IntegerField(read_only=True)
     benefit = serializers.IntegerField(read_only=True)
+    actual_received = serializers.IntegerField(read_only=True)
     class Meta:
         model = PromotionLine
         fields = '__all__'
@@ -77,6 +79,33 @@ class PromotionLineSerializer(serializers.ModelSerializer):
         detail.product_received = product_received
         detail.save()
         return instance
+
+
+class ResponsePromotionDetailSerializer(serializers.ModelSerializer):
+    product_received = ReadProductSerializer()
+    class Meta:
+        model = PromotionDetail
+        fields = '__all__'
+
+    # def update(self, instance, validated_data):
+        
+    #     instance = super().update(instance, validated_data)
+    #     # instance
+    #     return instance
+
+
+class ResponsePromotionLineSerializer(serializers.ModelSerializer):
+    detail = ResponsePromotionDetailSerializer()
+    remain = serializers.IntegerField(source="get_remain", read_only=True)
+    remain_today = serializers.IntegerField(read_only=True)
+    remain_customer = serializers.IntegerField(read_only=True)
+    benefit = serializers.IntegerField(read_only=True)
+    actual_received = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = PromotionLine
+        fields = '__all__'
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 # class PromotionLineBenefitSerializer(PromotionLineSerializer):
 #     benefit = serializers.IntegerField(source="")

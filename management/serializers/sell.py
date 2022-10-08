@@ -1,9 +1,11 @@
+from pprint import pprint
 from rest_framework import serializers
 
 from management.models import Order, OrderDetail, OrderRefund, OrderRefundDetail, Promotion, PromotionDetail, PromotionHistory, PromotionLine, WarehouseTransaction
 from management.serializers.product import PriceDetailSerializer, ReadProductSerializer, UnitExchangeSerializer
 
 class OrderDetailSerializer(serializers.ModelSerializer):
+    promotion_line = serializers.IntegerField(allow_null=True)
     class Meta:
         model = OrderDetail
         exclude = ('order', )
@@ -12,6 +14,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     details = OrderDetailSerializer(many=True)
+    promotion = serializers.IntegerField(allow_null=True)
     class Meta:
         model = Order
         fields = '__all__'
@@ -20,41 +23,15 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         details = validated_data.pop('details')
+        promotion_order = validated_data.pop('promotion') if "promotion" in validated_data.keys() else None
+        if promotion_order:
+            promotion_order = PromotionLine.objects.get(pk=promotion_order)
         obj = super().create(validated_data)
         total = 0
         for detail in details:
             quantity_base_unit = detail["quantity"]*detail["unit_exchange"].value
             detail["order"] = obj
-            promotion_lines = PromotionLine.get_by_product(detail["product"])
-            promotion_lines = PromotionLine.filter_customer(promotion_lines, obj.customer)
-            promotion_line, benefit = PromotionLine.get_best_benefit_product(
-                promotion_lines,
-                detail["product"],
-                quantity_base_unit,
-                obj.customer
-            )
-            print("3", promotion_line)
-            if promotion_line != None:
-                pl = promotion_line
-                quantity_base_actual_received = pl.quantity_base_actual_received(
-                    detail["product"],
-                    quantity_base_unit,
-                    obj.customer
-                )
-                detail_voucher = {
-                    "order": obj,
-                    "quantity": quantity_base_actual_received,
-                    "unit_exchange": pl.detail.product_received.get_unit_exchange(),
-                    "product": pl.detail.product_received,
-                    "price": None
-                }
-                detail_voucher = OrderDetail.objects.create(**detail_voucher)
-                WarehouseTransaction.objects.create(
-                    product=detail_voucher.product,
-                    reference=detail_voucher.pk,
-                    change=-quantity_base_actual_received,
-                    type="promotion"
-                )
+            promotion_line = detail.pop('promotion_line') if "promotion_line" in detail.keys() else None
 
             detail["price"] = detail["product"].get_price_detail(detail["unit_exchange"])
             detail["total"] = detail["quantity"]*detail["price"].price
@@ -66,29 +43,60 @@ class OrderSerializer(serializers.ModelSerializer):
                 change=-detail.get_quantity_dvtcb(),
                 type="order"
             )
+            # promotion product
             if promotion_line != None:
-                PromotionHistory.objects.create(
-                    promotion_line=promotion_line,
-                    type="Product",
-                    order=obj,
-                    buy_order_detail=detail,
-                    received_order_detail=detail_voucher,
-                    quantity=quantity_base_actual_received//promotion_line.detail.quantity_received,
-                    amount=benefit,
-                    note=promotion_line.title
+                promotion_line = PromotionLine.objects.get(pk = promotion_line)
+                pl = promotion_line
+                benefit_product = pl.benefit_product(
+                    detail.product,
+                    quantity_base_unit,
+                    obj.customer
                 )
-        promotion_lines_order = PromotionLine.get_by_order(total)
-        best_promotion_order, benefit = PromotionLine.get_best_benefit_order(promotion_lines_order, total)
+                quantity_base_actual_received = pl.quantity_base_actual_received(
+                    detail.product,
+                    quantity_base_unit,
+                    obj.customer
+                )
+                print("promotion product #######################")
+                pprint(vars(detail))
+                pprint(vars(pl))
+                print(benefit_product, quantity_base_actual_received)
+                if quantity_base_actual_received > 0:
+                    detail_voucher = {
+                        "order": obj,
+                        "quantity": quantity_base_actual_received,
+                        "unit_exchange": pl.detail.product_received.get_unit_exchange(),
+                        "product": pl.detail.product_received,
+                        "price": None
+                    }
+                    detail_voucher = OrderDetail.objects.create(**detail_voucher)
+                    WarehouseTransaction.objects.create(
+                        product=detail_voucher.product,
+                        reference=detail_voucher.pk,
+                        change=-quantity_base_actual_received,
+                        type="promotion"
+                    )
+                    PromotionHistory.objects.create(
+                        promotion_line=promotion_line,
+                        type="Product",
+                        order=obj,
+                        buy_order_detail=detail,
+                        received_order_detail=detail_voucher,
+                        quantity=quantity_base_actual_received//promotion_line.detail.quantity_received,
+                        amount=benefit_product,
+                        note=promotion_line.title
+                    )
         final_total = total
-        if best_promotion_order != None:
+        if promotion_order != None:
+            benefit = promotion_order.benefit_order(total)
             final_total -= benefit
             PromotionHistory.objects.create(
-                promotion_line=best_promotion_order,
+                promotion_line=promotion_order,
                 type="Order",
                 order=obj,
                 quantity=1,
                 amount=benefit,
-                note=best_promotion_order.title
+                note=promotion_order.title
             )
 
         obj.total = total

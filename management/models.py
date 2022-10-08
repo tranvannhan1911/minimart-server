@@ -1,5 +1,6 @@
 import datetime
 from itertools import product
+from pprint import pprint
 from secrets import choice
 from sqlite3 import IntegrityError
 from django.db import models
@@ -315,6 +316,7 @@ class Product(models.Model):
     def get_price_detail(self, unit_exchange=None):
         if unit_exchange == None:
             unit_exchange = self.get_unit_exchange(self.get_base_unit())
+        
         return self.pricedetails.filter(
             unit_exchange=unit_exchange,
             start_date__lte=timezone.now(),
@@ -659,8 +661,15 @@ class PromotionLine(models.Model):
     def benefit(self):
         return self.__benefit
 
+    __actual_received = 0
+    @property
+    def actual_received(self):
+        return self.__actual_received
+
     def quantity_base_actual_received(self, product, quantity_base_unit, customer):
         remain_today = self.get_remain_today(customer)
+        if remain_today == -1:
+            remain_today = 99999999999
         
         quantity_buy_p1 = self.detail.quantity_buy
         quantity_received_p1 = self.detail.quantity_received
@@ -671,6 +680,7 @@ class PromotionLine(models.Model):
         number_of_voucher_use = min(remain_today, quantity_base_unit // quantity_buy_p1)
         number_of_voucher_use = min(number_of_voucher_use, product_remain//quantity_received_p1)
         quantity_base_actual_received = number_of_voucher_use*quantity_received_p1
+        self.__actual_received = quantity_base_actual_received
         return quantity_base_actual_received
 
     def benefit_product(self, product, quantity_base_unit, customer):
@@ -678,6 +688,7 @@ class PromotionLine(models.Model):
         price = product.get_price_detail().price
         benefit = quantity_base_actual_received*price
         self.__benefit = benefit
+        print("benefit", product, quantity_base_unit, customer, benefit)
         return benefit
 
     @staticmethod
@@ -735,7 +746,7 @@ class PromotionLine(models.Model):
     def filter_customer(promotion_lines, customer):
         # trả về các khuyến mãi không tồn tại nhóm khách hàng áp dụng
         # hoặc khách hàng thuộc nhóm khách hàng được áp dụng
-        print(customer.customer_group.all())
+        # print(customer.customer_group.all())
         promotion_lines = promotion_lines.filter(
             Q(promotion__applicable_customer_groups__in = customer.customer_group.all()) |
             Q(promotion__applicable_customer_groups = None)

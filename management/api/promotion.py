@@ -13,7 +13,7 @@ from django.utils import timezone
 
 from management.models import CalculationUnit, Customer, HierarchyTree, PriceList, Product, ProductGroup, Promotion, PromotionHistory, PromotionLine, Supplier, User, created_updated
 from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
-from management.serializers.promotion import PromitionByOrderSerializer, PromitionByProductSerializer, PromitionByTypeSerializer, PromitionSerializer, PromotionHistorySerializer, PromotionLineSerializer
+from management.serializers.promotion import PromitionByOrderSerializer, PromitionByProductSerializer, PromitionByTypeSerializer, PromitionSerializer, PromotionHistorySerializer, PromotionLineSerializer, ResponsePromotionLineSerializer
 from management.utils import perms
 from management.serializers.user import (
     AddUserSerializer, UpdateUserSerializer, UserSerializer, 
@@ -136,7 +136,8 @@ class PromotionLineView(generics.GenericAPIView):
         obj = serializer.save()
         created_updated(obj, request)
         created_updated(obj.promotion, request)
-        return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
+        response = ResponsePromotionLineSerializer(obj)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
         return PromotionLine.objects.filter()
@@ -146,7 +147,7 @@ class PromotionLineView(generics.GenericAPIView):
         responses={200: swagger.promotion_line["list"]})
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        response = PromotionLineSerializer(data=queryset, many=True)
+        response = ResponsePromotionLineSerializer(data=queryset, many=True)
         response.is_valid()
         return Response(data = ApiCode.success(data={
             "count": len(response.data),
@@ -174,6 +175,7 @@ class PromotionLineIdView(generics.GenericAPIView):
         obj = serializer.save()
         created_updated(obj, request)
         created_updated(obj.promotion, request)
+        response = ResponsePromotionLineSerializer(obj)
 
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
@@ -186,7 +188,7 @@ class PromotionLineIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Khuyến mãi không tồn tại"), status = status.HTTP_200_OK)
 
         object = PromotionLine.objects.get(pk = id)
-        serializer = PromotionLineSerializer(object)
+        serializer = ResponsePromotionLineSerializer(object)
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -222,6 +224,7 @@ class PromotionProductIdView(generics.GenericAPIView):
     def get(self, request):
         product_id = int(request.query_params.get('product_id'))
         customer_id = request.query_params.get('customer_id')
+        quantity = int(request.query_params.get('quantity'))
         if not Product.objects.filter(pk = product_id).exists():
             return Response(data = ApiCode.error(message="Sản phẩm không tồn tại"), status = status.HTTP_200_OK)
         
@@ -237,11 +240,13 @@ class PromotionProductIdView(generics.GenericAPIView):
             for pl in promotion_lines:
                 pl.get_remain_today(customer)
                 pl.get_remain_customer(customer)
-        else:
-            promotion_lines = promotion_lines.filter(
-                    promotion__applicable_customer_groups=None)
+
+            promotion_lines = PromotionLine.sort_benefit_product(promotion_lines, product, quantity, customer)
+        # else:
+        #     promotion_lines = promotion_lines.filter(
+        #             promotion__applicable_customer_groups=None)
         
-        response = PromotionLineSerializer(promotion_lines, many=True)
+        response = ResponsePromotionLineSerializer(promotion_lines, many=True)
         return Response(data = ApiCode.success(data={
             "count": len(response.data),
             "results": response.data
@@ -272,7 +277,7 @@ class PromotionByOrderView(generics.GenericAPIView):
         for pl in promotion_lines:
             pl.get_remain_today(customer)
             pl.get_remain_customer(customer)
-        response = PromotionLineSerializer(promotion_lines, many=True)
+        response = ResponsePromotionLineSerializer(promotion_lines, many=True)
         return Response(data = ApiCode.success(data={
             "count": len(response.data),
             "results": response.data
@@ -304,7 +309,7 @@ class PromotionByTypeView(generics.GenericAPIView):
             for pl in promotion_lines:
                 pl.get_remain_today(customer)
                 pl.get_remain_customer(customer)
-        response = PromotionLineSerializer(promotion_lines, many=True)
+        response = ResponsePromotionLineSerializer(promotion_lines, many=True)
         return Response(data = ApiCode.success(data={
             "count": len(response.data),
             "results": response.data
