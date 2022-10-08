@@ -57,10 +57,10 @@ class OrderSerializer(serializers.ModelSerializer):
                     quantity_base_unit,
                     obj.customer
                 )
-                print("promotion product #######################")
-                pprint(vars(detail))
-                pprint(vars(pl))
-                print(benefit_product, quantity_base_actual_received)
+                # print("promotion product #######################")
+                # pprint(vars(detail))
+                # pprint(vars(pl))
+                # print(benefit_product, quantity_base_actual_received)
                 if quantity_base_actual_received > 0:
                     detail_voucher = {
                         "order": obj,

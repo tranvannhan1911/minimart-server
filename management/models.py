@@ -362,6 +362,12 @@ class UnitExchange(models.Model):
     def get_number_of(self, ammount):
         return self.value*ammount
 
+    @property
+    def price(self):
+        print(self)
+        print(self.product.get_price_detail(self))
+        return self.product.get_price_detail(self).price
+
     class Meta:
         db_table = 'UnitExchange'
     
@@ -407,8 +413,7 @@ class Order(models.Model):
         related_name='orders')
     total = models.FloatField('Tổng tiền', default=0)
     final_total = models.FloatField('Thành tiền', default=0)
-    status = models.CharField('Trạng thái', max_length=15, default="pending", choices=(
-        ('pending', 'Đang chờ'),
+    status = models.CharField('Trạng thái', max_length=15, default="complete", choices=(
         ('complete', 'Hoàn tất'),
         ('cancel', 'Đã hủy đơn / hoàn trả')
     ))
