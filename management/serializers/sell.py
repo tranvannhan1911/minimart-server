@@ -20,6 +20,11 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('total', 'final_total', 'date_created', 
             'user_created', 'date_updated', 'user_updated')
+        # extra_kwargs = {
+        #     "customer": {
+        #         "required": False
+        #     }
+        # }
 
     def create(self, validated_data):
         details = validated_data.pop('details')
