@@ -41,6 +41,56 @@ class UnitExchangeSerializer(serializers.ModelSerializer):
         read_only_fields = ('date_created', 'user_created', 
             'date_updated', 'user_updated')
 
+####################
+
+class RecursiveField(serializers.Serializer):
+    def to_representation(self, value):
+        serializer = self.parent.parent.__class__(value, context=self.context)
+        return serializer.data
+
+class CategoryTreeSerializer(serializers.ModelSerializer):
+    children = RecursiveField(many=True)
+    key = serializers.IntegerField(source="id")
+    class Meta:
+        model = HierarchyTree
+        fields = '__all__'
+
+class CategoryTreeSelectSerializer(serializers.ModelSerializer):
+    children = RecursiveField(many=True)
+    value = serializers.IntegerField(source="id")
+    label = serializers.CharField(source="name")
+    class Meta:
+        model = HierarchyTree
+        fields = '__all__'
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HierarchyTree
+        fields = '__all__'
+        read_only_fields = ('type', 'level', 'date_created', 'user_created', 
+            'date_updated', 'user_updated')
+
+    def create(self, validated_data):
+        category = super().create(validated_data)
+        level = 0
+        if category.parent != None:
+            level = category.parent.level + 1
+        category.level = level
+        category.type = "product"
+        category.save()
+        return category
+
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        level = 0
+        if instance.parent != None:
+            level = instance.parent.level + 1
+        instance.level = level
+        instance.type = "product"
+        instance.save()
+        return instance
+
 ##############################    
 class ProductSerializer(serializers.ModelSerializer):
     units = UnitExchangeSerializer(many=True, required=False)
@@ -103,6 +153,7 @@ class PriceDetailSerializer(serializers.ModelSerializer):
         
 class ReadProductSerializer(serializers.ModelSerializer):
     product_groups = ProductGroupSerializer(read_only=True, many=True, required=False)
+    product_category = CategorySerializer(read_only=True)
     units = UnitExchangeSerializer(source="unitexchanges", read_only=True, many=True)
     stock = serializers.IntegerField(read_only=True)
     base_unit = CalculationUnitSerializer(source="get_base_unit")
@@ -184,44 +235,3 @@ class ResponsePriceListSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('date_created', 'user_created', 
             'date_updated', 'user_updated')
-####################
-
-class RecursiveField(serializers.Serializer):
-    def to_representation(self, value):
-        serializer = self.parent.parent.__class__(value, context=self.context)
-        return serializer.data
-
-class CategoryTreeSerializer(serializers.ModelSerializer):
-    childs = RecursiveField(many=True)
-    class Meta:
-        model = HierarchyTree
-        fields = '__all__'
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = HierarchyTree
-        fields = '__all__'
-        read_only_fields = ('type', 'level', 'date_created', 'user_created', 
-            'date_updated', 'user_updated')
-
-    def create(self, validated_data):
-        category = super().create(validated_data)
-        level = 0
-        if category.parent != None:
-            level = category.parent.level + 1
-        category.level = level
-        category.type = "product"
-        category.save()
-        return category
-
-
-    def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
-        level = 0
-        if instance.parent != None:
-            level = instance.parent.level + 1
-        instance.level = level
-        instance.type = "product"
-        instance.save()
-        return instance
-

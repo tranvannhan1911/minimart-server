@@ -237,7 +237,7 @@ class HierarchyTree(models.Model):
         ("product", "Sản phẩm"),
     ))
     parent = models.ForeignKey("management.HierarchyTree", 
-        on_delete=models.CASCADE, null=True, related_name='childs')
+        on_delete=models.CASCADE, null=True, related_name='children')
     note = models.TextField('Ghi chú', null=True)
 
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)

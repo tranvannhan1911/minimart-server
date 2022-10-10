@@ -12,7 +12,7 @@ from management import serializers
 from management import swagger
 
 from management.models import CalculationUnit, HierarchyTree, PriceList, Product, ProductGroup, Supplier, User, created_updated
-from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer, ResponsePriceListSerializer, SellableSerializer
+from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSelectSerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer, ResponsePriceListSerializer, SellableSerializer
 from management.utils import perms
 
 from management.serializers.user import (
@@ -461,3 +461,43 @@ class CategoryIdView(generics.GenericAPIView):
         except:
             return Response(data = ApiCode.error(message="Không thể xóa danh mục sản phẩm này"), status = status.HTTP_200_OK)
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+
+
+# 
+
+class CategoryToSelectView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    def get_queryset(self):
+        return HierarchyTree.objects.filter(type="product", parent=None)
+
+    # @swagger_auto_schema(
+    #     manual_parameters=[SwaggerSchema.token],
+    #     responses={200: swagger.category["list"]})
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        response = CategoryTreeSelectSerializer(data=queryset, many=True)
+        response.is_valid()
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+        
+class CategoryToParentView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    def get(self, request, id):
+
+        curent = HierarchyTree.objects.get(pk = id)
+        data = []
+        while(curent):
+            print(curent)
+            data.insert(0, curent.id)
+            curent = curent.parent
+
+        return Response(data = ApiCode.success(data={
+            "tree": data
+        }), status = status.HTTP_200_OK)
