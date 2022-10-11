@@ -11,6 +11,7 @@ from django.contrib.auth.hashers import (
     check_password,
     make_password,
 )
+from vi_address.models import Ward
 
 def created_updated(obj, request):
     if obj.user_created is None:
@@ -152,6 +153,7 @@ class Customer(models.Model):
         ('U', 'Không xác định'),
     ))
     address = models.CharField('Địa chỉ', max_length=255, null=True)
+    ward = models.ForeignKey(Ward, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú', null=True)
     password = models.CharField("Mật khẩu", max_length=128, blank=True)
     last_login = models.DateTimeField("Lần đăng nhập cuối cùng", blank=True, null=True)

@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_hotp',
     'django_otp.plugins.otp_static',
-    'otp_twilio'
+    'otp_twilio',
+    'vi_address'
 ]
 
 MIDDLEWARE = [

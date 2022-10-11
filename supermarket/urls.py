@@ -27,6 +27,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
+from management.api.address import AddressPathIdView, AddressView
 from management.api.customer.account import CustomerForgotPassword, CustomerLoginView
 from management.api.inventory import InventoryRCIdView, InventoryRCView, InventoryRecordIdView, InventoryRecordView, WarehouseTransactionIdView, WarehouseTransactionView
 from management.api.product import CalculationUnitIdView, CategoryIdView, CategoryToParentView, CategoryToSelectView, CategoryView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
@@ -146,7 +147,10 @@ urlpatterns = [
         path('refund/', include([
             path('', OrderRefundView.as_view(), name='order_refund'),
             path('<int:id>/', OrderRefundIdView.as_view(), name='order_refund_id'),
-        ]))
+        ])),
+        path('address/', include('vi_address.urls')),
+        path('address/tree/', AddressView.as_view()),
+        path('address/path/<int:id>/', AddressPathIdView.as_view()),
     ])),
 
 ]

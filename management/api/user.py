@@ -167,8 +167,10 @@ class CustomerIdView(generics.GenericAPIView):
         responses={200: swagger.customer["get"]})
     @method_permission_classes((perms.IsAdminUser, ))
     def put(self, request, id):
+        if not Customer.objects.filter(pk=id).exists():
+            return Response(data = ApiCode.error(message="Khách hàng không tồn tại"), status = status.HTTP_200_OK)
 
-        user = get_object_or_404(User, id=id)
+        user = Customer.objects.get(id=id)
         serializer = CustomerSerializer(user, data=request.data)
 
         if serializer.is_valid() == False:
