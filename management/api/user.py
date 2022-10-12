@@ -52,7 +52,7 @@ class StaffView(generics.GenericAPIView):
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return User.objects.filter(is_staff=True)
+        return User.objects.all()
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
