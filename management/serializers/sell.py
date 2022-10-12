@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from management.models import Order, OrderDetail, OrderRefund, OrderRefundDetail, Promotion, PromotionDetail, PromotionHistory, PromotionLine, WarehouseTransaction
 from management.serializers.product import PriceDetailSerializer, ReadProductSerializer, UnitExchangeSerializer
+from management.serializers.user import CustomerSerializer, UserSerializer
 
 class OrderDetailSerializer(serializers.ModelSerializer):
     promotion_line = serializers.IntegerField(allow_null=True)
@@ -128,6 +129,9 @@ class ResponseOrderDetailSerializer(serializers.ModelSerializer):
 
 class ResponseOrderSerializer(serializers.ModelSerializer):
     details = ResponseOrderDetailSerializer(many=True)
+    customer = CustomerSerializer()
+    user_created = UserSerializer()
+    user_updated = UserSerializer()
     class Meta:
         model = Order
         fields = '__all__'

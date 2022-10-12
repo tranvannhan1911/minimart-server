@@ -40,16 +40,23 @@ class OrderView(generics.GenericAPIView):
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
-        
+
+        sum = 0
         for detail in request.data["details"]:
             unit_exchange = UnitExchange.objects.get(pk=detail["unit_exchange"])
             product = Product.objects.get(pk=detail["product"])
             quantity = detail["quantity"]*unit_exchange.value
             stock = product.stock()
+            sum += quantity
             if stock < quantity:
                 return Response(
                     data = ApiCode.error(message="Sản phẩm "+product.name+" chỉ còn "+product.remain()), 
                     status = status.HTTP_200_OK)
+
+        if sum == 0:
+            return Response(
+                data = ApiCode.error(message="Không thể tạo hóa đơn trống"), 
+                status = status.HTTP_200_OK)
 
         obj = serializer.save()
         created_updated(obj, request)

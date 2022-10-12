@@ -18,7 +18,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('fullname', 'gender', 'note', 'phone', 'address', 'date_created')
+        fields = ('fullname', 'gender', 'note', 'phone', 'address', 'date_created', 'is_manager')
         read_only_fields = ('date_created', 'user_created', 
             'date_updated', 'user_updated')
         extra_kwargs = {
@@ -33,7 +33,7 @@ class AddUserSerializer(serializers.ModelSerializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('fullname', 'gender', 'note', 'address', 'date_created')
+        fields = ('fullname', 'gender', 'note', 'address', 'date_created', 'is_manager')
         read_only_fields = ('date_created', 'user_created', 
             'date_updated', 'user_updated')
         extra_kwargs = {

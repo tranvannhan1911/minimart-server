@@ -99,6 +99,8 @@ class User(AbstractUser):
     date_updated = models.DateTimeField('Ngày cập nhật', null=True)
     user_updated = models.ForeignKey("management.User", on_delete=models.PROTECT, 
         null=True, related_name="users_updated")
+    is_manager = models.BooleanField("Quản lý", default=False)
+    is_staff = True
 
     email = None
     username = None
@@ -138,7 +140,7 @@ class User(AbstractUser):
         return phone
 
     class Meta:
-        db_table = 'User'
+        db_table = 'Staff'
 
 
 class Customer(models.Model):
