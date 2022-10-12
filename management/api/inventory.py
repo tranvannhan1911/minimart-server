@@ -41,6 +41,9 @@ class InventoryRCView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
+        if request.data["status"] == "cancel":
+            return Response(data = ApiCode.error(message="Không thể thêm phiếu nhập hàng với trạng thái hủy"), status = status.HTTP_200_OK)
+
         obj = serializer.save()
         created_updated(obj, request)
         response = ResponseInventoryRCSerializer(obj)
@@ -74,6 +77,10 @@ class InventoryRCIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Phiếu nhập hàng không tồn tại"), status = status.HTTP_200_OK)
 
         voucher = InventoryReceivingVoucher.objects.get(pk = id)
+        
+        if voucher.status == "cancel":
+            return Response(data = ApiCode.error(message="Không thể sửa phiếu nhập hàng với trạng thái hủy"), status = status.HTTP_200_OK)
+
         serializer = InventoryRCSerializer(voucher, data=request.data)
 
         if serializer.is_valid() == False:
@@ -127,6 +134,9 @@ class InventoryRecordView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
+        if request.data["status"] == "cancel":
+            return Response(data = ApiCode.error(message="Không thể thêm phiếu kiểm kê với trạng thái hủy"), status = status.HTTP_200_OK)
+
         obj = serializer.save()
         created_updated(obj, request)
         response = ResponseInventoryRecordSerializer(obj)
@@ -160,6 +170,9 @@ class InventoryRecordIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Phiếu kiểm kê không tồn tại"), status = status.HTTP_200_OK)
 
         voucher = InventoryVoucher.objects.get(pk = id)
+        if voucher.status == "cancel":
+            return Response(data = ApiCode.error(message="Không thể sửa phiếu kiểm kê với trạng thái hủy"), status = status.HTTP_200_OK)
+
         serializer = InventoryRecordSerializer(voucher, data=request.data)
 
         if serializer.is_valid() == False:
