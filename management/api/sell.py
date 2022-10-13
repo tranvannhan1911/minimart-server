@@ -10,7 +10,7 @@ from rest_framework import permissions
 from management import serializers
 from management import swagger
 
-from management.models import CalculationUnit, HierarchyTree, Order, OrderDetail, OrderRefund, PriceDetail, PriceList, Product, ProductGroup, Promotion, PromotionLine, Supplier, UnitExchange, User, created_updated
+from management.models import CalculationUnit, HierarchyTree, Order, OrderDetail, OrderRefund, PriceDetail, PriceList, Product, ProductGroup, Promotion, PromotionLine, Supplier, UnitExchange, User, WarehouseTransaction, created_updated
 from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer
 from management.serializers.promotion import PromitionSerializer, PromotionLineSerializer
 from management.serializers.sell import OrderRefundSerializer, OrderSerializer, ResponseOrderRefundSerializer, ResponseOrderSerializer
@@ -64,7 +64,7 @@ class OrderView(generics.GenericAPIView):
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return Order.objects.filter()
+        return Order.objects.filter(status="complete").order_by("-id")
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
@@ -135,7 +135,7 @@ class OrderRefundView(generics.GenericAPIView):
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return OrderRefund.objects.filter()
+        return OrderRefund.objects.filter().order_by("-id")
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
@@ -162,13 +162,24 @@ class OrderRefundIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Đơn hủy không tồn tại"), status = status.HTTP_200_OK)
 
         obj = OrderRefund.objects.get(pk = id)
-        serializer = OrderRefundSerializer(obj, data=request.data)
+        
+        if obj.status == "cancel":
+            return Response(data = ApiCode.error(message="Không thể cập nhật trạng thái của đơn đã bị hủy"), status = status.HTTP_200_OK)
 
-        if serializer.is_valid() == False:
-            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
+        if obj.status == "complete" and request.data["status"] == "cancel":
 
-        obj = serializer.save()
-        created_updated(obj, request)
+            for refund_detail in obj.details.all():
+                warehouse = WarehouseTransaction.objects.get(
+                    reference=refund_detail.pk,
+                    type="refund"
+                )
+                warehouse.delete()
+            obj.order.status = "complete"
+            obj.order.save()
+            obj.status = "cancel"
+            obj.save()
+
+            created_updated(obj, request)
         response = ResponseOrderRefundSerializer(obj)
 
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)

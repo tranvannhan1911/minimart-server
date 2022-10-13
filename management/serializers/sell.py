@@ -163,21 +163,23 @@ class OrderRefundSerializer(serializers.ModelSerializer):
             detail = OrderRefundDetail.objects.create(**detail)
             
             WarehouseTransaction.objects.create(
-                product=detail["product"],
+                product=detail.product,
                 reference=detail.pk,
                 change=+detail.get_quantity_dvtcb(),
                 type="refund"
             )
+        obj.order.status = "cancel"
+        obj.order.save()
         return obj
         
-    def update(self, instance, validated_data):
-        details = validated_data.pop('details')
-        # instance = super().update(instance, validated_data)
-        instance.note = validated_data["note"] if "note" in validated_data else instance.note
-        if instance.status == "pending" or (instance.status == "complete" and validated_data["status"] != "pending"):
-            instance.status = validated_data["status"] if "status" in validated_data else instance.status
-        instance.save()
-        return instance
+    # def update(self, instance, validated_data):
+    #     details = validated_data.pop('details')
+    #     # instance = super().update(instance, validated_data)
+    #     instance.note = validated_data["note"] if "note" in validated_data else instance.note
+    #     if (instance.status == "complete" and validated_data["status"] != "pending"):
+    #         instance.status = validated_data["status"] if "status" in validated_data else instance.status
+    #     instance.save()
+    #     return instance
 
 ########
 class ResponseOrderRefundDetailSerializer(serializers.ModelSerializer):
@@ -189,6 +191,9 @@ class ResponseOrderRefundDetailSerializer(serializers.ModelSerializer):
 
 class ResponseOrderRefundSerializer(serializers.ModelSerializer):
     details = ResponseOrderRefundDetailSerializer(many=True)
+    customer = CustomerSerializer(source="order.customer")
+    user_created = UserSerializer()
+    user_updated = UserSerializer()
     class Meta:
         model = OrderRefund
         fields = '__all__'
