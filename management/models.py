@@ -98,6 +98,7 @@ class User(AbstractUser):
         ('U', 'Không xác định'),
     ))
     address = models.CharField('Địa chỉ', max_length=255, null=True)
+    ward = models.ForeignKey(Ward, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú', null=True)
     
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
@@ -158,6 +159,12 @@ class User(AbstractUser):
             else:
                 phone = "0"+phone[3:]
         return phone
+
+    @staticmethod
+    def random_password():
+        import string
+        import random
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
     class Meta:
         db_table = 'Staff'
@@ -242,6 +249,7 @@ class Supplier(models.Model):
     phone = models.CharField('Số điện thoại', max_length=15)
     email = models.CharField('Địa chỉ email', max_length=50, null=True)
     address = models.CharField('Địa chỉ', max_length=255, null=True)
+    ward = models.ForeignKey(Ward, on_delete=models.PROTECT, null=True)
     note = models.TextField('Ghi chú', null=True)
 
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
@@ -441,7 +449,8 @@ class Order(models.Model):
     final_total = models.FloatField('Thành tiền', default=0)
     status = models.CharField('Trạng thái', max_length=15, default="complete", choices=(
         ('complete', 'Hoàn tất'),
-        ('cancel', 'Đã hủy đơn / hoàn trả')
+        ('cancel', 'Đã hủy đơn'),
+        ('refund', 'Đã trả đơn')
     ))
 
     date_created = models.DateTimeField('Ngày lập hóa đơn', default=timezone.now)
@@ -574,6 +583,7 @@ class WarehouseTransaction(models.Model):
     change = models.IntegerField('Thay đổi')
     type = models.CharField("Loại biến động", max_length=30, choices=(
         ('order', 'Bán hàng'),
+        ('order_cancel', 'Hủy hóa đơn'),
         ('promotion', 'Khuyến mãi'),
         ('inventory', 'Kiểm kê'),
         ('inventory_cancel', 'Hủy kiểm kê'),

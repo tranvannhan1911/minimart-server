@@ -45,6 +45,9 @@ class StaffView(generics.GenericAPIView):
 
         user = serializer.save()
         user.is_staff = True
+
+        raw_password = User.random_password()
+        user.set_password(raw_password)
         user.save()
         created_updated(user, request)
 
@@ -115,6 +118,23 @@ class StaffIdView(generics.GenericAPIView):
         except:
             return Response(data = ApiCode.error(message="Không thể xóa người dùng này"), status = status.HTTP_200_OK)
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+
+
+class ResetPasswordView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+
+    @method_permission_classes((perms.IsOwnUserOrAdmin, ))
+    def get(self, request, id):
+        if not User.objects.filter(id=id).exists():
+            return Response(data = ApiCode.error(message="Không tồn tại người dùng này"), status = status.HTTP_200_OK)
+
+        user = User.objects.get(id=id)
+        raw_password = User.random_password()
+        user.set_password(raw_password)
+        user.save()
+        response = UserSerializer(user)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
+
 
 #########################################
 

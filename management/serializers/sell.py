@@ -16,6 +16,8 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     details = OrderDetailSerializer(many=True)
     promotion = serializers.IntegerField(allow_null=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = Order
         fields = '__all__'
@@ -110,14 +112,22 @@ class OrderSerializer(serializers.ModelSerializer):
         obj.save()
         return obj
         
-    def update(self, instance, validated_data):
-        details = validated_data.pop('details')
+    # def update(self, instance, validated_data):
+    #     details = validated_data.pop('details')
 
-        instance.note = validated_data["note"] if "note" in validated_data else instance.note
-        if instance.status == "pending" or (instance.status == "complete" and validated_data["status"] != "pending"):
-            instance.status = validated_data["status"] if "status" in validated_data else instance.status
-        instance.save()
-        return instance
+    #     instance.note = validated_data["note"] if "note" in validated_data else instance.note
+    #     if validated_data["status"] == "cancel":
+    #         instance.status = "cancel"
+
+    #         for detail in instance.details.all():
+    #             WarehouseTransaction.objects.create(
+    #                 product=detail.product,
+    #                 reference=detail.pk,
+    #                 change=+detail.get_quantity_dvtcb(),
+    #                 type="order_cancel"
+    #             )
+    #     instance.save()
+    #     return instance
 
 class ResponseOrderDetailSerializer(serializers.ModelSerializer):
     product = ReadProductSerializer(read_only=True)
@@ -130,8 +140,8 @@ class ResponseOrderDetailSerializer(serializers.ModelSerializer):
 class ResponseOrderSerializer(serializers.ModelSerializer):
     details = ResponseOrderDetailSerializer(many=True)
     customer = CustomerSerializer()
-    user_created = UserSerializer()
-    user_updated = UserSerializer()
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = Order
         fields = '__all__'
@@ -149,6 +159,8 @@ class OrderRefundDetailSerializer(serializers.ModelSerializer):
 
 class OrderRefundSerializer(serializers.ModelSerializer):
     details = OrderRefundDetailSerializer(many=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = OrderRefund
         fields = '__all__'
@@ -168,7 +180,7 @@ class OrderRefundSerializer(serializers.ModelSerializer):
                 change=+detail.get_quantity_dvtcb(),
                 type="refund"
             )
-        obj.order.status = "cancel"
+        obj.order.status = "refund"
         obj.order.save()
         return obj
         
@@ -192,8 +204,8 @@ class ResponseOrderRefundDetailSerializer(serializers.ModelSerializer):
 class ResponseOrderRefundSerializer(serializers.ModelSerializer):
     details = ResponseOrderRefundDetailSerializer(many=True)
     customer = CustomerSerializer(source="order.customer")
-    user_created = UserSerializer()
-    user_updated = UserSerializer()
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = OrderRefund
         fields = '__all__'

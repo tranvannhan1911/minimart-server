@@ -27,7 +27,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
-from management.api.address import AddressPathIdView, AddressView
+from management.api.address import AddressPathIdView, AddressView, WardView
 from management.api.customer.account import CustomerForgotPassword, CustomerLoginView
 from management.api.general import CounterIndexView
 from management.api.inventory import InventoryRCIdView, InventoryRCView, InventoryRecordIdView, InventoryRecordView, WarehouseTransactionIdView, WarehouseTransactionView
@@ -37,7 +37,7 @@ from management.api.sell import OrderIdView, OrderRefundIdView, OrderRefundView,
 from management.api.supplier import SupplierIdView, SupplierView
 
 from management.api.user import (
-    CustomerIdView, CustomerView, StaffIdView, StaffView, 
+    CustomerIdView, CustomerView, ResetPasswordView, StaffIdView, StaffView, 
 )
 
 from management.api.customer_group import (
@@ -87,6 +87,7 @@ urlpatterns = [
         path('staff/', include([
             path('', StaffView.as_view(), name='staff'),
             path('<int:id>/', StaffIdView.as_view(), name='staff_id'),
+            path('reset_password/<int:id>/', ResetPasswordView.as_view()),
         ])),
         path('supplier/', include([
             path('', SupplierView.as_view(), name='supplier'),
@@ -152,6 +153,7 @@ urlpatterns = [
         path('address/', include('vi_address.urls')),
         path('address/tree/', AddressView.as_view()),
         path('address/path/<int:id>/', AddressPathIdView.as_view()),
+        path('address/ward/<int:id>/', WardView.as_view()),
         path('counter-indext/<str:table>/', CounterIndexView.as_view()),
     ])),
 

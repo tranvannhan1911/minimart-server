@@ -3,8 +3,11 @@ from rest_framework import serializers
 from django.utils import timezone
 
 from management.models import CalculationUnit, HierarchyTree, PriceDetail, PriceList, Product, ProductGroup, UnitExchange
+from management.serializers.user import UserSerializer
 
 class ProductGroupSerializer(serializers.ModelSerializer):
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = ProductGroup
         fields = '__all__'
@@ -12,6 +15,8 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             'date_updated', 'user_updated')
 
 class CalculationUnitSerializer(serializers.ModelSerializer):
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = CalculationUnit
         fields = '__all__'
@@ -26,6 +31,8 @@ class CalculationUnitSerializer(serializers.ModelSerializer):
 class UnitExchangeAllSerializer(serializers.ModelSerializer):
     unit_name = serializers.CharField(source="unit.name", read_only=True)
     price = serializers.IntegerField(read_only=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = UnitExchange
         fields = '__all__'
@@ -35,6 +42,8 @@ class UnitExchangeAllSerializer(serializers.ModelSerializer):
 class UnitExchangeSerializer(serializers.ModelSerializer):
     unit_name = serializers.CharField(source="unit.name", read_only=True)
     price = serializers.IntegerField(read_only=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = UnitExchange
         exclude = ('product', )
@@ -64,6 +73,8 @@ class CategoryTreeSelectSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CategorySerializer(serializers.ModelSerializer):
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = HierarchyTree
         fields = '__all__'
@@ -95,6 +106,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     units = UnitExchangeSerializer(many=True, required=False)
     stock = serializers.IntegerField(read_only=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = Product
         exclude = ('barcode_image', )
@@ -159,6 +172,8 @@ class ReadProductSerializer(serializers.ModelSerializer):
     base_unit = CalculationUnitSerializer(source="get_base_unit")
     price_detail = PriceDetailSerializer(source="get_price_detail")
     have_price = serializers.BooleanField(source="_have_price")
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = Product
         exclude = ('barcode_image', )
@@ -230,6 +245,8 @@ class ResponsePriceDetailSerializer(serializers.ModelSerializer):
         
 class ResponsePriceListSerializer(serializers.ModelSerializer):
     pricedetails = ResponsePriceDetailSerializer(many=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = PriceList
         fields = '__all__'

@@ -4,6 +4,11 @@ from management.models import Customer, CustomerGroup, User
 from management.serializers import ResponeSerializer
 from vi_address.models import City, District, Ward
 
+class WardAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ward
+        fields = '__all__'
+
 class WardSerializer(serializers.ModelSerializer):
     value = serializers.IntegerField(source="id")
     label = serializers.CharField(source="name")

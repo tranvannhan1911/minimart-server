@@ -64,7 +64,7 @@ class OrderView(generics.GenericAPIView):
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return Order.objects.filter(status="complete").order_by("-id")
+        return Order.objects.all().order_by("-id")
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
@@ -91,12 +91,18 @@ class OrderIdView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Đơn hàng không tồn tại"), status = status.HTTP_200_OK)
 
         obj = Order.objects.get(pk = id)
-        serializer = OrderSerializer(obj, data=request.data)
+        obj.note = request.data["note"] if "note" in request.data else obj.note
+        if request.data["status"] == "cancel":
+            obj.status = "cancel"
 
-        if serializer.is_valid() == False:
-            return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
-
-        obj = serializer.save()
+            for detail in obj.details.all():
+                WarehouseTransaction.objects.create(
+                    product=detail.product,
+                    reference=detail.pk,
+                    change=+detail.get_quantity_dvtcb(),
+                    type="order_cancel"
+                )
+        obj.save()
         created_updated(obj, request)
         response = ResponseOrderSerializer(obj)
 

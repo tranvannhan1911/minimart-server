@@ -1,8 +1,10 @@
 from rest_framework import serializers
 
-from management.models import InventoryReceivingVoucher, InventoryReceivingVoucherDetail, InventoryVoucher, InventoryVoucherDetail, Product, WarehouseTransaction
+from management.models import InventoryReceivingVoucher, InventoryReceivingVoucherDetail, InventoryVoucher, InventoryVoucherDetail, OrderDetail, OrderRefund, OrderRefundDetail, Product, WarehouseTransaction
 from management.serializers.product import ProductSerializer, ReadProductSerializer, UnitExchangeSerializer
+from management.serializers.sell import OrderSerializer, ResponseOrderDetailSerializer, ResponseOrderRefundDetailSerializer, ResponseOrderRefundSerializer, ResponseOrderSerializer
 from management.serializers.supplier import SupplierSerializer
+from management.serializers.user import UserSerializer
 
 
 class ResponseInventoryRCDetailSerializer(serializers.ModelSerializer):
@@ -15,6 +17,8 @@ class ResponseInventoryRCDetailSerializer(serializers.ModelSerializer):
 class ResponseInventoryRCSerializer(serializers.ModelSerializer):
     details = ResponseInventoryRCDetailSerializer(many=True)
     supplier = SupplierSerializer()
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = InventoryReceivingVoucher
         fields = '__all__'
@@ -28,6 +32,8 @@ class InventoryRCDetailSerializer(serializers.ModelSerializer):
 
 class InventoryRCSerializer(serializers.ModelSerializer):
     details = InventoryRCDetailSerializer(many=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = InventoryReceivingVoucher
         fields = '__all__'
@@ -108,6 +114,8 @@ class ResponseInventoryRecordDetailSerializer(serializers.ModelSerializer):
 
 class ResponseInventoryRecordSerializer(serializers.ModelSerializer):
     details = ResponseInventoryRecordDetailSerializer(many=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = InventoryVoucher
         fields = '__all__'
@@ -122,6 +130,8 @@ class InventoryRecordDetailSerializer(serializers.ModelSerializer):
 
 class InventoryRecordSerializer(serializers.ModelSerializer):
     details = InventoryRecordDetailSerializer(many=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = InventoryVoucher
         fields = '__all__'
@@ -196,7 +206,9 @@ class ResponseWarehouseTransactionSerializer(serializers.ModelSerializer):
     def get_reference(self, obj):
         _obj = None
         if obj.type == "order":
-            _obj = None
+            print(obj.reference)
+            _obj = OrderDetail.objects.get(pk = obj.reference)
+            _obj = ResponseOrderDetailSerializer(_obj).data
         elif obj.type == "inventory":
             _obj = InventoryVoucherDetail.objects.get(pk = obj.reference)
             _obj = ResponseInventoryRecordDetailSerializer(_obj).data
@@ -207,9 +219,11 @@ class ResponseWarehouseTransactionSerializer(serializers.ModelSerializer):
             _obj = InventoryReceivingVoucherDetail.objects.get(pk = obj.reference)
             _obj = ResponseInventoryRCDetailSerializer(_obj).data
         elif obj.type == "inventory_receiving_cancel":
-            _obj = None
+            _obj = InventoryReceivingVoucherDetail.objects.get(pk = obj.reference)
+            _obj = ResponseInventoryRCDetailSerializer(_obj).data
         elif obj.type == "refund":
-            _obj = None
+            _obj = OrderRefundDetail.objects.get(pk = obj.reference)
+            _obj = ResponseOrderRefundDetailSerializer(_obj).data
         return _obj
 
     def get_type(self, obj):

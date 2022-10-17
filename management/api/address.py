@@ -11,7 +11,7 @@ from vi_address.models import City
 from management import serializers
 
 from management.models import Supplier, User, created_updated
-from management.serializers.address import AddressSerializer
+from management.serializers.address import AddressSerializer, WardAllSerializer
 from management.serializers.supplier import SupplierSerializer
 from management.utils import perms
 
@@ -49,4 +49,19 @@ class AddressPathIdView(generics.GenericAPIView):
 
         return Response(data = ApiCode.success(data={
             "tree": data
+        }), status = status.HTTP_200_OK)
+
+
+
+class WardView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    def get(self, request, id):
+
+        ward = Ward.objects.get(pk = id)
+        response = WardAllSerializer(ward)
+
+        return Response(data = ApiCode.success(data={
+            "ward": response.data
         }), status = status.HTTP_200_OK)

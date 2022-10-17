@@ -15,10 +15,37 @@ class ChangePasswordSerializer(serializers.Serializer):
     password = serializers.CharField()
     new_password = serializers.CharField()
 
-class AddUserSerializer(serializers.ModelSerializer):
+
+
+class CustomerGroupSerializer(serializers.ModelSerializer):
+    # user_created = UserSerializer(read_only=True)
+    # user_updated = UserSerializer(read_only=True)
+    class Meta:
+        model = CustomerGroup
+        fields = '__all__'
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
+        extra_kwargs = {
+            'id': {
+                'read_only': True
+            }
+        }
+        
+class UserSerializer(serializers.ModelSerializer):
+    customer_group = CustomerGroupSerializer(read_only=True, many=True)
     class Meta:
         model = User
-        fields = ('fullname', 'gender', 'note', 'phone', 'address', 'date_created', 'is_manager')
+        exclude = ('password', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
+
+class AddUserSerializer(serializers.ModelSerializer):
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
+    class Meta:
+        model = User
+        fields = ('fullname', 'gender', 'note', 'phone', 'address', 'date_created', 'is_manager',
+            'user_created', 'user_updated', 'ward')
         read_only_fields = ('date_created', 'user_created', 
             'date_updated', 'user_updated')
         extra_kwargs = {
@@ -31,9 +58,12 @@ class AddUserSerializer(serializers.ModelSerializer):
         }
 
 class UpdateUserSerializer(serializers.ModelSerializer):
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = User
-        fields = ('fullname', 'gender', 'note', 'address', 'date_created', 'is_manager')
+        fields = ('fullname', 'gender', 'note', 'address', 'date_created', 'is_manager',
+            'user_created', 'user_updated', 'ward')
         read_only_fields = ('date_created', 'user_created', 
             'date_updated', 'user_updated')
         extra_kwargs = {
@@ -43,19 +73,9 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         }
 
 
-class CustomerGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomerGroup
-        fields = '__all__'
-        read_only_fields = ('date_created', 'user_created', 
-            'date_updated', 'user_updated')
-        extra_kwargs = {
-            'id': {
-                'read_only': True
-            }
-        }
-
 class AccountSerializer(serializers.ModelSerializer):
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = User
         exclude = ('password', )
@@ -76,17 +96,12 @@ class TokenAccessSerializer(serializers.Serializer):
 class ResponseTokenAccessSerializer(ResponeSerializer):
     data = TokenAccessSerializer()
 
-class UserSerializer(serializers.ModelSerializer):
-    customer_group = CustomerGroupSerializer(read_only=True, many=True)
-    class Meta:
-        model = User
-        exclude = ('password', )
-        read_only_fields = ('date_created', 'user_created', 
-            'date_updated', 'user_updated')
 
 ##########################
 
 class CustomerSerializer(serializers.ModelSerializer):
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = Customer
         exclude = ('password', )
@@ -104,6 +119,8 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 class ResponseCustomerSerializer(serializers.ModelSerializer):
     customer_group = CustomerGroupSerializer(read_only=True, many=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = Customer
         exclude = ('password', )

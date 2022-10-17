@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from management.models import Promotion, PromotionDetail, PromotionHistory, PromotionLine
 from management.serializers.product import ReadProductSerializer
+from management.serializers.user import UserSerializer
 
 class PromotionDetailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,6 +23,8 @@ class PromotionLineSerializer(serializers.ModelSerializer):
     remain_customer = serializers.IntegerField(read_only=True)
     benefit = serializers.IntegerField(read_only=True)
     actual_received = serializers.IntegerField(read_only=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = PromotionLine
         fields = '__all__'
@@ -101,6 +104,8 @@ class ResponsePromotionLineSerializer(serializers.ModelSerializer):
     remain_customer = serializers.IntegerField(read_only=True)
     benefit = serializers.IntegerField(read_only=True)
     actual_received = serializers.IntegerField(read_only=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = PromotionLine
         fields = '__all__'
@@ -112,6 +117,8 @@ class ResponsePromotionLineSerializer(serializers.ModelSerializer):
 
 class PromitionSerializer(serializers.ModelSerializer):
     lines = PromotionLineSerializer(many=True, read_only=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
     class Meta:
         model = Promotion
         fields = '__all__'
