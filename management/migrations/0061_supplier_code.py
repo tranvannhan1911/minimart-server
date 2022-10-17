@@ -2,7 +2,14 @@
 
 from django.db import migrations, models
 
+import management
 
+
+def random_code(apps, schema_editor):
+    for i in management.models.Supplier.objects.all():
+        i.code=management.models.unique_rand()
+        i.save()
+        
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -13,7 +20,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='supplier',
             name='code',
-            field=models.CharField(default='', max_length=10, unique=True, verbose_name='Mã code'),
-            preserve_default=False,
+            field=models.CharField(default="", max_length=10, verbose_name='Mã code'),
+        ),
+        migrations.RunPython(random_code),
+        migrations.AlterField(
+            model_name='supplier',
+            name='code',
+            field=models.CharField(max_length=10, unique=True, verbose_name='Mã code'),
         ),
     ]
