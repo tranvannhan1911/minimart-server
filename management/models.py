@@ -1,4 +1,6 @@
 import datetime
+from email.policy import default
+from enum import unique
 from itertools import product
 from pprint import pprint
 from secrets import choice
@@ -43,6 +45,10 @@ def filter_date(queryset, start_of_date, end_of_date):
     # )
     return queryset
 
+def unique_rand():
+    code = User.objects.make_random_password(length=8)
+    return code
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password, **extra_fields):
         if not phone:
@@ -83,6 +89,7 @@ class CustomerGroup(models.Model):
         super().delete(using, keep_parents)
 
 class User(AbstractUser):
+    code = models.CharField('Mã nhân viên', max_length=30, unique=True, default=unique_rand)
     phone = models.CharField('Số điện thoại', max_length=15, unique=True)
     fullname = models.CharField('Tên nhân viên', max_length=30, null=True)
     gender = models.CharField('Giới tính', max_length=1, default='U', choices=(
@@ -111,6 +118,19 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.format_code()
+        super(User, self).save(*args, **kwargs)
+
+    def format_code(self):
+        while True:
+            _code = "NV"+str(CounterIndex.increase("User")).zfill(5)
+            if not User.objects.filter(code = _code).exists():
+                self.code = _code
+                break
+
 
     def __str__(self):
         return self.phone
@@ -217,7 +237,7 @@ class ProductGroup(models.Model):
         db_table = 'ProductGroup'
 
 class Supplier(models.Model):
-    # supplier_id =  models.AutoField('Mã nhà cung cấp', primary_key=True)
+    code = models.CharField('Mã code', max_length=30, unique=True)
     name = models.CharField('Tên nhà cung cấp', max_length=100)
     phone = models.CharField('Số điện thoại', max_length=15)
     email = models.CharField('Địa chỉ email', max_length=50, null=True)
@@ -235,6 +255,7 @@ class Supplier(models.Model):
         db_table = 'Supplier'
 
 class HierarchyTree(models.Model):
+    code = models.CharField('Mã code', max_length=30, unique=True)
     name = models.CharField('Tên cấp', max_length=50)
     level = models.IntegerField('Cấp', default=0)
     type = models.CharField('Loại', max_length=15, choices=(
@@ -257,7 +278,8 @@ class HierarchyTree(models.Model):
 
 class CalculationUnit(models.Model):
     # unit_id = models.AutoField('Mã đơn vị tính', primary_key=True)
-    name = models.CharField('Tên đơn vị tính', max_length=50)
+    code = models.CharField('Mã code', max_length=30, unique=True)
+    name = models.CharField('Tên đơn vị tính', max_length=50, unique=True)
     note = models.TextField('Ghi chú', help_text='Ghi chú nội bộ', null=True)
 
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
@@ -878,3 +900,21 @@ class History(models.Model):
 
     class Meta:
         db_table = 'History'
+
+class CounterIndex(models.Model):
+    value = models.IntegerField("Giá trị")
+    table = models.CharField("Bảng", max_length=30)
+
+    class Meta:
+        db_table = 'CounterIndex'
+
+    @staticmethod
+    def increase(table):
+        try:
+            counter = CounterIndex.objects.get(table=table)
+            counter.value += 1
+            counter.save()
+            return counter.value
+        except:
+            CounterIndex.objects.create(table=table, value = 1)
+            return 1
