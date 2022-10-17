@@ -29,6 +29,7 @@ from drf_yasg import openapi
 from django_twilio.views import sms
 from management.api.address import AddressPathIdView, AddressView
 from management.api.customer.account import CustomerForgotPassword, CustomerLoginView
+from management.api.general import CounterIndexView
 from management.api.inventory import InventoryRCIdView, InventoryRCView, InventoryRecordIdView, InventoryRecordView, WarehouseTransactionIdView, WarehouseTransactionView
 from management.api.product import CalculationUnitIdView, CategoryIdView, CategoryToParentView, CategoryToSelectView, CategoryView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
 from management.api.promotion import PromotionByOrderView, PromotionByTypeView, PromotionHistoryIdView, PromotionHistoryView, PromotionIdView, PromotionLineIdView, PromotionLineView, PromotionProductIdView, PromotionView
@@ -151,6 +152,7 @@ urlpatterns = [
         path('address/', include('vi_address.urls')),
         path('address/tree/', AddressView.as_view()),
         path('address/path/<int:id>/', AddressPathIdView.as_view()),
+        path('counter-indext/<str:table>/', CounterIndexView.as_view()),
     ])),
 
 ]
