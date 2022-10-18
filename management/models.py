@@ -336,7 +336,8 @@ class Product(models.Model):
     def get_base_unit(self):
         return self.units.filter(
             unitexchanges__product=self, 
-            unitexchanges__is_base_unit=True
+            unitexchanges__is_base_unit=True,
+            unitexchanges__is_active=True
             ).first()
 
     def get_unit_exchange(self, unit=None):
@@ -344,7 +345,8 @@ class Product(models.Model):
             unit = self.get_base_unit()
         return UnitExchange.objects.filter(
             product=self, 
-            unit=unit
+            unit=unit,
+            is_active=True
             ).first()
 
     def get_price_detail(self, unit_exchange=None):
@@ -385,6 +387,7 @@ class UnitExchange(models.Model):
     allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
         help_text='Cho phép bán hàng bằng đơn vị này không?', default=False)
     is_base_unit = models.BooleanField('Đơn vị cơ bản', default=False)
+    is_active = models.BooleanField('Hoạt động', default=True)
 
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
@@ -550,7 +553,10 @@ class InventoryReceivingVoucherDetail(models.Model):
     receiving_voucher = models.ForeignKey(InventoryReceivingVoucher, on_delete=models.CASCADE,
         related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', 
+        on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField('Số lượng')
+    quantity_base_unit = models.PositiveIntegerField('Số lượng trên đơn vị cơ bản', default=1)
     price = models.FloatField('Giá nhập')
     note = models.TextField('Ghi chú', null=True)
 

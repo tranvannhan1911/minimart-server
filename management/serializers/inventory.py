@@ -47,6 +47,7 @@ class InventoryRCSerializer(serializers.ModelSerializer):
         for detail in details:
             detail["receiving_voucher"] = voucher
             total += detail["quantity"]*detail["price"]
+            detail["quantity_base_unit"] = detail["quantity"]*detail["unit_exchange"].value
             irvd = InventoryReceivingVoucherDetail.objects.create(**detail)
             if voucher.status == "complete":
                 WarehouseTransaction.objects.create(

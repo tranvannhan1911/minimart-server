@@ -132,21 +132,22 @@ class ProductSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         # instance.units.clear()
         for unit in instance.units.all():
-            _unit = UnitExchange.objects.get(product=instance.pk, unit=unit.pk)
             try:
-                _unit.delete()
+                _unit = UnitExchange.objects.get(product=instance.pk, unit=unit.pk, is_active=True)
+                _unit.is_active = False
+                _unit.save()
             except:
                 pass
 
         for unit in units:
-            if not UnitExchange.objects.filter(product=instance.pk, unit=unit["unit"].pk).exists():
+            if not UnitExchange.objects.filter(product=instance.pk, unit=unit["unit"].pk, is_active=True).exists():
                 unit["product"] = instance.pk
                 unit["unit"] = unit["unit"].pk
                 unit = UnitExchangeAllSerializer(data=unit)
                 unit.is_valid()
                 unit.save()
             else:
-                _unit = UnitExchange.objects.get(product=instance.pk, unit=unit["unit"].pk)
+                _unit = UnitExchange.objects.get(product=instance.pk, unit=unit["unit"].pk, is_active=True)
                 _unit.value = unit["value"]
                 _unit.allow_sale = unit["allow_sale"]
                 _unit.save()
@@ -167,7 +168,8 @@ class PriceDetailSerializer(serializers.ModelSerializer):
 class ReadProductSerializer(serializers.ModelSerializer):
     product_groups = ProductGroupSerializer(read_only=True, many=True, required=False)
     product_category = CategorySerializer(read_only=True)
-    units = UnitExchangeSerializer(source="unitexchanges", read_only=True, many=True)
+    # units = UnitExchangeSerializer(source="unitexchanges", read_only=True, many=True)
+    units = serializers.SerializerMethodField()
     stock = serializers.IntegerField(read_only=True)
     base_unit = CalculationUnitSerializer(source="get_base_unit")
     price_detail = PriceDetailSerializer(source="get_price_detail")
@@ -182,6 +184,12 @@ class ReadProductSerializer(serializers.ModelSerializer):
 
     def get_stock(self, obj):
         return obj.stock()
+
+    def get_units(self, obj):
+        queryset = UnitExchange.objects.filter(product=obj, is_active=True)
+        return UnitExchangeSerializer(queryset, many=True).data
+
+    
 
         
 class PriceListSerializer(serializers.ModelSerializer):
