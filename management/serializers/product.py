@@ -199,8 +199,6 @@ class PriceListSerializer(serializers.ModelSerializer):
         for detail in pricedetails:
             detail["pricelist"] = pricelist
             pricelist_base_unit = detail["product"].get_price_detail()
-            detail["start_date"] = pricelist.start_date
-            detail["end_date"] = pricelist.end_date
             detail = PriceDetail.objects.create(**detail)
             products.append(detail.product)
 
@@ -212,16 +210,12 @@ class PriceListSerializer(serializers.ModelSerializer):
                 if PriceDetail.objects.filter(
                         unit_exchange=unit_exchange,
                         product=product,
-                        start_date__lte=timezone.now(),
-                        end_date__gte=timezone.now(),
                     ).count() == 0:
                     PriceDetail.objects.create(
                         pricelist=pricelist,
                         unit_exchange=unit_exchange,
                         price=price_base_unit.price*unit_exchange.value,
-                        product=product,
-                        start_date=price_base_unit.start_date,
-                        end_date=price_base_unit.end_date,
+                        product=product
                     )
                     
         return pricelist

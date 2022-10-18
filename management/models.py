@@ -353,8 +353,8 @@ class Product(models.Model):
         
         return self.pricedetails.filter(
             unit_exchange=unit_exchange,
-            start_date__lte=timezone.now(),
-            end_date__gte=timezone.now(),
+            pricelist__start_date__lte=timezone.now(),
+            pricelist__end_date__gte=timezone.now(),
         ).order_by("-id").first()
 
     def get_price_detail_by_unit(self, unit=None):
@@ -433,12 +433,24 @@ class PriceDetail(models.Model):
     unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', on_delete=models.CASCADE,
         related_name='pricedetails', null=True)
     price = models.FloatField('Giá bán', default=0)
-    start_date = models.DateTimeField('Thời gian bắt đầu', default=timezone.now)
-    end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
+    # start_date = models.DateTimeField('Thời gian bắt đầu', default=timezone.now)
+    # end_date = models.DateTimeField('Thời gian kết thúc', default=timezone.now)
     note = models.TextField('Ghi chú', null=True)
 
     class Meta:
         db_table = 'PriceDetail'
+
+    @staticmethod
+    def check_overlapse(product, start_date, end_date, exclude=None):
+        queryset = PriceDetail.objects.filter(
+            product=product,
+            pricelist__status=True)
+
+        if exclude:
+            queryset = queryset.exclude(pricelist__price_list_id = exclude.price_list_id)
+        queryset = queryset.exclude(pricelist__start_date__gt=end_date)
+        queryset = queryset.exclude(pricelist__end_date__lt=start_date)
+        return queryset
 
 class Order(models.Model):
     # order_id = models.AutoField('Mã đơn hàng', primary_key=True)

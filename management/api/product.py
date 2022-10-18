@@ -11,7 +11,7 @@ from rest_framework import permissions
 from management import serializers
 from management import swagger
 
-from management.models import CalculationUnit, HierarchyTree, PriceList, Product, ProductGroup, Supplier, User, created_updated
+from management.models import CalculationUnit, HierarchyTree, PriceDetail, PriceList, Product, ProductGroup, Supplier, User, created_updated
 from management.serializers.product import CalculationUnitSerializer, CategorySerializer, CategoryTreeSelectSerializer, CategoryTreeSerializer, PriceListSerializer, ProductGroupSerializer, ProductSerializer, ReadProductSerializer, ResponsePriceListSerializer, SellableSerializer
 from management.utils import perms
 
@@ -303,6 +303,25 @@ class PriceListView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
         
+        if len(request.data["pricedetails"]) == 0:
+            return Response(data = ApiCode.error(message="Không thể tạo bảng giá trống"), status = status.HTTP_200_OK)
+        
+        messages = []
+        if request.data["status"]:
+            for detail in request.data["pricedetails"]:
+                pricedetails = PriceDetail.check_overlapse(
+                    detail["product"], 
+                    datetime.fromisoformat(request.data["start_date"][:-5]),
+                    datetime.fromisoformat(request.data["end_date"][:-5])
+                    )
+
+                if pricedetails.count() > 0:
+                    product = Product.objects.get(pk=detail["product"])
+                    messages.append('Sản phẩm '+product.name+' đã tồn tại trong bảng giá có mã là '+str(pricedetails.first().pricelist.price_list_id))
+        
+        if len(messages) > 0:
+            return Response(data = ApiCode.error(message=messages), status = status.HTTP_200_OK)
+        
         obj = serializer.save()
         created_updated(obj, request)
         response = ResponsePriceListSerializer(obj)
@@ -341,10 +360,26 @@ class PriceListIdView(generics.GenericAPIView):
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
+        messages = []
+        if pricelist.status == False and request.data["status"]:
+            for detail in request.data["pricedetails"]:
+                pricedetails = PriceDetail.check_overlapse(
+                    detail["product"], 
+                    datetime.fromisoformat(request.data["start_date"][:-5]),
+                    datetime.fromisoformat(request.data["end_date"][:-5])
+                    )
+
+                if pricedetails.count() > 0:
+                    product = Product.objects.get(pk=detail["product"])
+                    messages.append('Sản phẩm '+product.name+' đã tồn tại trong bảng giá có mã là '+str(pricedetails.first().pricelist.price_list_id))
+        
+        if len(messages) > 0:
+            return Response(data = ApiCode.error(message=messages), status = status.HTTP_200_OK)
+        
+
         obj = serializer.save()
         created_updated(obj, request)
         response = ResponsePriceListSerializer(obj)
-
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     @swagger_auto_schema(

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 import management
 
-
 def random_code(apps, schema_editor):
     for i in management.models.Supplier.objects.all():
         i.code=management.models.unique_rand()
