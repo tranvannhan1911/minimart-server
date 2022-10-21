@@ -225,6 +225,7 @@ class PromotionProductIdView(generics.GenericAPIView):
         product_id = int(request.query_params.get('product_id'))
         customer_id = request.query_params.get('customer_id')
         quantity = int(request.query_params.get('quantity'))
+        quantity_in_use = int(request.query_params.get('quantity_in_use', 0))
         if not Product.objects.filter(pk = product_id).exists():
             return Response(data = ApiCode.error(message="Sản phẩm không tồn tại"), status = status.HTTP_200_OK)
         
@@ -241,7 +242,9 @@ class PromotionProductIdView(generics.GenericAPIView):
                 pl.get_remain_today(customer)
                 pl.get_remain_customer(customer)
 
-            promotion_lines = PromotionLine.sort_benefit_product(promotion_lines, product, quantity, customer)
+            promotion_lines = PromotionLine.sort_benefit_product(
+                    promotion_lines, product, 
+                    quantity, customer, quantity_in_use)
         # else:
         #     promotion_lines = promotion_lines.filter(
         #             promotion__applicable_customer_groups=None)

@@ -53,7 +53,7 @@ class InventoryRCSerializer(serializers.ModelSerializer):
                 WarehouseTransaction.objects.create(
                     product=detail["product"],
                     reference=irvd.pk,
-                    change=detail["quantity"],
+                    change=detail["quantity_base_unit"],
                     type="inventory_receiving"
                 )
         voucher.total = total
@@ -78,7 +78,7 @@ class InventoryRCSerializer(serializers.ModelSerializer):
                 WarehouseTransaction.objects.create(
                     product=detail["product"],
                     reference=irvd.pk,
-                    change=detail["quantity"],
+                    change=detail["quantity_base_unit"],
                     type="inventory_receiving"
                 )
         instance.total = total
@@ -97,7 +97,7 @@ class InventoryRCSerializer(serializers.ModelSerializer):
                 WarehouseTransaction.objects.create(
                     product=detail.product,
                     reference=detail.pk,
-                    change=-detail.quantity,
+                    change=-detail.quantity_base_unit,
                     type="inventory_receiving_cancel"
                 )
             return instance

@@ -725,7 +725,7 @@ class PromotionLine(models.Model):
     def actual_received(self):
         return self.__actual_received
 
-    def quantity_base_actual_received(self, product, quantity_base_unit, customer):
+    def quantity_base_actual_received(self, product, quantity_base_unit, customer, quantity_in_use_of_product=0):
         remain_today = self.get_remain_today(customer)
         if remain_today == -1:
             remain_today = 99999999999
@@ -733,8 +733,8 @@ class PromotionLine(models.Model):
         quantity_buy_p1 = self.detail.quantity_buy
         quantity_received_p1 = self.detail.quantity_received
         
-        product_remain = product.stock()
-        product_remain -= quantity_base_unit
+        product_remain = self.detail.product_received.stock()
+        product_remain -= quantity_in_use_of_product
 
         number_of_voucher_use = min(remain_today, quantity_base_unit // quantity_buy_p1)
         number_of_voucher_use = min(number_of_voucher_use, product_remain//quantity_received_p1)
@@ -742,8 +742,11 @@ class PromotionLine(models.Model):
         self.__actual_received = quantity_base_actual_received
         return quantity_base_actual_received
 
-    def benefit_product(self, product, quantity_base_unit, customer):
-        quantity_base_actual_received = self.quantity_base_actual_received(product, quantity_base_unit, customer)
+    def benefit_product(self, product, quantity_base_unit, customer, quantity_in_use_of_product=0):
+        quantity_base_actual_received = self.quantity_base_actual_received(
+            product, quantity_base_unit, 
+            customer, quantity_in_use_of_product)
+
         price = product.get_price_detail().price
         benefit = quantity_base_actual_received*price
         self.__benefit = benefit
@@ -751,20 +754,23 @@ class PromotionLine(models.Model):
         return benefit
 
     @staticmethod
-    def get_best_benefit_product(promotion_lines, product, quantity_base_unit, customer):
+    def get_best_benefit_product(promotion_lines, product, quantity_base_unit, customer,
+            quantity_in_use_of_product=0):
         promotion_line = None
         benefit = 0
         for pl in promotion_lines:
-            b = pl.benefit_product(product, quantity_base_unit, customer)
+            b = pl.benefit_product(product, quantity_base_unit, customer, quantity_in_use_of_product)
             if benefit < b:
                 benefit = b
                 promotion_line = pl
         return promotion_line, benefit
 
     @staticmethod
-    def sort_benefit_product(promotion_lines, product, quantity, customer):
+    def sort_benefit_product(promotion_lines, product, quantity, customer,
+            quantity_in_use_of_product=0):
         promotion_lines = sorted(promotion_lines, 
-            key=lambda t: -t.benefit_product(product, quantity, customer))
+            key=lambda t: -t.benefit_product(product, quantity, customer,
+                quantity_in_use_of_product))
         return promotion_lines
 
     def benefit_order(self, amount):
