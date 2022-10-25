@@ -357,6 +357,7 @@ class Product(models.Model):
             unit_exchange=unit_exchange,
             pricelist__start_date__lte=timezone.now(),
             pricelist__end_date__gte=timezone.now(),
+            pricelist__status = True
         ).order_by("-id").first()
 
     def get_price_detail_by_unit(self, unit=None):

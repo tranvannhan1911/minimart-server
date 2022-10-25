@@ -42,13 +42,22 @@ class OrderView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
 
         sum = 0
+        _quantity_buys = {}
         for detail in request.data["details"]:
             unit_exchange = UnitExchange.objects.get(pk=detail["unit_exchange"])
-            product = Product.objects.get(pk=detail["product"])
+            # product = Product.objects.get(pk=detail["product"])
             quantity = detail["quantity"]*unit_exchange.value
-            stock = product.stock()
+            # stock = product.stock()
             sum += quantity
-            if stock < quantity:
+            if detail["product"] in _quantity_buys.keys():
+                _quantity_buys[detail["product"]] += quantity
+            else:
+                _quantity_buys[detail["product"]] = quantity
+
+        for i in _quantity_buys:
+            product = Product.objects.get(pk=i)
+            stock = product.stock()
+            if stock < _quantity_buys[i]:
                 return Response(
                     data = ApiCode.error(message="Sản phẩm "+product.name+" chỉ còn "+product.remain()), 
                     status = status.HTTP_200_OK)

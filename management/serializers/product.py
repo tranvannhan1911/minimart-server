@@ -41,6 +41,7 @@ class UnitExchangeAllSerializer(serializers.ModelSerializer):
 
 class UnitExchangeSerializer(serializers.ModelSerializer):
     unit_name = serializers.CharField(source="unit.name", read_only=True)
+    unit_code = serializers.CharField(source="unit.code", read_only=True)
     price = serializers.IntegerField(read_only=True)
     user_created = UserSerializer(read_only=True)
     user_updated = UserSerializer(read_only=True)

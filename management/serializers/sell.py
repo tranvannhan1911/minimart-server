@@ -29,6 +29,16 @@ class OrderSerializer(serializers.ModelSerializer):
         #     }
         # }
 
+    def get_quantity_in_use_by_product(self, details, product_id):
+        cnt = 0
+        for detail in details:
+            print("get_quantity_in_use_by_product", detail["product"], product_id)
+            if detail["product"].id == product_id:
+                quantity_base_unit = detail["quantity"]*detail["unit_exchange"].value
+                cnt += quantity_base_unit
+        return cnt
+
+
     def create(self, validated_data):
         details = validated_data.pop('details')
         promotion_order = validated_data.pop('promotion') if "promotion" in validated_data.keys() else None
@@ -36,6 +46,8 @@ class OrderSerializer(serializers.ModelSerializer):
             promotion_order = PromotionLine.objects.get(pk=promotion_order)
         obj = super().create(validated_data)
         total = 0
+
+        check = {}
         for detail in details:
             quantity_base_unit = detail["quantity"]*detail["unit_exchange"].value
             detail["order"] = obj
@@ -52,17 +64,19 @@ class OrderSerializer(serializers.ModelSerializer):
                 type="order"
             )
             # promotion product
-            if promotion_line != None:
+            if detail.product.id not in check.keys() and promotion_line != None:
+                quantity_inuse = self.get_quantity_in_use_by_product(details, detail.product.id)
+                print("quantity_inuse", quantity_inuse)
                 promotion_line = PromotionLine.objects.get(pk = promotion_line)
                 pl = promotion_line
                 benefit_product = pl.benefit_product(
                     detail.product,
-                    quantity_base_unit,
+                    quantity_inuse,
                     obj.customer
                 )
                 quantity_base_actual_received = pl.quantity_base_actual_received(
                     detail.product,
-                    quantity_base_unit,
+                    quantity_inuse,
                     obj.customer
                 )
                 # print("promotion product #######################")
@@ -70,6 +84,7 @@ class OrderSerializer(serializers.ModelSerializer):
                 # pprint(vars(pl))
                 # print(benefit_product, quantity_base_actual_received)
                 if quantity_base_actual_received > 0:
+                    check[detail.product.id] = True
                     detail_voucher = {
                         "order": obj,
                         "quantity": quantity_base_actual_received,
