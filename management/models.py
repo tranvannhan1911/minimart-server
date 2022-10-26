@@ -215,6 +215,7 @@ class Customer(models.Model):
             raw_password = self.random_password()
         self.password = make_password(raw_password)
         self._password = raw_password
+        return raw_password
 
     def check_password(self, raw_password):
         salt = self.password.split("$")[2]

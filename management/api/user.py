@@ -26,6 +26,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from management.utils.perms import method_permission_classes
 from rest_framework import exceptions
+from supermarket.settings import MESSAGE_PASSWORD_TWILIO_TEMPLATE
+from management.utils.twilio import MessageClient
 
 class StaffView(generics.GenericAPIView):
     authentication_classes = [JWTAuthentication]
@@ -132,6 +134,12 @@ class ResetPasswordView(generics.GenericAPIView):
         raw_password = User.random_password()
         user.set_password(raw_password)
         user.save()
+
+        message = MESSAGE_PASSWORD_TWILIO_TEMPLATE.format(password=raw_password)
+        number = User.format_phone(user.phone)
+        client = MessageClient()
+        client.send_message(message, number)
+
         response = UserSerializer(user)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
@@ -155,8 +163,14 @@ class CustomerView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Số điện thoại bị trùng"), status = status.HTTP_200_OK)
 
         customer = serializer.save()
-        customer.set_password()
+        raw_password = customer.set_password()
         customer.save()
+
+        message = MESSAGE_PASSWORD_TWILIO_TEMPLATE.format(password=raw_password)
+        number = User.format_phone(customer.phone)
+        client = MessageClient()
+        client.send_message(message, number)
+
         created_updated(customer, request)
 
         response = ResponseCustomerSerializer(customer)

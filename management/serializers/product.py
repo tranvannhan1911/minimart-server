@@ -165,7 +165,15 @@ class PriceDetailSerializer(serializers.ModelSerializer):
         model = PriceDetail
         fields = '__all__'
         read_only_fields = ('pricelist', )
-        
+
+
+# class ProductCalculationUnitSerializer(CalculationUnitSerializer):
+#     unit_exchange = serializers.SerializerMethodField()
+
+#     def get_unit_exchange(self, obj):
+#         queryset = UnitExchange.objects.filter(product=obj, is_active=True)
+#         return UnitExchangeSerializer(queryset, many=True).data    
+
 class ReadProductSerializer(serializers.ModelSerializer):
     product_groups = ProductGroupSerializer(read_only=True, many=True, required=False)
     product_category = CategorySerializer(read_only=True)
