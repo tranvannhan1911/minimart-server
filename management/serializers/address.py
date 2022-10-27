@@ -41,3 +41,19 @@ class AddressSerializer(serializers.ModelSerializer):
         query = District.objects.filter(parent_code=obj.id)
         serializer = DistrictSerializer(query, many=True)
         return serializer.data
+############################
+
+class DistrictAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = District
+        fields = '__all__'
+
+class CityAllSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = '__all__'
+
+class CityDistricWardSerializer(serializers.Serializer):
+    ward = WardAllSerializer(source="*")
+    district = DistrictAllSerializer(source="parent_code")
+    city = CityAllSerializer(source="parent_code.parent_code")

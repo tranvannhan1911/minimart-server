@@ -1,0 +1,27 @@
+{
+    "user_created": {
+        "id": 1,
+        "last_login": "2022-10-12T01:03:18.610565Z",
+        "is_superuser": true,
+        "is_active": true,
+        "date_joined": "2022-10-08T12:46:22.423752Z",
+        "code": "",
+        "phone": "0369462308",
+        "fullname": "Trần Văn Nhân",
+        "gender": "U",
+        "address": null,
+        "note": null,
+        "date_created": "2022-10-08T12:46:22.423766Z",
+        "date_updated": null,
+        "is_manager": true,
+        "ward": null,
+        "user_created": 1,
+        "user_updated": null,
+        "groups": [],
+        "user_permissions": []
+    },
+    "date_created": "2022-10-21T15:26:02.365944Z",
+    "discount": 10800.0,
+    "total": 108000.0,
+    "final_total": 97200.0
+}

@@ -15,6 +15,8 @@ from django.contrib.auth.hashers import (
 )
 from vi_address.models import Ward
 
+from management.utils.utils import to_datetime
+
 def created_updated(obj, request):
     if obj.user_created is None:
         obj.user_created = request.user
@@ -479,6 +481,34 @@ class Order(models.Model):
 
     class Meta:
         db_table = 'Order'
+
+    @staticmethod
+    def _filter(queryset, start_date, end_date, staff_id):
+        if start_date:
+            start_date = to_datetime(start_date)
+            queryset = queryset.filter(date_created_gte=start_date)
+            
+        if end_date:
+            end_date = to_datetime(end_date)
+            queryset = queryset.filter(date_created_lte=end_date)
+
+        if staff_id:
+            queryset = queryset.filter(user_created__id=staff_id)
+
+        return queryset
+
+
+    @staticmethod
+    def _filter_date(queryset, start_date, end_date):
+        if start_date:
+            start_date = to_datetime(start_date)
+            queryset = queryset.filter(date_created_gte=start_date)
+            
+        if end_date:
+            end_date = to_datetime(end_date)
+            queryset = queryset.filter(date_created_lte=end_date)
+
+        return queryset
 
 class OrderDetail(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, 

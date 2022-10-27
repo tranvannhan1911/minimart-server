@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt import serializers as serializers_jwt
 from management.models import Customer, CustomerGroup, User
 from management.serializers import ResponeSerializer
+from management.serializers.address import CityDistricWardSerializer
 
 class PhoneSerializer(serializers.Serializer):
     phone = serializers.CharField()
@@ -121,6 +122,16 @@ class ResponseCustomerSerializer(serializers.ModelSerializer):
     customer_group = CustomerGroupSerializer(read_only=True, many=True)
     user_created = UserSerializer(read_only=True)
     user_updated = UserSerializer(read_only=True)
+    class Meta:
+        model = Customer
+        exclude = ('password', )
+
+
+class ResponseCustomerWardSerializer(serializers.ModelSerializer):
+    customer_group = CustomerGroupSerializer(read_only=True, many=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
+    ward = CityDistricWardSerializer()
     class Meta:
         model = Customer
         exclude = ('password', )

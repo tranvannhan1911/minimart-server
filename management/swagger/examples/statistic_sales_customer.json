@@ -1,0 +1,110 @@
+{
+    "customer": {
+        "id": 1,
+        "customer_group": [],
+        "user_created": {
+            "id": 1,
+            "last_login": "2022-10-12T01:03:18.610565Z",
+            "is_superuser": true,
+            "is_active": true,
+            "date_joined": "2022-10-08T12:46:22.423752Z",
+            "code": "",
+            "phone": "0369462308",
+            "fullname": "Trần Văn Nhân",
+            "gender": "U",
+            "address": null,
+            "note": null,
+            "date_created": "2022-10-08T12:46:22.423766Z",
+            "date_updated": null,
+            "is_manager": true,
+            "ward": null,
+            "user_created": 1,
+            "user_updated": null,
+            "groups": [],
+            "user_permissions": []
+        },
+        "user_updated": null,
+        "phone": "0987654321",
+        "fullname": "Bút Lê",
+        "gender": "U",
+        "address": "28A",
+        "note": null,
+        "last_login": null,
+        "is_active": true,
+        "date_created": "2022-10-08T12:47:36.992450Z",
+        "date_updated": null,
+        "ward": {
+            "ward": {
+                "id": 8784,
+                "name": "Bình Chiểu",
+                "slug": "binh-chieu",
+                "type": "phuong",
+                "name_with_type": "Phường Bình Chiểu",
+                "path": "Bình Chiểu, Thủ Đức, Hồ Chí Minh",
+                "path_with_type": "Phường Bình Chiểu, Thành phố Thủ Đức, Thành phố Hồ Chí Minh",
+                "code": 26797,
+                "parent_code": 557
+            },
+            "district": {
+                "id": 557,
+                "name": "Thủ Đức",
+                "slug": "thu-duc",
+                "type": "thanh-pho",
+                "name_with_type": "Thành phố Thủ Đức",
+                "path": "Thủ Đức, Hồ Chí Minh",
+                "path_with_type": "Thành phố Thủ Đức, Thành phố Hồ Chí Minh",
+                "code": 769,
+                "parent_code": 28
+            },
+            "city": {
+                "id": 28,
+                "name": "Hồ Chí Minh",
+                "slug": "ho-chi-minh",
+                "type": "thanh-pho",
+                "name_with_type": "Thành phố Hồ Chí Minh",
+                "code": 79
+            }
+        }
+    },
+    "product_groups": {
+        "id": 1,
+        "user_created": {
+            "id": 1,
+            "last_login": "2022-10-12T01:03:18.610565Z",
+            "is_superuser": true,
+            "is_active": true,
+            "date_joined": "2022-10-08T12:46:22.423752Z",
+            "code": "",
+            "phone": "0369462308",
+            "fullname": "Trần Văn Nhân",
+            "gender": "U",
+            "address": null,
+            "note": null,
+            "date_created": "2022-10-08T12:46:22.423766Z",
+            "date_updated": null,
+            "is_manager": true,
+            "ward": null,
+            "user_created": 1,
+            "user_updated": null,
+            "groups": [],
+            "user_permissions": []
+        },
+        "user_updated": null,
+        "product_group_code": "CAF001",
+        "name": "Cafe",
+        "description": null,
+        "note": null,
+        "date_created": "2022-10-08T12:48:14.496746Z",
+        "date_updated": null
+    },
+    "product_category": {
+        "id": 4,
+        "name": "Nước",
+        "level": 0,
+        "type": "product",
+        "parent": 1
+    },
+    "discount": 139600.0,
+    "total": 1456000.0,
+    "final_total": 1316400.0
+}
