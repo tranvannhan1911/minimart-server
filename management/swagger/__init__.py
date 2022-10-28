@@ -1,4 +1,5 @@
 import json
+from secrets import choice
 from drf_yasg import openapi
 from management.serializers import ResponeSuccessSerializer
 from management.utils.apicode import ApiCode
@@ -12,6 +13,7 @@ class SwaggerSchema():
     end_date = openapi.Parameter("end_date", in_=openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False)
     staff_id = openapi.Parameter("staff_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
     customer_id = openapi.Parameter("customer_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
+    promotion_type = openapi.Parameter("type", in_=openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False, description="Order: chiết khấu hoặc giảm tiền, Product: Tặng sản phẩm")
 
     @staticmethod
     def success():
@@ -57,3 +59,4 @@ promotion_history = get_example("promotion_history")
 statistic_sales_staff = get_example("statistic_sales_staff")
 statistic_sales_customer = get_example("statistic_sales_customer")
 statistic_refund = get_example("statistic_refund")
+statistic_promotion = get_example("statistic_promotion")

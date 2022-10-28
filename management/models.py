@@ -954,6 +954,12 @@ class PromotionHistory(models.Model):
     class Meta:
         db_table = 'PromotionHistory'
 
+    @staticmethod
+    def filter_type(queryset, type):
+        if type:
+            return queryset.filter(type=type)
+        return queryset
+
 class History(models.Model):
     object_name = models.CharField('Tên đối tượng', max_length=50)
     object_id = models.CharField('Mã đối tượng', max_length=50)

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
-from management.models import Order, OrderDetail, OrderRefund, OrderRefundDetail
+from management.models import Order, OrderDetail, OrderRefund, OrderRefundDetail, Promotion, PromotionHistory, PromotionLine
 from management.serializers.product import CategorySerializer, PriceDetailSerializer, ProductGroupSerializer, ReadProductSerializer, UnitExchangeSerializer
+from management.serializers.promotion import PromotionDetailSerializer
 from management.serializers.user import CustomerSerializer, ResponseCustomerSerializer, ResponseCustomerWardSerializer, UserSerializer
 
 # class ResponseOrderDetailSerializer(serializers.ModelSerializer):
@@ -56,4 +57,32 @@ class StatisticRefundSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderRefundDetail
         fields = '__all__'
+
+##################
+
+class StatisticPromitionSerializer(serializers.ModelSerializer):
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
+    class Meta:
+        model = Promotion
+        fields = '__all__'
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
+
+class StatisticPromotionLineSerializer(serializers.ModelSerializer):
+    detail = PromotionDetailSerializer()
+    remain = serializers.IntegerField(source="get_remain", read_only=True)
+    user_created = UserSerializer(read_only=True)
+    user_updated = UserSerializer(read_only=True)
+    promotion = StatisticPromitionSerializer()
+    class Meta:
+        model = PromotionLine
+        fields = '__all__'
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
     
+class StatisticPromotionHistorySerializer(serializers.ModelSerializer):
+    promotion_line = StatisticPromotionLineSerializer()
+    class Meta:
+        model = PromotionHistory
+        exclude = ('note', 'order', 'buy_order_detail', 'received_order_detail')
