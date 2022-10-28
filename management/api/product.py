@@ -299,6 +299,7 @@ class PriceListView(generics.GenericAPIView):
         request_body=PriceListSerializer,
         responses={200: swagger.pricelist["get"]})
     def post(self, request):
+        # print(request.data["start_date"])
         serializer = PriceListSerializer(data=request.data)
         if serializer.is_valid() == False:
             return Response(data = ApiCode.error(message=serializer.errors), status = status.HTTP_200_OK)
@@ -307,6 +308,9 @@ class PriceListView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Không thể tạo bảng giá trống"), status = status.HTTP_200_OK)
         
         messages = []
+        if "status" not in request.data.keys():
+            request.data["status"] = "pending"
+
         if request.data["status"]:
             for detail in request.data["pricedetails"]:
                 pricedetails = PriceDetail.check_overlapse(

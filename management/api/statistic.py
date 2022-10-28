@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from management import swagger
 
-from management.models import Customer, InventoryReceivingVoucher, InventoryReceivingVoucherDetail, Order, Product, PromotionHistory, PromotionLine, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated
-from management.serializers.statistic import StatisticInventoryReceivingSerializer, StatisticPromotionHistorySerializer, StatisticRefundSerializer, StatisticSalesCustomerSerializer, StatisticSellSerializer
+from management.models import Customer, InventoryReceivingVoucher, InventoryReceivingVoucherDetail, Order, Product, PromotionHistory, PromotionLine, WarehouseTransaction, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated, filter_product
+from management.serializers.statistic import StatisticInventoryReceivingSerializer, StatisticPromotionHistorySerializer, StatisticRefundSerializer, StatisticSalesCustomerSerializer, StatisticSellSerializer, StatisticStockSerializer
 from management.serializers.supplier import SupplierSerializer
 from management.utils import perms
 
@@ -17,7 +17,7 @@ from management.swagger.user import  SwaggerUserSchema
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from management.utils.perms import method_permission_classes
-from management.utils.utils import to_datetime
+from management.utils.utils import end_of_date, to_datetime
 from django.db.models import Sum, F, OuterRef, Subquery
 
 class StatisticSellView(generics.GenericAPIView):
@@ -105,12 +105,12 @@ class StatisticSalesCustomerView(generics.GenericAPIView):
             else:
                 que["customer"] = None
 
-            if que["details__product__product_groups"]:
+            if que["details__product__product_groups"] and ProductGroup.objects.filter(pk=que["details__product__product_groups"]).exists():
                 que["product_groups"] = ProductGroup.objects.get(pk=que["details__product__product_groups"])
             else:
                 que["product_groups"] = None
 
-            if que["details__product__product_category"]:
+            if que["details__product__product_category"] and ProductGroup.objects.filter(pk=que["details__product__product_category"]).exists():
                 que["product_category"] = ProductGroup.objects.get(pk=que["details__product__product_category"])
             else:
                 que["product_category"] = None
@@ -137,14 +137,21 @@ class StatisticRefundView(generics.GenericAPIView):
         manual_parameters=[
             SwaggerSchema.token,
             SwaggerSchema.start_date,
-            SwaggerSchema.end_date],
+            SwaggerSchema.end_date,
+            SwaggerSchema.product_id,
+            SwaggerSchema.product_group_id,
+            SwaggerSchema.product_category_id],
         responses={200: swagger.statistic_refund["list"]})
     def get(self, request, *args, **kwargs):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
+        product_id = request.query_params.get('product_id', None)
+        product_group_id = request.query_params.get('product_group_id', None)
+        product_category_id = request.query_params.get('product_category_id', None)
 
         queryset = self.get_queryset()
         queryset = _filter_date_str(queryset, start_date, end_date)
+        queryset = filter_product(queryset, product_id, product_group_id, product_category_id)
 
         response = StatisticRefundSerializer(queryset, many=True)
         return Response(data = ApiCode.success(data={
@@ -217,7 +224,7 @@ class StatisticInventoryReceivingView(generics.GenericAPIView):
 
         queryset = self.get_queryset()
         queryset = InventoryReceivingVoucherDetail.filter_date(queryset, start_date, end_date)
-        queryset = InventoryReceivingVoucherDetail.filter_product(queryset, product_id, product_group_id, product_category_id)
+        queryset = filter_product(queryset, product_id, product_group_id, product_category_id)
 
         queryset = queryset.values("product").annotate(
             quantity_base_unit=Sum("quantity_base_unit"),
@@ -227,6 +234,49 @@ class StatisticInventoryReceivingView(generics.GenericAPIView):
             que["product"] = Product.objects.get(pk=que["product"])
         
         response = StatisticInventoryReceivingSerializer(queryset, many=True)
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+class StatisticStockView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    def get_queryset(self):
+        return WarehouseTransaction.objects.all()
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            SwaggerSchema.token,
+            SwaggerSchema.date_required,
+            SwaggerSchema.product_id,
+            SwaggerSchema.product_group_id,
+            SwaggerSchema.product_category_id],
+        responses={200: swagger.statistic_stock["list"]})
+    def get(self, request, *args, **kwargs):
+        date = request.query_params.get('date', None)
+        product_id = request.query_params.get('product_id', None)
+        product_group_id = request.query_params.get('product_group_id', None)
+        product_category_id = request.query_params.get('product_category_id', None)
+        if not date:
+            return Response(data = ApiCode.error(message="Ngày không hợp lệ"), status = status.HTTP_200_OK)
+        
+        date = to_datetime(date)
+        date = end_of_date(date)
+
+        queryset = self.get_queryset()
+        queryset = queryset.filter(date_created__lte=date)
+        queryset = filter_product(queryset, product_id, product_group_id, product_category_id)
+
+        queryset = queryset.values("product").annotate(
+            stock_base_unit=Sum("change")
+        )
+        for que in queryset:
+            que["product"] = Product.objects.get(pk=que["product"])
+
+        # return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+        response = StatisticStockSerializer(queryset, many=True)
         return Response(data = ApiCode.success(data={
             "count": len(response.data),
             "results": response.data

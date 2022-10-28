@@ -34,7 +34,7 @@ from management.api.inventory import InventoryRCIdView, InventoryRCView, Invento
 from management.api.product import CalculationUnitIdView, CategoryIdView, CategoryToParentView, CategoryToSelectView, CategoryView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
 from management.api.promotion import PromotionByOrderView, PromotionByTypeView, PromotionHistoryIdView, PromotionHistoryView, PromotionIdView, PromotionLineIdView, PromotionLineView, PromotionProductIdView, PromotionView
 from management.api.sell import OrderIdView, OrderRefundIdView, OrderRefundView, OrderView
-from management.api.statistic import StatisticInventoryReceivingView, StatisticPromotionView, StatisticRefundView, StatisticSalesCustomerView, StatisticSellView
+from management.api.statistic import StatisticInventoryReceivingView, StatisticPromotionView, StatisticRefundView, StatisticSalesCustomerView, StatisticSellView, StatisticStockView
 from management.api.supplier import SupplierIdView, SupplierView
 
 from management.api.user import (
@@ -163,6 +163,7 @@ urlpatterns = [
             path('refund/', StatisticRefundView.as_view()),
             path('promotion/', StatisticPromotionView.as_view()),
             path('receiving/', StatisticInventoryReceivingView.as_view()),
+            path('stock/', StatisticStockView.as_view()),
         ])),
     ])),
 

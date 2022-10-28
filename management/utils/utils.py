@@ -11,7 +11,7 @@ def start_of_date(date):
     return start
 
 def end_of_date(date):
-    end  = date.replace(hour=29, minute=59, second=59, microsecond=999999)
+    end  = date.replace(hour=23, minute=59, second=59, microsecond=999999)
     return end
 
 def start_end_of_date(date):

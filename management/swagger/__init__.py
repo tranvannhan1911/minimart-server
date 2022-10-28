@@ -17,6 +17,7 @@ class SwaggerSchema():
     product_id = openapi.Parameter("product_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
     product_group_id = openapi.Parameter("product_group_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
     product_category_id = openapi.Parameter("product_category_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
+    date_required = openapi.Parameter("date", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=True)
 
     @staticmethod
     def success():
@@ -64,4 +65,5 @@ statistic_sales_customer = get_example("statistic_sales_customer")
 statistic_refund = get_example("statistic_refund")
 statistic_promotion = get_example("statistic_promotion")
 statistic_inventory_receiving = get_example("statistic_inventory_receiving")
+statistic_stock = get_example("statistic_stock")
 

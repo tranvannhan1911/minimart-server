@@ -51,12 +51,26 @@ def _filter_date_str(queryset, start_date, end_date):
     if start_date:
         start_date = to_datetime(start_date)
         start_date = start_of_date(start_date)
-        queryset = queryset.filter(date_created_gte=start_date)
+        queryset = queryset.filter(date_created__gte=start_date)
         
     if end_date:
         end_date = to_datetime(end_date)
         end_date = end_of_date(end_date)
-        queryset = queryset.filter(date_created_lte=end_date)
+        queryset = queryset.filter(date_created__lte=end_date)
+
+    return queryset
+
+def filter_product(queryset, product_id, product_group_id, product_category_id):
+    if product_id:
+        queryset = queryset.filter(product=product_id)
+        
+    if product_group_id:
+        queryset = queryset.filter(product__product_groups=product_group_id)
+
+    if product_category_id and HierarchyTree.objects.filter(pk = product_category_id).exists():
+        product_category = HierarchyTree.objects.get(pk = product_category_id)
+        childrens = product_category.get_all_children_id()
+        queryset = queryset.filter(product__product_category__in=childrens)
 
     return queryset
 
@@ -624,24 +638,6 @@ class InventoryReceivingVoucherDetail(models.Model):
             queryset = queryset.filter(receiving_voucher__date_created_lte=end_date)
 
         return queryset
-
-    
-    @staticmethod
-    def filter_product(queryset, product_id, product_group_id, product_category_id):
-        if product_id:
-            queryset = queryset.filter(product=product_id)
-            
-        if product_group_id:
-            queryset = queryset.filter(product__product_groups=product_group_id)
-
-        if product_category_id and HierarchyTree.objects.filter(pk = product_category_id).exists():
-            product_category = HierarchyTree.objects.get(pk = product_category_id)
-            childrens = product_category.get_all_children_id()
-            queryset = queryset.filter(product__product_category__in=childrens)
-
-        return queryset
-
-    
 
 class InventoryVoucher(models.Model):
     # voucher_id = models.AutoField('Mã phiếu kiểm kê', primary_key=True)
