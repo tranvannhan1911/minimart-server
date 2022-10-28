@@ -14,6 +14,9 @@ class SwaggerSchema():
     staff_id = openapi.Parameter("staff_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
     customer_id = openapi.Parameter("customer_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
     promotion_type = openapi.Parameter("type", in_=openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False, description="Order: chiết khấu hoặc giảm tiền, Product: Tặng sản phẩm")
+    product_id = openapi.Parameter("product_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
+    product_group_id = openapi.Parameter("product_group_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
+    product_category_id = openapi.Parameter("product_category_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
 
     @staticmethod
     def success():
@@ -60,3 +63,5 @@ statistic_sales_staff = get_example("statistic_sales_staff")
 statistic_sales_customer = get_example("statistic_sales_customer")
 statistic_refund = get_example("statistic_refund")
 statistic_promotion = get_example("statistic_promotion")
+statistic_inventory_receiving = get_example("statistic_inventory_receiving")
+

@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from management import swagger
 
-from management.models import Customer, Order, PromotionHistory, PromotionLine, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated
-from management.serializers.statistic import StatisticPromotionHistorySerializer, StatisticRefundSerializer, StatisticSalesCustomerSerializer, StatisticSellSerializer
+from management.models import Customer, InventoryReceivingVoucher, InventoryReceivingVoucherDetail, Order, Product, PromotionHistory, PromotionLine, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated
+from management.serializers.statistic import StatisticInventoryReceivingSerializer, StatisticPromotionHistorySerializer, StatisticRefundSerializer, StatisticSalesCustomerSerializer, StatisticSellSerializer
 from management.serializers.supplier import SupplierSerializer
 from management.utils import perms
 
@@ -152,8 +152,6 @@ class StatisticRefundView(generics.GenericAPIView):
             "results": response.data
         }), status = status.HTTP_200_OK)
 
-
-
 class StatisticPromotionView(generics.GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = (perms.IsAdminUser,)
@@ -188,6 +186,47 @@ class StatisticPromotionView(generics.GenericAPIView):
 
         # return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
         response = StatisticPromotionHistorySerializer(queryset, many=True)
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+
+class StatisticInventoryReceivingView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    def get_queryset(self):
+        return InventoryReceivingVoucherDetail.objects.filter(receiving_voucher__status="complete")
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            SwaggerSchema.token,
+            SwaggerSchema.start_date,
+            SwaggerSchema.end_date,
+            SwaggerSchema.product_id,
+            SwaggerSchema.product_group_id,
+            SwaggerSchema.product_category_id],
+        responses={200: swagger.statistic_inventory_receiving["list"]})
+    def get(self, request, *args, **kwargs):
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+        product_id = request.query_params.get('product_id', None)
+        product_group_id = request.query_params.get('product_group_id', None)
+        product_category_id = request.query_params.get('product_category_id', None)
+
+        queryset = self.get_queryset()
+        queryset = InventoryReceivingVoucherDetail.filter_date(queryset, start_date, end_date)
+        queryset = InventoryReceivingVoucherDetail.filter_product(queryset, product_id, product_group_id, product_category_id)
+
+        queryset = queryset.values("product").annotate(
+            quantity_base_unit=Sum("quantity_base_unit"),
+            total=Sum(F("quantity")*F("price"))
+        )
+        for que in queryset:
+            que["product"] = Product.objects.get(pk=que["product"])
+        
+        response = StatisticInventoryReceivingSerializer(queryset, many=True)
         return Response(data = ApiCode.success(data={
             "count": len(response.data),
             "results": response.data

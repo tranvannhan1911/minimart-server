@@ -1,6 +1,7 @@
+from dataclasses import field
 from rest_framework import serializers
 
-from management.models import Order, OrderDetail, OrderRefund, OrderRefundDetail, Promotion, PromotionHistory, PromotionLine
+from management.models import InventoryReceivingVoucherDetail, Order, OrderDetail, OrderRefund, OrderRefundDetail, Promotion, PromotionHistory, PromotionLine
 from management.serializers.product import CategorySerializer, PriceDetailSerializer, ProductGroupSerializer, ReadProductSerializer, UnitExchangeSerializer
 from management.serializers.promotion import PromotionDetailSerializer
 from management.serializers.user import CustomerSerializer, ResponseCustomerSerializer, ResponseCustomerWardSerializer, UserSerializer
@@ -86,3 +87,12 @@ class StatisticPromotionHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PromotionHistory
         exclude = ('note', 'order', 'buy_order_detail', 'received_order_detail')
+            
+################################
+class StatisticInventoryReceivingSerializer(serializers.ModelSerializer):
+    # promotion_line = StatisticPromotionLineSerializer()
+    total = serializers.FloatField()
+    product = ReadProductSerializer()
+    class Meta:
+        model = InventoryReceivingVoucherDetail
+        exclude = ('quantity', 'price', 'receiving_voucher', 'unit_exchange')
