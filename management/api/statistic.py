@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from management import swagger
 
-from management.models import Customer, Order, ProductGroup, Supplier, User, created_updated
-from management.serializers.statistic import StatisticSalesCustomerSerializer, StatisticSellSerializer
+from management.models import Customer, Order, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated
+from management.serializers.statistic import StatisticRefundSerializer, StatisticSalesCustomerSerializer, StatisticSellSerializer
 from management.serializers.supplier import SupplierSerializer
 from management.utils import perms
 
@@ -28,7 +28,11 @@ class StatisticSellView(generics.GenericAPIView):
         return Order.objects.filter(status="complete")
 
     @swagger_auto_schema(
-        manual_parameters=[SwaggerSchema.token],
+        manual_parameters=[
+            SwaggerSchema.token, 
+            SwaggerSchema.start_date,
+            SwaggerSchema.end_date,
+            SwaggerSchema.staff_id],
         responses={200: swagger.statistic_sales_staff["list"]})
     def get(self, request, *args, **kwargs):
         start_date = request.query_params.get('start_date', None)
@@ -66,7 +70,11 @@ class StatisticSalesCustomerView(generics.GenericAPIView):
         return Order.objects.filter(status="complete")
 
     @swagger_auto_schema(
-        manual_parameters=[SwaggerSchema.token],
+        manual_parameters=[
+            SwaggerSchema.token, 
+            SwaggerSchema.start_date,
+            SwaggerSchema.end_date,
+            SwaggerSchema.customer_id],
         responses={200: swagger.statistic_sales_customer["list"]})
     def get(self, request, *args, **kwargs):
         start_date = request.query_params.get('start_date', None)
@@ -112,6 +120,33 @@ class StatisticSalesCustomerView(generics.GenericAPIView):
             response.append(que)
 
         response = StatisticSalesCustomerSerializer(response, many=True)
+        return Response(data = ApiCode.success(data={
+            "count": len(response.data),
+            "results": response.data
+        }), status = status.HTTP_200_OK)
+
+
+class StatisticRefundView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+    def get_queryset(self):
+        return OrderRefundDetail.objects.filter(order_refund__status="complete")
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            SwaggerSchema.token,
+            SwaggerSchema.start_date,
+            SwaggerSchema.end_date],
+        responses={200: swagger.statistic_refund["list"]})
+    def get(self, request, *args, **kwargs):
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        queryset = self.get_queryset()
+        queryset = _filter_date_str(queryset, start_date, end_date)
+
+        response = StatisticRefundSerializer(queryset, many=True)
         return Response(data = ApiCode.success(data={
             "count": len(response.data),
             "results": response.data

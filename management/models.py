@@ -15,7 +15,7 @@ from django.contrib.auth.hashers import (
 )
 from vi_address.models import Ward
 
-from management.utils.utils import to_datetime
+from management.utils.utils import end_of_date, start_of_date, to_datetime
 
 def created_updated(obj, request):
     if obj.user_created is None:
@@ -45,6 +45,19 @@ def filter_date(queryset, start_of_date, end_of_date):
     #             Q(date_created__day_lte=end_of_date.day)))
     #     )
     # )
+    return queryset
+
+def _filter_date_str(queryset, start_date, end_date):
+    if start_date:
+        start_date = to_datetime(start_date)
+        start_date = start_of_date(start_date)
+        queryset = queryset.filter(date_created_gte=start_date)
+        
+    if end_date:
+        end_date = to_datetime(end_date)
+        end_date = end_of_date(end_date)
+        queryset = queryset.filter(date_created_lte=end_date)
+
     return queryset
 
 def unique_rand():
@@ -484,14 +497,7 @@ class Order(models.Model):
 
     @staticmethod
     def _filter(queryset, start_date, end_date, staff_id):
-        if start_date:
-            start_date = to_datetime(start_date)
-            queryset = queryset.filter(date_created_gte=start_date)
-            
-        if end_date:
-            end_date = to_datetime(end_date)
-            queryset = queryset.filter(date_created_lte=end_date)
-
+        queryset = _filter_date_str(queryset, start_date, end_date)
         if staff_id:
             queryset = queryset.filter(user_created__id=staff_id)
 
@@ -500,15 +506,7 @@ class Order(models.Model):
 
     @staticmethod
     def _filter_date(queryset, start_date, end_date):
-        if start_date:
-            start_date = to_datetime(start_date)
-            queryset = queryset.filter(date_created_gte=start_date)
-            
-        if end_date:
-            end_date = to_datetime(end_date)
-            queryset = queryset.filter(date_created_lte=end_date)
-
-        return queryset
+        return _filter_date_str(queryset, start_date, end_date)
 
 class OrderDetail(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, 
@@ -544,6 +542,10 @@ class OrderRefund(models.Model):
     
     class Meta:
         db_table = 'OrderRefund'
+
+    @staticmethod
+    def _filter_date(queryset, start_date, end_date):
+        return _filter_date_str(queryset, start_date, end_date)
 
 class OrderRefundDetail(models.Model):
     order_refund = models.ForeignKey(OrderRefund, on_delete=models.CASCADE,

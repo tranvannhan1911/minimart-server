@@ -7,7 +7,11 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class SwaggerSchema():
 
-    token = openapi.Parameter("Authorization", in_="header", type="string", required=True)
+    token = openapi.Parameter("Authorization", in_=openapi.IN_HEADER, type=openapi.TYPE_STRING, required=True)
+    start_date = openapi.Parameter("start_date", in_=openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False)
+    end_date = openapi.Parameter("end_date", in_=openapi.IN_QUERY, type=openapi.TYPE_STRING, required=False)
+    staff_id = openapi.Parameter("staff_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
+    customer_id = openapi.Parameter("customer_id", in_=openapi.IN_QUERY, type=openapi.TYPE_INTEGER, required=False)
 
     @staticmethod
     def success():
@@ -52,3 +56,4 @@ refund = get_example("refund")
 promotion_history = get_example("promotion_history")
 statistic_sales_staff = get_example("statistic_sales_staff")
 statistic_sales_customer = get_example("statistic_sales_customer")
+statistic_refund = get_example("statistic_refund")
