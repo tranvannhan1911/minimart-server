@@ -133,12 +133,21 @@ class ProductSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         # instance.units.clear()
         for unit in instance.units.all():
-            try:
-                _unit = UnitExchange.objects.get(product=instance.pk, unit=unit.pk, is_active=True)
-                _unit.is_active = False
-                _unit.save()
-            except:
-                pass
+            print(unit, units)
+            # print(unit not in units)
+            # _unit = UnitExchange.objects.get(product=instance.pk, unit=unit.pk, is_active=True)
+            # if _unit.is_active == True:
+            is_contain = False
+            for _input_unit in units:
+                if unit.id == _input_unit["unit"].id:
+                    is_contain = True
+                    break
+            if not is_contain:
+                try:
+                    _unit = UnitExchange.objects.get(product=instance.pk, unit=unit.pk, is_active=True)
+                    _unit.delete()
+                except:
+                    pass
 
         for unit in units:
             if not UnitExchange.objects.filter(product=instance.pk, unit=unit["unit"].pk, is_active=True).exists():
@@ -212,28 +221,28 @@ class PriceListSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         pricedetails = validated_data.pop('pricedetails')
         pricelist = super().create(validated_data)
-        products = []
+        # products = []
         for detail in pricedetails:
             detail["pricelist"] = pricelist
-            pricelist_base_unit = detail["product"].get_price_detail()
+            # pricelist_base_unit = detail["product"].get_price_detail()
             detail = PriceDetail.objects.create(**detail)
-            products.append(detail.product)
+            # products.append(detail.product)
 
-        products = set(products)
-        for product in products:
-            price_base_unit = product.get_price_detail()
-            for unit in product.units.all():
-                unit_exchange = product.get_unit_exchange(unit)
-                if PriceDetail.objects.filter(
-                        unit_exchange=unit_exchange,
-                        product=product,
-                    ).count() == 0:
-                    PriceDetail.objects.create(
-                        pricelist=pricelist,
-                        unit_exchange=unit_exchange,
-                        price=price_base_unit.price*unit_exchange.value,
-                        product=product
-                    )
+        # products = set(products)
+        # for product in products:
+        #     price_base_unit = product.get_price_detail()
+        #     for unit in product.units.all():
+        #         unit_exchange = product.get_unit_exchange(unit)
+        #         if PriceDetail.objects.filter(
+        #                 unit_exchange=unit_exchange,
+        #                 product=product,
+        #             ).count() == 0:
+        #             PriceDetail.objects.create(
+        #                 pricelist=pricelist,
+        #                 unit_exchange=unit_exchange,
+        #                 price=price_base_unit.price*unit_exchange.value,
+        #                 product=product
+        #             )
                     
         return pricelist
 

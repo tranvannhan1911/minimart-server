@@ -411,9 +411,12 @@ class Product(models.Model):
         return self.get_price_detail(unit_exchange)
 
     def _have_price(self):
-        if self.get_price_detail() == None:
-            return False
-        return True
+        for un in self.units.all():
+            unit_exchange = self.get_unit_exchange(un)
+            # print(un, unit_exchange, self.get_price_detail(unit_exchange))
+            if self.get_price_detail(unit_exchange):
+                return True
+        return False
     
     def remain(self):
         return str(self.stock())+" "+self.get_base_unit().name
@@ -472,6 +475,13 @@ class PriceList(models.Model):
     
     class Meta:
         db_table = 'PriceList'
+        
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.start_date = start_of_date(self.start_date)
+            self.end_date = end_of_date(self.end_date)
+
+        super(PriceList, self).save(*args, **kwargs)
 
 class PriceDetail(models.Model):
     pricelist = models.ForeignKey(PriceList, on_delete=models.CASCADE, 
@@ -714,6 +724,13 @@ class Promotion(models.Model):
     
     class Meta:
         db_table = 'Promotion'
+        
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.start_date = start_of_date(self.start_date)
+            self.end_date = end_of_date(self.end_date)
+
+        super(Promotion, self).save(*args, **kwargs)
 
 class PromotionLine(models.Model):
     title = models.CharField('Tiêu đề của khuyến mãi', max_length=255, default="")
@@ -740,6 +757,13 @@ class PromotionLine(models.Model):
     date_updated = models.DateTimeField('Ngày cập nhật', null=True)
     user_updated = models.ForeignKey(User, on_delete=models.PROTECT, 
         null=True, related_name="promotion_lines_updated")
+        
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.start_date = start_of_date(self.start_date)
+            self.end_date = end_of_date(self.end_date)
+
+        super(PromotionLine, self).save(*args, **kwargs)
     
     def get_used(self):
         count = 0

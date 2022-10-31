@@ -207,25 +207,28 @@ class ResponseWarehouseTransactionSerializer(serializers.ModelSerializer):
 
     def get_reference(self, obj):
         _obj = None
-        if obj.type == "order":
-            print(obj.reference)
-            _obj = OrderDetail.objects.get(pk = obj.reference)
-            _obj = ResponseOrderDetailSerializer(_obj).data
-        elif obj.type == "inventory":
-            _obj = InventoryVoucherDetail.objects.get(pk = obj.reference)
-            _obj = ResponseInventoryRecordDetailSerializer(_obj).data
-        elif obj.type == "inventory_cancel":
-            _obj = InventoryVoucherDetail.objects.get(pk = obj.reference)
-            _obj = ResponseInventoryRecordDetailSerializer(_obj).data
-        elif obj.type == "inventory_receiving":
-            _obj = InventoryReceivingVoucherDetail.objects.get(pk = obj.reference)
-            _obj = ResponseInventoryRCDetailSerializer(_obj).data
-        elif obj.type == "inventory_receiving_cancel":
-            _obj = InventoryReceivingVoucherDetail.objects.get(pk = obj.reference)
-            _obj = ResponseInventoryRCDetailSerializer(_obj).data
-        elif obj.type == "refund":
-            _obj = OrderRefundDetail.objects.get(pk = obj.reference)
-            _obj = ResponseOrderRefundDetailSerializer(_obj).data
+        try:
+            if obj.type == "order":
+                print(obj.reference)
+                _obj = OrderDetail.objects.get(pk = obj.reference)
+                _obj = ResponseOrderDetailSerializer(_obj).data
+            elif obj.type == "inventory":
+                _obj = InventoryVoucherDetail.objects.get(pk = obj.reference)
+                _obj = ResponseInventoryRecordDetailSerializer(_obj).data
+            elif obj.type == "inventory_cancel":
+                _obj = InventoryVoucherDetail.objects.get(pk = obj.reference)
+                _obj = ResponseInventoryRecordDetailSerializer(_obj).data
+            elif obj.type == "inventory_receiving":
+                _obj = InventoryReceivingVoucherDetail.objects.get(pk = obj.reference)
+                _obj = ResponseInventoryRCDetailSerializer(_obj).data
+            elif obj.type == "inventory_receiving_cancel":
+                _obj = InventoryReceivingVoucherDetail.objects.get(pk = obj.reference)
+                _obj = ResponseInventoryRCDetailSerializer(_obj).data
+            elif obj.type == "refund":
+                _obj = OrderRefundDetail.objects.get(pk = obj.reference)
+                _obj = ResponseOrderRefundDetailSerializer(_obj).data
+        except:
+            pass
         return _obj
 
     def get_type(self, obj):
