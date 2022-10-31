@@ -4,16 +4,24 @@ from rest_framework import serializers
 from management.models import InventoryReceivingVoucherDetail, Order, OrderDetail, OrderRefund, OrderRefundDetail, Promotion, PromotionHistory, PromotionLine, WarehouseTransaction
 from management.serializers.product import CategorySerializer, PriceDetailSerializer, ProductGroupSerializer, ReadProductSerializer, UnitExchangeSerializer
 from management.serializers.promotion import PromotionDetailSerializer
+from management.serializers.sell import ResponseOrderSerializer
 from management.serializers.user import CustomerSerializer, ResponseCustomerSerializer, ResponseCustomerWardSerializer, UserSerializer
 
-# class ResponseOrderDetailSerializer(serializers.ModelSerializer):
-#     product = ReadProductSerializer(read_only=True)
-#     unit_exchange = UnitExchangeSerializer(read_only=True)
-#     price = PriceDetailSerializer()
-#     class Meta:
-#         model = OrderDetail
-#         fields = '__all__'
 
+
+class StatisticTop5CustomerSerializer(serializers.Serializer):
+    total = serializers.FloatField()
+    final_total = serializers.FloatField()
+    customer = ResponseCustomerSerializer()
+
+class StatisticDashboardSerializer(serializers.Serializer):
+    top_5_order = ResponseOrderSerializer(many=True)
+    top_5_customer = StatisticTop5CustomerSerializer(many=True)
+    total_order_7_days = serializers.IntegerField()
+    total_order_refund_7_days = serializers.IntegerField()
+    total_money_7_days = serializers.IntegerField()
+
+################################
 class StatisticSellSerializer(serializers.Serializer):
     user_created = UserSerializer(read_only=True)
     date_created = serializers.DateTimeField()

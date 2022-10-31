@@ -2,10 +2,12 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
+from django.utils import timezone
+import datetime
 from management import swagger
 
-from management.models import Customer, InventoryReceivingVoucher, InventoryReceivingVoucherDetail, Order, Product, PromotionHistory, PromotionLine, WarehouseTransaction, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated, filter_product
-from management.serializers.statistic import StatisticInventoryReceivingSerializer, StatisticPromotionHistorySerializer, StatisticRefundSerializer, StatisticSalesCustomerSerializer, StatisticSellSerializer, StatisticStockSerializer
+from management.models import Customer, InventoryReceivingVoucher, InventoryReceivingVoucherDetail, Order, OrderRefund, Product, PromotionHistory, PromotionLine, WarehouseTransaction, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated, filter_product
+from management.serializers.statistic import StatisticDashboardSerializer, StatisticInventoryReceivingSerializer, StatisticPromotionHistorySerializer, StatisticRefundSerializer, StatisticSalesCustomerSerializer, StatisticSellSerializer, StatisticStockSerializer
 from management.serializers.supplier import SupplierSerializer
 from management.utils import perms
 
@@ -17,8 +19,78 @@ from management.swagger.user import  SwaggerUserSchema
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from management.utils.perms import method_permission_classes
-from management.utils.utils import end_of_date, to_datetime
+from management.utils.utils import end_of_date, start_of_date, to_datetime
 from django.db.models import Sum, F, OuterRef, Subquery
+
+
+class StatisticDashboardView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = (perms.IsAdminUser,)
+
+
+    def top_5_customer(self, start_date, today, user):
+        top_5_customer = Order.objects.filter(
+                date_created__gte=start_date,
+                status="complete",
+                user_created=user
+            ).values("customer").annotate(
+                total=Sum("total"),
+                final_total=Sum("final_total"),
+            ).order_by("-final_total")[:5]
+        
+        for elm in top_5_customer:
+            elm["customer"] = Customer.objects.get(pk = int(elm["customer"]))
+
+        # print(top_5_customer)
+        return top_5_customer
+
+    def top_5_order(self, start_date, today, user):
+        top_5_order = Order.objects.filter(
+                date_created__gte=start_date,
+                user_created=user,
+                status="complete"
+            ).order_by("-final_total")[:5]
+        # print(top_5_order)
+        return top_5_order
+
+    # @swagger_auto_schema(
+    #     manual_parameters=[
+    #         SwaggerSchema.token, 
+    #         SwaggerSchema.start_date,
+    #         SwaggerSchema.end_date,
+    #         SwaggerSchema.staff_id],
+    #     responses={200: swagger.statistic_sales_staff["list"]})
+    def get(self, request, *args, **kwargs):
+        today = end_of_date(timezone.now())
+        start_date = start_of_date(today-datetime.timedelta(days=7))
+        top_5_customer = self.top_5_customer(start_date, today, request.user)
+        top_5_order = self.top_5_order(start_date, today, request.user)
+        
+        total_order = Order.objects.filter(
+            date_created__gte=start_date, 
+            user_created=request.user).count()
+
+        total_order_refund = OrderRefund.objects.filter(
+            date_created__gte=start_date, 
+            user_created=request.user).count()
+
+        total_money = Order.objects.filter(
+                date_created__gte=start_date,
+                status="complete", 
+                user_created=request.user
+            ).aggregate(Sum("final_total"))["final_total__sum"]
+        # print(total_order, total_order_refund, total_money)
+        data = {
+            "top_5_customer": top_5_customer, 
+            "top_5_order": top_5_order, 
+            "total_order_7_days": total_order,
+            "total_order_refund_7_days": total_order_refund, 
+            "total_money_7_days": total_money
+        }
+        # print(data)
+        response = StatisticDashboardSerializer(data)
+        # return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+        return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
 class StatisticSellView(generics.GenericAPIView):
     authentication_classes = [JWTAuthentication]
