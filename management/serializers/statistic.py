@@ -1,25 +1,45 @@
 from dataclasses import field
 from rest_framework import serializers
 
-from management.models import InventoryReceivingVoucherDetail, Order, OrderDetail, OrderRefund, OrderRefundDetail, Promotion, PromotionHistory, PromotionLine, WarehouseTransaction
+from management.models import Customer, InventoryReceivingVoucherDetail, Order, OrderDetail, OrderRefund, OrderRefundDetail, Promotion, PromotionHistory, PromotionLine, WarehouseTransaction
 from management.serializers.product import CategorySerializer, PriceDetailSerializer, ProductGroupSerializer, ReadProductSerializer, UnitExchangeSerializer
 from management.serializers.promotion import PromotionDetailSerializer
 from management.serializers.sell import ResponseOrderSerializer
 from management.serializers.user import CustomerSerializer, ResponseCustomerSerializer, ResponseCustomerWardSerializer, UserSerializer
 
 
+class ResponseShortCustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        exclude = ('password', 'customer_group', 'user_created',
+            'user_updated')
+
+class ShortResponseOrderSerializer(serializers.ModelSerializer):
+    # customer = CustomerSerializer()
+    class Meta:
+        model = Order
+        exclude = ('customer', 'user_created', 'user_updated')
 
 class StatisticTop5CustomerSerializer(serializers.Serializer):
     total = serializers.FloatField()
     final_total = serializers.FloatField()
-    customer = ResponseCustomerSerializer()
+    customer = ResponseShortCustomerSerializer()
+
+class StatisticOrder7DaysSerializer(serializers.Serializer):
+    date = serializers.CharField()
+    total = serializers.FloatField()
+    final_total = serializers.FloatField()
+    count = serializers.IntegerField()
 
 class StatisticDashboardSerializer(serializers.Serializer):
-    top_5_order = ResponseOrderSerializer(many=True)
+    top_5_order = ShortResponseOrderSerializer(many=True)
     top_5_customer = StatisticTop5CustomerSerializer(many=True)
-    total_order_7_days = serializers.IntegerField()
-    total_order_refund_7_days = serializers.IntegerField()
+    order_7_days = StatisticOrder7DaysSerializer(many=True)
+    
+    count_order_7_days = serializers.IntegerField()
+    count_order_refund_7_days = serializers.IntegerField()
     total_money_7_days = serializers.IntegerField()
+    count_customer_7_days = serializers.IntegerField()
 
 ################################
 class StatisticSellSerializer(serializers.Serializer):

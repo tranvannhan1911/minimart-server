@@ -66,4 +66,5 @@ statistic_refund = get_example("statistic_refund")
 statistic_promotion = get_example("statistic_promotion")
 statistic_inventory_receiving = get_example("statistic_inventory_receiving")
 statistic_stock = get_example("statistic_stock")
+statistic_dashboard = get_example("statistic_dashboard")
 

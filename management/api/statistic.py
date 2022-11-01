@@ -1,10 +1,12 @@
 
+from pprint import pprint
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
 import datetime
 from management import swagger
+from django.db.models.functions import TruncDate
 
 from management.models import Customer, InventoryReceivingVoucher, InventoryReceivingVoucherDetail, Order, OrderRefund, Product, PromotionHistory, PromotionLine, WarehouseTransaction, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated, filter_product
 from management.serializers.statistic import StatisticDashboardSerializer, StatisticInventoryReceivingSerializer, StatisticPromotionHistorySerializer, StatisticRefundSerializer, StatisticSalesCustomerSerializer, StatisticSellSerializer, StatisticStockSerializer
@@ -49,47 +51,84 @@ class StatisticDashboardView(generics.GenericAPIView):
                 date_created__gte=start_date,
                 user_created=user,
                 status="complete"
+            ).values("customer").annotate(
+                total=Sum("total"),
+                final_total=Sum("final_total"),
             ).order_by("-final_total")[:5]
         # print(top_5_order)
         return top_5_order
+        
+    def order_7_days(self, start_date, today, user):
+        order_7_days = Order.objects.filter(
+                date_created__gte=start_date,
+                user_created=user,
+                status="complete"
+            )
 
-    # @swagger_auto_schema(
-    #     manual_parameters=[
-    #         SwaggerSchema.token, 
-    #         SwaggerSchema.start_date,
-    #         SwaggerSchema.end_date,
-    #         SwaggerSchema.staff_id],
-    #     responses={200: swagger.statistic_sales_staff["list"]})
+        res = {}
+        delta = datetime.timedelta(days=1)
+        while start_date <= today:
+            key = start_date.strftime("%d-%m-%Y")
+            res[key] = {
+                "date": key,
+                "total": 0,
+                "final_total": 0,
+                "count": 0
+            }
+            start_date += delta
+
+        for elm in order_7_days.all():
+            key = elm.date_created.strftime("%d-%m-%Y")
+            res[key]["total"] += elm.total
+            res[key]["final_total"] += elm.final_total
+            res[key]["count"] += 1
+
+        result = []
+        for elm in res:
+            result.append(res[elm])
+            
+        return result
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            SwaggerSchema.token],
+        responses={200: swagger.statistic_dashboard["get"]})
     def get(self, request, *args, **kwargs):
         today = end_of_date(timezone.now())
-        start_date = start_of_date(today-datetime.timedelta(days=7))
+        start_date = start_of_date(today-datetime.timedelta(days=6))
         top_5_customer = self.top_5_customer(start_date, today, request.user)
         top_5_order = self.top_5_order(start_date, today, request.user)
+        order_7_days = self.order_7_days(start_date, today, request.user)
         
-        total_order = Order.objects.filter(
+        count_order_7_days = Order.objects.filter(
             date_created__gte=start_date, 
             user_created=request.user).count()
 
-        total_order_refund = OrderRefund.objects.filter(
+        count_order_refund_7_days = OrderRefund.objects.filter(
             date_created__gte=start_date, 
             user_created=request.user).count()
 
-        total_money = Order.objects.filter(
+        count_customer_7_days = Order.objects.filter(
+            date_created__gte=start_date, 
+            user_created=request.user).values("customer").count()
+
+        total_money_7_days = Order.objects.filter(
                 date_created__gte=start_date,
                 status="complete", 
                 user_created=request.user
             ).aggregate(Sum("final_total"))["final_total__sum"]
-        # print(total_order, total_order_refund, total_money)
+            
         data = {
             "top_5_customer": top_5_customer, 
-            "top_5_order": top_5_order, 
-            "total_order_7_days": total_order,
-            "total_order_refund_7_days": total_order_refund, 
-            "total_money_7_days": total_money
+            "top_5_order": top_5_order,
+            "order_7_days": order_7_days, 
+            "count_order_7_days": count_order_7_days,
+            "count_order_refund_7_days": count_order_refund_7_days, 
+            "total_money_7_days": total_money_7_days,
+            "count_customer_7_days": count_customer_7_days
         }
-        # print(data)
+        
         response = StatisticDashboardSerializer(data)
-        # return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
 class StatisticSellView(generics.GenericAPIView):
