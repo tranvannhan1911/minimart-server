@@ -104,21 +104,23 @@ class InventoryRCIdView(generics.GenericAPIView):
         serializer = ResponseInventoryRCSerializer(voucher)
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
-    # @swagger_auto_schema(
-    #     manual_parameters=[SwaggerSchema.token],
-    #     responses={200: SwaggerSchema.success()})
-    # @method_permission_classes((perms.IsAdminUser, ))
-    # def delete(self, request, id):
-    #     if not InventoryReceivingVoucher.objects.filter(pk = id).exists():
-    #         return Response(data = ApiCode.error(message="Phiếu nhập hàng không tồn tại"), status = status.HTTP_200_OK)
+    @swagger_auto_schema(
+        manual_parameters=[SwaggerSchema.token],
+        responses={200: SwaggerSchema.success()})
+    @method_permission_classes((perms.IsAdminUser, ))
+    def delete(self, request, id):
+        if not InventoryReceivingVoucher.objects.filter(pk = id).exists():
+            return Response(data = ApiCode.error(message="Phiếu nhập hàng không tồn tại"), status = status.HTTP_200_OK)
 
-    #     voucher = InventoryReceivingVoucher.objects.get(pk = id)
+        voucher = InventoryReceivingVoucher.objects.get(pk = id)
+        if voucher.status != "pending":
+            return Response(data = ApiCode.error(message="Chỉ xóa được phiếu nhập hàng ở trạng thái tạo mới"), status = status.HTTP_200_OK)
 
-    #     try:
-    #         voucher.delete()
-    #     except:
-    #         return Response(data = ApiCode.error(message="Không thể xóa phiếu nhập hàng này"), status = status.HTTP_200_OK)
-    #     return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
+        try:
+            voucher.delete()
+        except:
+            return Response(data = ApiCode.error(message="Không thể xóa phiếu nhập hàng này"), status = status.HTTP_200_OK)
+        return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 
 ##############################################
 class InventoryRecordView(generics.GenericAPIView):

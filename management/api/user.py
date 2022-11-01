@@ -135,10 +135,13 @@ class ResetPasswordView(generics.GenericAPIView):
         user.set_password(raw_password)
         user.save()
 
-        message = MESSAGE_PASSWORD_TWILIO_TEMPLATE.format(password=raw_password)
-        number = User.format_phone(user.phone)
-        client = MessageClient()
-        client.send_message(message, number)
+        try:
+            message = MESSAGE_PASSWORD_TWILIO_TEMPLATE.format(password=raw_password)
+            number = User.format_phone(user.phone)
+            client = MessageClient()
+            client.send_message(message, number)
+        except:
+            pass
 
         response = UserSerializer(user)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
