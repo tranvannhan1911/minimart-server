@@ -597,6 +597,20 @@ class OrderRefundDetail(models.Model):
     def get_quantity_dvtcb(self):
         return self.quantity*self.unit_exchange.value
 
+    @staticmethod
+    def filter_date(queryset, start_date, end_date):
+        if start_date:
+            start_date = to_datetime(start_date)
+            start_date = start_of_date(start_date)
+            queryset = queryset.filter(order_refund__date_created__gte=start_date)
+            
+        if end_date:
+            end_date = to_datetime(end_date)
+            end_date = end_of_date(end_date)
+            queryset = queryset.filter(order_refund__date_created__lte=end_date)
+
+        return queryset
+
     class Meta:
         db_table = 'OrderRefundDetail'
 
@@ -640,12 +654,12 @@ class InventoryReceivingVoucherDetail(models.Model):
         if start_date:
             start_date = to_datetime(start_date)
             start_date = start_of_date(start_date)
-            queryset = queryset.filter(receiving_voucher__date_created_gte=start_date)
+            queryset = queryset.filter(receiving_voucher__date_created__gte=start_date)
             
         if end_date:
             end_date = to_datetime(end_date)
             end_date = end_of_date(end_date)
-            queryset = queryset.filter(receiving_voucher__date_created_lte=end_date)
+            queryset = queryset.filter(receiving_voucher__date_created__lte=end_date)
 
         return queryset
 

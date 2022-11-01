@@ -41,7 +41,8 @@ class StatisticDashboardView(generics.GenericAPIView):
             ).order_by("-final_total")[:5]
         
         for elm in top_5_customer:
-            elm["customer"] = Customer.objects.filter(pk = int(elm["customer"])).first()
+            if elm["customer"]:
+                elm["customer"] = Customer.objects.filter(pk = elm["customer"]).first()
 
         # print(top_5_customer)
         return top_5_customer
@@ -261,7 +262,7 @@ class StatisticRefundView(generics.GenericAPIView):
         product_category_id = request.query_params.get('product_category_id', None)
 
         queryset = self.get_queryset()
-        queryset = _filter_date_str(queryset, start_date, end_date)
+        queryset = OrderRefundDetail.filter_date(queryset, start_date, end_date)
         queryset = filter_product(queryset, product_id, product_group_id, product_category_id)
 
         response = StatisticRefundSerializer(queryset, many=True)
@@ -370,10 +371,11 @@ class StatisticStockView(generics.GenericAPIView):
         product_id = request.query_params.get('product_id', None)
         product_group_id = request.query_params.get('product_group_id', None)
         product_category_id = request.query_params.get('product_category_id', None)
+        
+        date = to_datetime(date)
         if not date:
             return Response(data = ApiCode.error(message="Ngày không hợp lệ"), status = status.HTTP_200_OK)
         
-        date = to_datetime(date)
         date = end_of_date(date)
 
         queryset = self.get_queryset()
