@@ -8,7 +8,7 @@ import datetime
 from management import swagger
 from django.db.models.functions import TruncDate
 
-from management.models import Customer, InventoryReceivingVoucher, InventoryReceivingVoucherDetail, Order, OrderRefund, Product, PromotionHistory, PromotionLine, WarehouseTransaction, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated, filter_product
+from management.models import Customer, HierarchyTree, InventoryReceivingVoucher, InventoryReceivingVoucherDetail, Order, OrderRefund, Product, PromotionHistory, PromotionLine, WarehouseTransaction, _filter_date_str, OrderRefundDetail, ProductGroup, Supplier, User, created_updated, filter_product
 from management.serializers.statistic import StatisticDashboardSerializer, StatisticInventoryReceivingSerializer, StatisticPromotionHistorySerializer, StatisticRefundSerializer, StatisticSalesCustomerSerializer, StatisticSellSerializer, StatisticStockSerializer
 from management.serializers.supplier import SupplierSerializer
 from management.utils import perms
@@ -221,8 +221,8 @@ class StatisticSalesCustomerView(generics.GenericAPIView):
             else:
                 que["product_groups"] = None
 
-            if que["details__product__product_category"] and ProductGroup.objects.filter(pk=que["details__product__product_category"]).exists():
-                que["product_category"] = ProductGroup.objects.filter(pk=que["details__product__product_category"]).first()
+            if que["details__product__product_category"] and HierarchyTree.objects.filter(pk=que["details__product__product_category"]).exists():
+                que["product_category"] = HierarchyTree.objects.filter(pk=que["details__product__product_category"]).first()
             else:
                 que["product_category"] = None
 
