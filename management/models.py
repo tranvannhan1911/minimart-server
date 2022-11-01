@@ -449,8 +449,8 @@ class UnitExchange(models.Model):
 
     @property
     def price(self):
-        print(self)
-        print(self.product.get_price_detail(self))
+        # print(self)
+        # print(self.product.get_price_detail(self))
         return self.product.get_price_detail(self).price
 
     class Meta:
@@ -850,7 +850,7 @@ class PromotionLine(models.Model):
         price = product.get_price_detail().price
         benefit = quantity_base_actual_received*price
         self.__benefit = benefit
-        print("benefit", product, quantity_base_unit, customer, benefit)
+        # print("benefit", product, quantity_base_unit, customer, benefit)
         return benefit
 
     @staticmethod
