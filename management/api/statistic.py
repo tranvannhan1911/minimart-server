@@ -41,7 +41,7 @@ class StatisticDashboardView(generics.GenericAPIView):
             ).order_by("-final_total")[:5]
         
         for elm in top_5_customer:
-            elm["customer"] = Customer.objects.get(pk = int(elm["customer"]))
+            elm["customer"] = Customer.objects.filter(pk = int(elm["customer"])).first()
 
         # print(top_5_customer)
         return top_5_customer
@@ -161,7 +161,7 @@ class StatisticSellView(generics.GenericAPIView):
         
         response = []
         for que in queryset.all():
-            que["user_created"] = User.objects.get(pk=que["user_created"])
+            que["user_created"] = User.objects.filter(pk=que["user_created"]).first()
             response.append(que)
 
         response = StatisticSellSerializer(response, many=True)
@@ -212,17 +212,17 @@ class StatisticSalesCustomerView(generics.GenericAPIView):
         response = []
         for que in queryset.all():
             if que["customer"]:
-                que["customer"] = Customer.objects.get(pk=que["customer"])
+                que["customer"] = Customer.objects.filter(pk=que["customer"]).first()
             else:
                 que["customer"] = None
 
             if que["details__product__product_groups"] and ProductGroup.objects.filter(pk=que["details__product__product_groups"]).exists():
-                que["product_groups"] = ProductGroup.objects.get(pk=que["details__product__product_groups"])
+                que["product_groups"] = ProductGroup.objects.filter(pk=que["details__product__product_groups"]).first()
             else:
                 que["product_groups"] = None
 
             if que["details__product__product_category"] and ProductGroup.objects.filter(pk=que["details__product__product_category"]).exists():
-                que["product_category"] = ProductGroup.objects.get(pk=que["details__product__product_category"])
+                que["product_category"] = ProductGroup.objects.filter(pk=que["details__product__product_category"]).first()
             else:
                 que["product_category"] = None
 
@@ -300,7 +300,7 @@ class StatisticPromotionView(generics.GenericAPIView):
         )
 
         for que in queryset:
-            que["promotion_line"] = PromotionLine.objects.get(pk=que["promotion_line"])
+            que["promotion_line"] = PromotionLine.objects.filter(pk=que["promotion_line"]).first()
 
         # return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
         response = StatisticPromotionHistorySerializer(queryset, many=True)
@@ -342,7 +342,7 @@ class StatisticInventoryReceivingView(generics.GenericAPIView):
             total=Sum(F("quantity")*F("price"))
         )
         for que in queryset:
-            que["product"] = Product.objects.get(pk=que["product"])
+            que["product"] = Product.objects.filter(pk=que["product"]).first()
         
         response = StatisticInventoryReceivingSerializer(queryset, many=True)
         return Response(data = ApiCode.success(data={
@@ -384,7 +384,7 @@ class StatisticStockView(generics.GenericAPIView):
             stock_base_unit=Sum("change")
         )
         for que in queryset:
-            que["product"] = Product.objects.get(pk=que["product"])
+            que["product"] = Product.objects.filter(pk=que["product"]).first()
 
         # return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
         response = StatisticStockSerializer(queryset, many=True)
