@@ -15,14 +15,15 @@ class ResponseShortCustomerSerializer(serializers.ModelSerializer):
             'user_updated')
 
 class ShortResponseOrderSerializer(serializers.ModelSerializer):
-    # customer = CustomerSerializer()
+    customer = serializers.CharField(source="customer.fullname")
     class Meta:
         model = Order
-        exclude = ('customer', 'user_created', 'user_updated')
+        exclude = ('user_created', 'user_updated', 'note')
 
 class StatisticTop5CustomerSerializer(serializers.Serializer):
     total = serializers.FloatField()
     final_total = serializers.FloatField()
+    count = serializers.IntegerField()
     customer = ResponseShortCustomerSerializer()
 
 class StatisticOrder7DaysSerializer(serializers.Serializer):

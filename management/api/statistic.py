@@ -22,7 +22,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from management.utils.perms import method_permission_classes
 from management.utils.utils import end_of_date, start_of_date, to_datetime
-from django.db.models import Sum, F, OuterRef, Subquery
+from django.db.models import Sum, F, OuterRef, Subquery, Count
 
 
 class StatisticDashboardView(generics.GenericAPIView):
@@ -35,9 +35,10 @@ class StatisticDashboardView(generics.GenericAPIView):
                 date_created__gte=start_date,
                 status="complete",
                 user_created=user
-            ).values("customer").annotate(
+            ).exclude(customer=None).values("customer").annotate(
                 total=Sum("total"),
                 final_total=Sum("final_total"),
+                count=Count("id")
             ).order_by("-final_total")[:5]
         
         for elm in top_5_customer:
@@ -52,10 +53,7 @@ class StatisticDashboardView(generics.GenericAPIView):
                 date_created__gte=start_date,
                 user_created=user,
                 status="complete"
-            ).values("customer").annotate(
-                total=Sum("total"),
-                final_total=Sum("final_total"),
-            ).order_by("-final_total")[:5]
+            ).exclude(customer=None).order_by("-final_total")[:5]
         # print(top_5_order)
         return top_5_order
         
@@ -264,7 +262,7 @@ class StatisticRefundView(generics.GenericAPIView):
         queryset = self.get_queryset()
         queryset = OrderRefundDetail.filter_date(queryset, start_date, end_date)
         queryset = filter_product(queryset, product_id, product_group_id, product_category_id)
-
+        # queryset = queryset.annotate(total = Sum(""))
         response = StatisticRefundSerializer(queryset, many=True)
         return Response(data = ApiCode.success(data={
             "count": len(response.data),
