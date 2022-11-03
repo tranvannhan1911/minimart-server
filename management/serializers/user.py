@@ -16,11 +16,15 @@ class ChangePasswordSerializer(serializers.Serializer):
     password = serializers.CharField()
     new_password = serializers.CharField()
 
-
+class UserCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ('password', 'date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 class CustomerGroupSerializer(serializers.ModelSerializer):
-    # user_created = UserSerializer(read_only=True)
-    # user_updated = UserSerializer(read_only=True)
+    user_created = UserCreateUpdateSerializer(read_only=True)
+    user_updated = UserCreateUpdateSerializer(read_only=True)
     class Meta:
         model = CustomerGroup
         fields = '__all__'
@@ -34,6 +38,8 @@ class CustomerGroupSerializer(serializers.ModelSerializer):
         
 class UserSerializer(serializers.ModelSerializer):
     customer_group = CustomerGroupSerializer(read_only=True, many=True)
+    user_created = UserCreateUpdateSerializer(read_only=True)
+    user_updated = UserCreateUpdateSerializer(read_only=True)
     class Meta:
         model = User
         exclude = ('password', )
