@@ -192,7 +192,7 @@ REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoS
 
 TWILIO_NUMBER = OTP_TWILIO_FROM = "+19705784710"
 TWILIO_ACCOUNT_SID = OTP_TWILIO_ACCOUNT = "AC2b7debcdb06e6517c53147d6a71ad0ff"
-TWILIO_AUTH_TOKEN = OTP_TWILIO_AUTH = "d822409216c21aca670db69615c1c4b1"
+TWILIO_AUTH_TOKEN = OTP_TWILIO_AUTH = "795abbf53166048859759e943e54e8b4"
 OTP_TWILIO_TOKEN_VALIDITY = 360
 OTP_TWILIO_TOKEN_TEMPLATE = "Mã xác minh của bạn trên hệ thống siêu thị mini là {token}"
 MESSAGE_PASSWORD_TWILIO_TEMPLATE = "Mật khẩu của bạn trên hệ thống siêu thị mini là {password}, hãy truy cập vào ứng dụng và đổi mật khẩu."

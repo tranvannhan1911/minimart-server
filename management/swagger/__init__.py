@@ -46,6 +46,16 @@ def get_example(name):
                     }),
     }
     
+
+token = openapi.Response(
+    description="Successful",
+    examples={
+        "application/json": ApiCode.success(data={
+            "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NiwicGhvbmUiOiIwMzY5NDYyMzA4In0.h1V-mVuoJgWQuPJzrx-miA6mo_f8QECSE8f1UCHxzY0",
+            "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjcwMTA0NTE2LCJpYXQiOjE2Njc1MTI1MTYsImp0aSI6ImM5MmZjOTY5NzNlYTRiNWM5NzhjYTUyNTVmOTBiOWY2IiwiaWQiOjYsInBob25lIjoiMDM2OTQ2MjMwOCJ9.NMOIQgi9ZHWp_T4EbpLFHdKgRgs_YbXJcNGoC8QIi9M"
+        })
+    })
+
 customer = get_example("customer")
 category = get_example("category")
 inventory_receiving = get_example("inventory_receiving")
@@ -67,4 +77,5 @@ statistic_promotion = get_example("statistic_promotion")
 statistic_inventory_receiving = get_example("statistic_inventory_receiving")
 statistic_stock = get_example("statistic_stock")
 statistic_dashboard = get_example("statistic_dashboard")
+
 

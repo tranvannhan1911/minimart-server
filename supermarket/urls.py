@@ -28,7 +28,6 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django_twilio.views import sms
 from management.api.address import AddressPathIdView, AddressView, WardView
-from management.api.customer.account import CustomerForgotPassword, CustomerLoginView
 from management.api.general import CounterIndexView
 from management.api.inventory import InventoryRCIdView, InventoryRCView, InventoryRecordIdView, InventoryRecordView, WarehouseTransactionIdView, WarehouseTransactionView
 from management.api.product import CalculationUnitIdView, CategoryIdView, CategoryToParentView, CategoryToSelectView, CategoryView, PriceListIdView, PriceListView, ProductGroupIdView, ProductGroupView, CalculationUnitView, ProductIdView, ProductView
@@ -44,6 +43,16 @@ from management.api.user import (
 from management.api.customer_group import (
     CustomerGroupIdView, CustomerGroupView
 )
+
+from management.api.mobile.account import (
+    CustomerForgotPassword, CustomerLoginView, 
+    CustomerForgotPasswordVerify,
+    MobileChangePasswordView
+)
+
+from management.api.mobile.customer import MobileCustomerView
+from management.api.mobile.order import CustomerOrderView
+
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -71,11 +80,6 @@ urlpatterns = [
             path('forgot_password/verify/', ForgotPasswordVerify.as_view(), name="forgot_password_verify"),
             path('change_password/', ChangePasswordView.as_view(), name='change_password'),
             path('get_info/', GetInfoView.as_view(), name='get_info'),
-
-            # customer
-            
-            path('login-customer/', CustomerLoginView.as_view()),
-            path('forgot-password-customer/', CustomerForgotPassword.as_view()),
         ])),
         path('customer/', include([
             path('', CustomerView.as_view(), name='customer'),
@@ -165,6 +169,22 @@ urlpatterns = [
             path('promotion/', StatisticPromotionView.as_view()),
             path('receiving/', StatisticInventoryReceivingView.as_view()),
             path('stock/', StatisticStockView.as_view()),
+        ])),
+
+        
+        path('mobile/', include([
+            path('account/', include([
+                path('login/', CustomerLoginView.as_view()),
+                path('forgot-password/', CustomerForgotPassword.as_view()),
+                path('forgot-password/verify/', CustomerForgotPasswordVerify.as_view()),
+                path('change-password/', MobileChangePasswordView.as_view()),
+            ])),
+            path('customer/', include([
+                path('info/', MobileCustomerView.as_view()),
+            ])),
+            path('order/', CustomerOrderView.as_view()),
+            
+            
         ])),
     ])),
 

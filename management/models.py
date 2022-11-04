@@ -1072,3 +1072,30 @@ class CounterIndex(models.Model):
         except:
             CounterIndex.objects.create(table=table, value = 1)
             return 1
+
+
+class OtpCustomer(models.Model):
+    customer = models.ForeignKey(Customer, 
+        on_delete=models.CASCADE, null=True)
+    code = models.IntegerField()
+    exp = models.DateTimeField()
+
+    @staticmethod
+    def generate(customer):
+        import random
+        code = random.randint(100000, 999999)
+        OtpCustomer.objects.create(customer=customer, code=code, exp=datetime.datetime.now()+datetime.timedelta(minutes=5))
+        return code
+
+    @staticmethod
+    def verify(customer, code):
+        if not OtpCustomer.objects.filter(customer=customer, code=code).exists():
+            return False
+
+        otp_customer = OtpCustomer.objects.filter(customer=customer, code=code).order_by("-exp").first()
+        print(otp_customer.exp, timezone.now())
+        if otp_customer.exp >= timezone.now():
+            return True
+
+        return False
+    
