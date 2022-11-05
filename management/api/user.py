@@ -169,10 +169,13 @@ class CustomerView(generics.GenericAPIView):
         raw_password = customer.set_password()
         customer.save()
 
-        message = MESSAGE_PASSWORD_TWILIO_TEMPLATE.format(password=raw_password)
-        number = User.format_phone(customer.phone)
-        client = MessageClient()
-        client.send_message(message, number)
+        try:
+            message = MESSAGE_PASSWORD_TWILIO_TEMPLATE.format(password=raw_password)
+            number = User.format_phone(customer.phone)
+            client = MessageClient()
+            client.send_message(message, number)
+        except:
+            pass
 
         created_updated(customer, request)
 
