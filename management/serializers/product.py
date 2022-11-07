@@ -228,6 +228,7 @@ class ReadProductSerializer(serializers.ModelSerializer):
     base_unit = CalculationUnitSerializer(source="get_base_unit")
     price_detail = PriceDetailSerializer(source="get_price_detail")
     have_price = serializers.BooleanField(source="_have_price")
+    unit_exchange_report = UnitExchangeSerializer(source="get_unit_exchange_report")
     user_created = UserSerializer(read_only=True)
     user_updated = UserSerializer(read_only=True)
     class Meta:

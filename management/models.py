@@ -422,6 +422,18 @@ class Product(models.Model):
         return str(self.stock())+" "+self.get_base_unit().name
 
 
+    def get_unit_exchange_report(self):
+        unit_exchange = UnitExchange.objects.filter(
+            product=self, 
+            is_active=True,
+            is_report=True
+            ).first()
+        if unit_exchange:
+            return unit_exchange
+        
+        return self.get_unit_exchange()
+        
+
     class Meta:
         db_table = 'Product'
 
@@ -435,6 +447,7 @@ class UnitExchange(models.Model):
     allow_sale = models.BooleanField('Đơn vị được phép bán hàng',
         help_text='Cho phép bán hàng bằng đơn vị này không?', default=False)
     is_base_unit = models.BooleanField('Đơn vị cơ bản', default=False)
+    is_report = models.BooleanField('Đơn vị dùng để báo cáo', default=False)
     is_active = models.BooleanField('Hoạt động', default=True)
 
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
