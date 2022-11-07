@@ -169,7 +169,7 @@ class OrderRefundDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderRefundDetail
         exclude = ('order_refund', )
-        read_only_fields = ('total', )
+        read_only_fields = ('total', 'quantity_base_unit')
 
 
 class OrderRefundSerializer(serializers.ModelSerializer):
@@ -180,21 +180,27 @@ class OrderRefundSerializer(serializers.ModelSerializer):
         model = OrderRefund
         fields = '__all__'
         read_only_fields = ('date_created', 'user_created', 
-            'date_updated', 'user_updated')
+            'date_updated', 'user_updated', 'total')
 
     def create(self, validated_data):
         details = validated_data.pop('details')
         obj = super().create(validated_data)
+        total = 0
         for detail in details:
             detail["order_refund"] = obj
+            detail["order_detail"] = obj.order.get_detail_by_product_unit(detail["product"], detail["unit_exchange"])
+            detail["total"] = detail["order_detail"].price.price * detail["quantity"]
+            print("unit exchange", detail["unit_exchange"])
+            detail["quantity_base_unit"] = detail["unit_exchange"].value * detail["quantity"]
+            total += detail["total"]
             detail = OrderRefundDetail.objects.create(**detail)
-            
             WarehouseTransaction.objects.create(
                 product=detail.product,
                 reference=detail.pk,
                 change=+detail.get_quantity_dvtcb(),
                 type="refund"
             )
+        obj.total = total
         obj.order.status = "refund"
         obj.order.save()
         return obj

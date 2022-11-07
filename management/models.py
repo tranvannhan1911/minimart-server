@@ -546,6 +546,9 @@ class Order(models.Model):
     def _filter_date(queryset, start_date, end_date):
         return _filter_date_str(queryset, start_date, end_date)
 
+    def get_detail_by_product_unit(self, product, unit_exchange):
+        return self.details.filter(product=product, unit_exchange=unit_exchange).first()
+        
 class OrderDetail(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, 
         related_name='details')
@@ -558,6 +561,7 @@ class OrderDetail(models.Model):
 
     def get_quantity_dvtcb(self):
         return self.quantity*self.unit_exchange.value
+
     class Meta:
         db_table = 'OrderDetail'
 
@@ -570,7 +574,7 @@ class OrderRefund(models.Model):
         ('complete', 'Hoàn tất'),
         ('cancel', 'Hủy')
     ))
-
+    total = models.FloatField('Tổng tiền', default=0)
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     user_created = models.ForeignKey(User, on_delete=models.PROTECT, 
         null=True, related_name="orders_refund_created")
@@ -589,9 +593,12 @@ class OrderRefundDetail(models.Model):
     order_refund = models.ForeignKey(OrderRefund, on_delete=models.CASCADE,
         related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    order_detail = models.ForeignKey(OrderDetail, on_delete=models.PROTECT, null=True)
     unit_exchange = models.ForeignKey(UnitExchange, verbose_name='Đơn vị tính', 
         on_delete=models.CASCADE)
+    total = models.FloatField('Thành tiền', default=0)
     quantity = models.PositiveIntegerField('Số lượng')
+    quantity_base_unit = models.PositiveIntegerField('Số lượng đơn vị tính cơ bản', default=0)
     note = models.TextField('Ghi chú', null=True)
 
     def get_quantity_dvtcb(self):
@@ -986,6 +993,12 @@ class PromotionLine(models.Model):
             end_date__gte=timezone.now()
         )
 
+    
+    @staticmethod
+    def filter_type(queryset, type):
+        if type:
+            return queryset.filter(type=type)
+        return queryset
 
     class Meta:
         db_table = 'PromotionLine'

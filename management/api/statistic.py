@@ -108,8 +108,13 @@ class StatisticDashboardView(generics.GenericAPIView):
             user_created=request.user).count()
 
         count_customer_7_days = Order.objects.filter(
-            date_created__gte=start_date, 
-            user_created=request.user).values("customer").count()
+                date_created__gte=start_date, 
+                user_created=request.user
+            ).exclude(customer=None).values("customer").distinct().count()
+        count_customer_7_days += Order.objects.filter(
+                date_created__gte=start_date, 
+                user_created=request.user
+            ).filter(customer=None).count()
 
         total_money_7_days = Order.objects.filter(
                 date_created__gte=start_date,
@@ -293,13 +298,17 @@ class StatisticPromotionView(generics.GenericAPIView):
         queryset = PromotionHistory.filter_type(queryset, type)
 
         queryset = queryset.values("promotion_line").annotate(
-            quantity=Sum("quantity"),
+            quantity_used=Sum("quantity"),
             amount=Sum("amount"),
             type=F("type"),
         )
 
         for que in queryset:
             que["promotion_line"] = PromotionLine.objects.filter(pk=que["promotion_line"]).first()
+            que["quantity_product_received"] = None
+
+            if que["promotion_line"].type == "Product":
+                que["quantity_product_received"] = que["quantity_used"]*que["promotion_line"].detail.quantity_received
 
         # return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
         response = StatisticPromotionHistorySerializer(queryset, many=True)

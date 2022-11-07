@@ -13,10 +13,29 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('date_created', 'user_created', 
             'date_updated', 'user_updated')
+            
+class ShortProductGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductGroup
+        fields = '__all__'
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 class CalculationUnitSerializer(serializers.ModelSerializer):
     user_created = UserSerializer(read_only=True)
     user_updated = UserSerializer(read_only=True)
+    class Meta:
+        model = CalculationUnit
+        fields = '__all__'
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
+        extra_kwargs = {
+            'id': {
+                'read_only': True
+            }
+        }
+
+class ShortCalculationUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = CalculationUnit
         fields = '__all__'
@@ -51,6 +70,15 @@ class UnitExchangeSerializer(serializers.ModelSerializer):
         read_only_fields = ('date_created', 'user_created', 
             'date_updated', 'user_updated')
 
+class ShortUnitExchangeSerializer(serializers.ModelSerializer):
+    unit_name = serializers.CharField(source="unit.name", read_only=True)
+    unit_code = serializers.CharField(source="unit.code", read_only=True)
+    price = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = UnitExchange
+        exclude = ('product', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
 ####################
 
 class RecursiveField(serializers.Serializer):
@@ -102,6 +130,14 @@ class CategorySerializer(serializers.ModelSerializer):
         instance.type = "product"
         instance.save()
         return instance
+
+
+class ShortCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HierarchyTree
+        fields = '__all__'
+        read_only_fields = ('type', 'level', 'date_created', 'user_created', 
+            'date_updated', 'user_updated')
 
 ##############################    
 class ProductSerializer(serializers.ModelSerializer):
@@ -207,7 +243,26 @@ class ReadProductSerializer(serializers.ModelSerializer):
         queryset = UnitExchange.objects.filter(product=obj, is_active=True)
         return UnitExchangeSerializer(queryset, many=True).data
 
-    
+
+class ShortResponseProductSerializer(serializers.ModelSerializer):
+    product_groups = ShortProductGroupSerializer(read_only=True, many=True, required=False)
+    product_category = ShortCategorySerializer(read_only=True)
+    # units = UnitExchangeSerializer(source="unitexchanges", read_only=True, many=True)
+    units = serializers.SerializerMethodField()
+    stock = serializers.IntegerField(read_only=True)
+    base_unit = ShortCalculationUnitSerializer(source="get_base_unit")
+    class Meta:
+        model = Product
+        exclude = ('barcode_image', )
+        read_only_fields = ('date_created', 'user_created', 
+            'date_updated', 'user_updated')
+
+    def get_stock(self, obj):
+        return obj.stock()
+
+    def get_units(self, obj):
+        queryset = UnitExchange.objects.filter(product=obj, is_active=True)
+        return ShortUnitExchangeSerializer(queryset, many=True).data
 
         
 class PriceListSerializer(serializers.ModelSerializer):
