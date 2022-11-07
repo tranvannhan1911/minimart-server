@@ -157,16 +157,48 @@ class StatisticSellView(generics.GenericAPIView):
         queryset = self.get_queryset()
         queryset = Order._filter(queryset, start_date, end_date, staff_id)
         
-        queryset = queryset.values('user_created', 'date_created').annotate(
-            discount=Sum("total")-Sum("final_total"),
-            total=Sum("total"), 
-            final_total=Sum("final_total"),
-        )
+
+        # queryset = queryset.values('user_created', 'date_created').annotate(
+        #     discount=Sum("total")-Sum("final_total"),
+        #     total=Sum("total"), 
+        #     final_total=Sum("final_total"),
+        # )
         
-        response = []
+        # response = []
+        # for que in queryset.all():
+        #     que["user_created"] = User.objects.filter(pk=que["user_created"]).first()
+        #     response.append(que)
+
+        # print("que", queryset.values('date_created__date'))
+        queryset = queryset.order_by("-date_created")
+        tmp = {}
         for que in queryset.all():
-            que["user_created"] = User.objects.filter(pk=que["user_created"]).first()
-            response.append(que)
+            key = que.date_created.strftime("%d/%m/%Y")
+            if que.user_created.id not in tmp.keys():
+                tmp[que.user_created.id] = {
+                    
+                }
+            if key not in tmp[que.user_created.id].keys():
+                tmp[que.user_created.id][key] = {
+                    "user_created": que.user_created,
+                    "date_created": key,
+                    "discount": que.total - que.final_total,
+                    "final_total": que.final_total,
+                    "total": que.total
+                }
+            else:
+                tmp[que.user_created.id][key]["discount"] += que.total - que.final_total
+                tmp[que.user_created.id][key]["final_total"] += que.final_total
+                tmp[que.user_created.id][key]["total"] += que.total
+        # print("tmp", tmp)
+
+        response = []
+        for staff_key in tmp:
+            for date_key in tmp[staff_key]:
+                response.append(tmp[staff_key][date_key])
+
+
+        # return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 
         response = StatisticSellSerializer(response, many=True)
         return Response(data = ApiCode.success(data={
@@ -174,7 +206,6 @@ class StatisticSellView(generics.GenericAPIView):
             "results": response.data
         }), status = status.HTTP_200_OK)
 
-        # return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 
 
 class StatisticSalesCustomerView(generics.GenericAPIView):
