@@ -52,7 +52,7 @@ from management.api.mobile.account import (
 
 from management.api.mobile.customer import MobileCustomerView
 from management.api.mobile.order import CustomerOrderView
-
+from management.api.mobile.product import MobileProductView
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -183,7 +183,7 @@ urlpatterns = [
                 path('info/', MobileCustomerView.as_view()),
             ])),
             path('order/', CustomerOrderView.as_view()),
-            
+            path('product/<int:barcode>/', MobileProductView.as_view()),
             
         ])),
     ])),
