@@ -193,7 +193,6 @@ urlpatterns = [
                 path('personal/', MobilePromotionPersonalView.as_view()),
                 path('product/', MobilePromotionProductView.as_view()),
                 path('order/', MobilePromotionOrderView.as_view()),
-                
             ])),
             
         ])),

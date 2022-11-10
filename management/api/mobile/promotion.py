@@ -44,10 +44,10 @@ class MobilePromotionPersonalView(generics.GenericAPIView):
         queryset = self.get_queryset()
         queryset = queryset.filter(
             start_date__lte=timezone.now(),
-            start_date__gte=timezone.now()
+            end_date__gte=timezone.now()
         ).exclude(promotion__applicable_customer_groups = None)
         queryset = PromotionLine.filter_customer(queryset, request.customer)
-        response = ResponsePromotionLineSerializer(many=True)
+        response = ResponsePromotionLineSerializer(queryset, many=True)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
     
 class MobilePromotionProductView(generics.GenericAPIView):
@@ -62,11 +62,11 @@ class MobilePromotionProductView(generics.GenericAPIView):
         queryset = self.get_queryset()
         queryset = queryset.filter(
             start_date__lte=timezone.now(),
-            start_date__gte=timezone.now(),
+            end_date__gte=timezone.now(),
             type="Product"
         )
         queryset = PromotionLine.filter_customer(queryset, request.customer)
-        response = ResponsePromotionLineSerializer(many=True)
+        response = ResponsePromotionLineSerializer(queryset, many=True)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
 
@@ -82,8 +82,8 @@ class MobilePromotionOrderView(generics.GenericAPIView):
         queryset = self.get_queryset()
         queryset = queryset.filter(
             start_date__lte=timezone.now(),
-            start_date__gte=timezone.now(),
+            end_date__gte=timezone.now(),
         ).exclude(type="Product")
         queryset = PromotionLine.filter_customer(queryset, request.customer)
-        response = ResponsePromotionLineSerializer(many=True)
+        response = ResponsePromotionLineSerializer(queryset, many=True)
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
