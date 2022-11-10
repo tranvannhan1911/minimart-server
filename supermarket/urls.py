@@ -53,6 +53,11 @@ from management.api.mobile.account import (
 from management.api.mobile.customer import MobileCustomerView
 from management.api.mobile.order import CustomerOrderView
 from management.api.mobile.product import MobileProductView
+from management.api.mobile.promotion import (
+    MobilePromotionPersonalView,
+    MobilePromotionProductView,
+    MobilePromotionOrderView
+)
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -184,6 +189,12 @@ urlpatterns = [
             ])),
             path('order/', CustomerOrderView.as_view()),
             path('product/<int:barcode>/', MobileProductView.as_view()),
+            path('promotion/', include([
+                path('personal/', MobilePromotionPersonalView.as_view()),
+                path('product/', MobilePromotionProductView.as_view()),
+                path('order/', MobilePromotionOrderView.as_view()),
+                
+            ])),
             
         ])),
     ])),
