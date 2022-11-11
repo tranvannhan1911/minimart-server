@@ -104,7 +104,8 @@ class CustomerForgotPasswordVerify(generics.GenericAPIView):
         try:
             client = MessageClient()
             client.send_message("Mật khẩu mới của bạn là {0}".format(new_password), User.format_phone(phone))
-        except:
+        except Exception as e:
+            print("error", e)
             return Response(data = ApiCode.error(message="Có lỗi xảy ra!"), status = status.HTTP_200_OK)
 
         customer.set_password(new_password)

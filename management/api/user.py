@@ -140,7 +140,8 @@ class ResetPasswordView(generics.GenericAPIView):
             number = User.format_phone(user.phone)
             client = MessageClient()
             client.send_message(message, number)
-        except:
+        except Exception as e:
+            print("error", e)
             pass
 
         response = UserSerializer(user)
@@ -174,7 +175,8 @@ class CustomerView(generics.GenericAPIView):
             number = User.format_phone(customer.phone)
             client = MessageClient()
             client.send_message(message, number)
-        except:
+        except Exception as e:
+            print("error", e)
             pass
 
         created_updated(customer, request)
