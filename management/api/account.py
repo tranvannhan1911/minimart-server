@@ -93,7 +93,7 @@ class ForgotPassword(generics.GenericAPIView):
             verifier.generate_challenge()
         except Exception as e:
             print("error", e)
-            return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
+            return Response(data = ApiCode.error(message="Lỗi gửi OTP"), status = status.HTTP_200_OK)
 
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 
