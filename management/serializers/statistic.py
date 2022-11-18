@@ -54,10 +54,16 @@ class StatisticOrder7DaysSerializer(serializers.Serializer):
     final_total = serializers.FloatField()
     count = serializers.IntegerField()
 
+class StatisticOrderRefund7DaysSerializer(serializers.Serializer):
+    date = serializers.CharField()
+    total = serializers.FloatField()
+    count = serializers.IntegerField()
+
 class StatisticDashboardSerializer(serializers.Serializer):
     top_5_order = ShortResponseOrderSerializer(many=True)
     top_5_customer = StatisticTop5CustomerSerializer(many=True)
     order_7_days = StatisticOrder7DaysSerializer(many=True)
+    order_refund_7_days = StatisticOrderRefund7DaysSerializer(many=True)
     
     count_order_7_days = serializers.IntegerField()
     count_order_refund_7_days = serializers.IntegerField()

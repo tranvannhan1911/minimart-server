@@ -88,6 +88,35 @@ class StatisticDashboardView(generics.GenericAPIView):
             
         return result
 
+    def order_refund_7_days(self, start_date, today, user):
+        order_refund_7_days = OrderRefund.objects.filter(
+            date_created__gte=start_date, 
+            user_created=user,
+            status="complete")
+
+        res = {}
+        delta = datetime.timedelta(days=1)
+        while start_date <= today:
+            key = start_date.strftime("%d-%m-%Y")
+            res[key] = {
+                "date": key,
+                "total": 0,
+                "final_total": 0,
+                "count": 0
+            }
+            start_date += delta
+
+        for elm in order_refund_7_days.all():
+            key = elm.date_created.strftime("%d-%m-%Y")
+            res[key]["total"] += elm.total
+            res[key]["count"] += 1
+
+        result = []
+        for elm in res:
+            result.append(res[elm])
+            
+        return result
+
     @swagger_auto_schema(
         manual_parameters=[
             SwaggerSchema.token],
@@ -98,6 +127,7 @@ class StatisticDashboardView(generics.GenericAPIView):
         top_5_customer = self.top_5_customer(start_date, today, request.user)
         top_5_order = self.top_5_order(start_date, today, request.user)
         order_7_days = self.order_7_days(start_date, today, request.user)
+        order_refund_7_days = self.order_refund_7_days(start_date, today, request.user)
         
         count_order_7_days = Order.objects.filter(
             date_created__gte=start_date, 
@@ -126,6 +156,7 @@ class StatisticDashboardView(generics.GenericAPIView):
             "top_5_customer": top_5_customer, 
             "top_5_order": top_5_order,
             "order_7_days": order_7_days, 
+            "order_refund_7_days": order_refund_7_days,
             "count_order_7_days": count_order_7_days,
             "count_order_refund_7_days": count_order_refund_7_days, 
             "total_money_7_days": total_money_7_days,

@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
             name='code',
             field=models.CharField(default="", max_length=10, verbose_name='Mã code'),
         ),
-        migrations.RunPython(random_code),
+        # migrations.RunPython(random_code),
         migrations.AlterField(
             model_name='supplier',
             name='code',

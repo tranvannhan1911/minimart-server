@@ -257,7 +257,7 @@ class Customer(models.Model):
         db_table = 'Customer'
 
 class ProductGroup(models.Model):
-    product_group_code = models.CharField('Mã nhóm sản phẩm', max_length=15)
+    product_group_code = models.CharField('Mã nhóm sản phẩm', max_length=15, unique=True)
     name = models.CharField('Tên nhóm sản phẩm', max_length=255)
     description = models.TextField('Mô tả nhóm sản phẩm', 
         help_text='Mô tả của nhóm sản phẩm', null=True)
@@ -345,7 +345,7 @@ class CalculationUnit(models.Model):
 
 
 class Product(models.Model):
-    product_code = models.CharField('Mã sản phẩm', max_length=15)
+    product_code = models.CharField('Mã sản phẩm', max_length=15, unique=True)
     name = models.CharField('Tên sản phẩm', max_length=255)
     description = models.TextField('Mô tả sản phẩm', null=True)
     image = models.CharField('Hình ảnh sản phẩm', max_length=255, null=True)
