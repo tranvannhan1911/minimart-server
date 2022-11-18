@@ -196,6 +196,7 @@ class ProductSerializer(serializers.ModelSerializer):
                 _unit = UnitExchange.objects.get(product=instance.pk, unit=unit["unit"].pk, is_active=True)
                 _unit.value = unit["value"]
                 _unit.allow_sale = unit["allow_sale"]
+                _unit.is_report = unit["is_report"]
                 _unit.save()
             
         return instance
