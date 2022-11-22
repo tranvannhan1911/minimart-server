@@ -63,7 +63,7 @@ class CustomerForgotPassword(generics.GenericAPIView):
         phone = User.convert_phone(number)
         
         if Customer.check_exists(phone, True) == False:
-            return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
+            return Response(data = ApiCode.error(message="Số điện thoại không tồn tại!"), status = status.HTTP_200_OK)
 
         customer = Customer.objects.get(phone = phone)
 
