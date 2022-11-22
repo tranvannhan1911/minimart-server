@@ -170,11 +170,13 @@ class CustomerView(generics.GenericAPIView):
         raw_password = customer.set_password()
         customer.save()
 
+        print("create new customer", raw_password)
         try:
             message = MESSAGE_PASSWORD_TWILIO_TEMPLATE.format(password=raw_password)
             number = User.format_phone(customer.phone)
             client = MessageClient()
             client.send_message(message, number)
+            print("sent OTP success")
         except Exception as e:
             print("error", e)
             pass

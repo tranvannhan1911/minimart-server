@@ -243,14 +243,12 @@ class Customer(models.Model):
         if not raw_password:
             raw_password = self.random_password()
         self.password = make_password(raw_password)
-        print("set password", raw_password)
         self._password = raw_password
         return raw_password
 
     def check_password(self, raw_password):
         salt = self.password.split("$")[2]
         password = make_password(raw_password, salt)
-        print(raw_password, salt, password, self.password)
         if password == self.password:
             return True
         return False

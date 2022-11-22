@@ -120,6 +120,7 @@ class ForgotPasswordVerify(generics.GenericAPIView):
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)
         
         new_password = User.random_password()
+        print("change password", new_password)
         client = MessageClient()
         client.send_message("Mật khẩu mới của bạn là {0}".format(new_password), number)
         user.set_password(new_password)

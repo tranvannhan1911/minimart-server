@@ -107,6 +107,7 @@ class CustomerForgotPasswordVerify(generics.GenericAPIView):
             print("error", e)
             return Response(data = ApiCode.error(message="Có lỗi xảy ra!"), status = status.HTTP_200_OK)
 
+        print("change customer password", new_password)
         customer.set_password(new_password)
         customer.save()
 
