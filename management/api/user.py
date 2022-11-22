@@ -167,7 +167,7 @@ class CustomerView(generics.GenericAPIView):
             return Response(data = ApiCode.error(message="Số điện thoại bị trùng"), status = status.HTTP_200_OK)
 
         customer = serializer.save()
-        raw_password = customer.set_password("biDijSyM")
+        raw_password = customer.set_password()
         customer.save()
 
         try:

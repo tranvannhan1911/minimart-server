@@ -68,14 +68,13 @@ class CustomerForgotPassword(generics.GenericAPIView):
         customer = Customer.objects.get(phone = phone)
 
         otp = OtpCustomer.generate(customer)
-        # try:
-        message = OTP_TWILIO_TOKEN_TEMPLATE.format(token=otp)
-        number = User.format_phone(customer.phone)
-        print(number)
-        client = MessageClient()
-        client.send_message(message, number)
-        # except:
-        #     return Response(data = ApiCode.error(message="Có lỗi xảy ra!"), status = status.HTTP_200_OK)
+        try:
+            message = OTP_TWILIO_TOKEN_TEMPLATE.format(token=otp)
+            number = User.format_phone(customer.phone)
+            client = MessageClient()
+            client.send_message(message, number)
+        except:
+            return Response(data = ApiCode.error(message="Có lỗi xảy ra!"), status = status.HTTP_200_OK)
         
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 
