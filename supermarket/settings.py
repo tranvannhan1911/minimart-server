@@ -206,6 +206,7 @@ SWAGGER_SETTINGS = {
             'name': 'Authorization'
         }
     },
+    'USE_SESSION_AUTH': False
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
