@@ -118,7 +118,7 @@ class CustomerGroup(models.Model):
         super().delete(using, keep_parents)
 
 class User(AbstractUser):
-    code = models.CharField('Mã nhân viên', max_length=30, unique=True, default=unique_rand)
+    # code = models.CharField('Mã nhân viên', max_length=30, unique=True, default=unique_rand)
     phone = models.CharField('Số điện thoại', max_length=15, unique=True)
     fullname = models.CharField('Tên nhân viên', max_length=30, null=True)
     gender = models.CharField('Giới tính', max_length=1, default='U', choices=(

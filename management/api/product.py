@@ -47,7 +47,7 @@ class ProductGroupView(generics.GenericAPIView):
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return ProductGroup.objects.all()
+        return ProductGroup.objects.all().order_by("-date_created")
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
@@ -131,7 +131,7 @@ class CalculationUnitView(generics.GenericAPIView):
         return Response(data = ApiCode.success(data=serializer.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return CalculationUnit.objects.all()
+        return CalculationUnit.objects.all().order_by("-date_created")
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
@@ -216,7 +216,7 @@ class ProductView(generics.GenericAPIView):
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return Product.objects.all()
+        return Product.objects.all().order_by("-date_created")
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
@@ -332,7 +332,7 @@ class PriceListView(generics.GenericAPIView):
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return PriceList.objects.all()
+        return PriceList.objects.all().order_by("-date_created")
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
