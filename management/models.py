@@ -128,7 +128,7 @@ class User(AbstractUser):
     ))
     address = models.CharField('Địa chỉ', max_length=255, null=True)
     ward = models.ForeignKey(Ward, on_delete=models.PROTECT, null=True)
-    note = models.TextField('Ghi chú', null=True)
+    note = models.TextField('Ghi chú', null=True, blank=True)
     
     date_created = models.DateTimeField('Ngày tạo', default=timezone.now)
     user_created = models.ForeignKey("management.User", on_delete=models.PROTECT, 
