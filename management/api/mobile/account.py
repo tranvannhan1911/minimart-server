@@ -68,13 +68,15 @@ class CustomerForgotPassword(generics.GenericAPIView):
         customer = Customer.objects.get(phone = phone)
 
         otp = OtpCustomer.generate(customer)
+        print("Customer forgot password otp: ", otp)
         try:
             message = OTP_TWILIO_TOKEN_TEMPLATE.format(token=otp)
             number = User.format_phone(customer.phone)
             client = MessageClient()
             client.send_message(message, number)
-        except:
-            return Response(data = ApiCode.error(message="Có lỗi xảy ra!"), status = status.HTTP_200_OK)
+        except Exception as e:
+            print("error", e)
+            return Response(data = ApiCode.error(message="Gửi OTP thất bại!"), status = status.HTTP_200_OK)
         
         return Response(data = ApiCode.success(), status = status.HTTP_200_OK)
 
@@ -127,7 +129,7 @@ class MobileChangePasswordView(generics.GenericAPIView):
 
         phone = serializer.data["phone"]
         password = serializer.data["password"]
-        new_password = serializer.data["new_password"]
+        new_password = serializer.data["new_password"] 
 
         if Customer.check_exists(phone, True) == False:
             return Response(data = ApiCode.error(), status = status.HTTP_200_OK)

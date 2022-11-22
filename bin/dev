@@ -3,10 +3,10 @@ docker run -d -p 8000:8000 \
     -e MYSQL_NAME=minimart \
     -e MYSQL_USER=minimart \
     -e MYSQL_PASSWORD=minimart \
-    -e MYSQL_HOST=127.0.0.1 \
+    -e MYSQL_HOST=13.214.169.137 \
     -e MYSQL_PORT=3306 \
     -e PYTHONUNBUFFERED=1 \
     --restart on-failure:5 \
     --name minimart-server \
-    --network="host" \
-    tranvannhan1911/minimart-server:v106
+    -v $(pwd):/app \
+    tranvannhan1911/minimart-server

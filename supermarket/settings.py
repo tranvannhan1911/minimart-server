@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-6me)jt41+m#uel@o^5tm2y9tx0loa@ngsy&b*z0iib@lev_@bw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['13.214.169.137', 'localhost', '127.0.0.1', '192.168.1.124']
 
@@ -192,7 +192,7 @@ REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoS
 
 TWILIO_NUMBER = OTP_TWILIO_FROM = "+14258421598"
 TWILIO_ACCOUNT_SID = OTP_TWILIO_ACCOUNT = "AC96a2c39c219172903d4d6679681ea12e"
-TWILIO_AUTH_TOKEN = OTP_TWILIO_AUTH = "73231f64bc11d245a3a7d4b23be7d027"
+TWILIO_AUTH_TOKEN = OTP_TWILIO_AUTH = "ae322de8762a7dffdaacca39a8b2983b"
 OTP_TWILIO_TOKEN_VALIDITY = 360
 OTP_TWILIO_TOKEN_TEMPLATE = "Mã xác minh của bạn trên hệ thống siêu thị mini là {token}"
 MESSAGE_PASSWORD_TWILIO_TEMPLATE = "Mật khẩu của bạn trên hệ thống siêu thị mini là {password}, hãy truy cập vào ứng dụng và đổi mật khẩu."
