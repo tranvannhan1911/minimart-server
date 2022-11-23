@@ -150,16 +150,16 @@ class User(AbstractUser):
     objects = CustomUserManager()
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            self.format_code()
+        # if not self.pk:
+        #     self.format_code()
         super(User, self).save(*args, **kwargs)
 
-    def format_code(self):
-        while True:
-            _code = "NV"+str(CounterIndex.increase("User")).zfill(5)
-            if not User.objects.filter(code = _code).exists():
-                self.code = _code
-                break
+    # def format_code(self):
+    #     while True:
+    #         _code = "NV"+str(CounterIndex.increase("User")).zfill(5)
+    #         if not User.objects.filter(code = _code).exists():
+    #             self.code = _code
+    #             break
 
 
     def __str__(self):

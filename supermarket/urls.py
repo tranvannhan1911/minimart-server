@@ -66,6 +66,7 @@ schema_view = get_schema_view(
       description="Quản lý siêu thị mini API",
    ),
    public=True,
+   permission_classes=(permissions.AllowAny, )
 )
 
 
