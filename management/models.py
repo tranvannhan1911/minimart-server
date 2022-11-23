@@ -1110,7 +1110,7 @@ class OtpCustomer(models.Model):
     def generate(customer):
         import random
         code = random.randint(100000, 999999)
-        OtpCustomer.objects.create(customer=customer, code=code, exp=datetime.datetime.now()+datetime.timedelta(minutes=5))
+        OtpCustomer.objects.create(customer=customer, code=code, exp=timezone.now()+datetime.timedelta(minutes=5))
         return code
 
     @staticmethod
