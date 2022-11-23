@@ -2,7 +2,6 @@
 ssh -i "~/.ssh/minimart.pem" ubuntu@13.214.169.137 '''/bin/bash -c "cd /home/ubuntu/minimart-server \
         && git pull origin main \
         && (docker rm -f minimart-server || true) \
-        && (docker rmi -f $(docker images -a | grep tranvannhan1911/minimart-server | awk "{print $3}") || true) \
         && docker build -t tranvannhan1911/minimart-server . \
         && docker run -d \
             -e MYSQL_NAME=minimart \
@@ -16,3 +15,5 @@ ssh -i "~/.ssh/minimart.pem" ubuntu@13.214.169.137 '''/bin/bash -c "cd /home/ubu
             --network="host" \
             tranvannhan1911/minimart-server \
         && docker exec minimart-server python3 manage.py migrate "'''
+
+# && (docker rmi -f $(docker images -a | grep tranvannhan1911/minimart-server | awk "{print $3}") || true) \

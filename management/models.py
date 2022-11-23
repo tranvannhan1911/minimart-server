@@ -242,6 +242,7 @@ class Customer(models.Model):
     def set_password(self, raw_password=None):
         if not raw_password:
             raw_password = self.random_password()
+        print("set_password", raw_password)
         self.password = make_password(raw_password)
         self._password = raw_password
         return raw_password
