@@ -14,9 +14,9 @@ RUN apt install libmysqlclient-dev -y
 
 COPY requirements.txt .
 
-RUN pip install -r requirements.txt
-
 RUN apt install iputils-ping -y
+
+RUN pip install -r requirements.txt
 
 COPY . .
 
