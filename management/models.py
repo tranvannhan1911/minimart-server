@@ -1119,7 +1119,7 @@ class OtpCustomer(models.Model):
             return False
 
         otp_customer = OtpCustomer.objects.filter(customer=customer, code=code).order_by("-exp").first()
-        print(otp_customer.exp, timezone.now())
+        print(otp_customer.exp, timezone.now(), otp_customer.exp >= timezone.now())
         if otp_customer.exp >= timezone.now():
             return True
 

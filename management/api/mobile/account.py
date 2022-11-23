@@ -98,6 +98,7 @@ class CustomerForgotPasswordVerify(generics.GenericAPIView):
 
         customer = Customer.objects.get(phone = phone)
 
+        print("check otp", customer, code)
         if not OtpCustomer.verify(customer, code):
             return Response(data = ApiCode.error(message="OTP không hợp lệ!"), status = status.HTTP_200_OK)
 
