@@ -708,7 +708,7 @@ class InventoryVoucherDetail(models.Model):
     inventory_voucher = models.ForeignKey(InventoryVoucher, on_delete=models.CASCADE,
         related_name='details')
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    quantity_before = models.PositiveIntegerField('Số lượng trước', null=True)
+    quantity_before = models.IntegerField('Số lượng trước', null=True)
     quantity_after = models.PositiveIntegerField('Số lượng sau')
     note = models.TextField('Ghi chú', null=True)
 
