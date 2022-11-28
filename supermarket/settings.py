@@ -198,7 +198,7 @@ REST_FRAMEWORK = {
 
 TWILIO_NUMBER = OTP_TWILIO_FROM = "+14258421598"
 TWILIO_ACCOUNT_SID = OTP_TWILIO_ACCOUNT = "AC96a2c39c219172903d4d6679681ea12e"
-TWILIO_AUTH_TOKEN = OTP_TWILIO_AUTH = "ae322de8762a7dffdaacca39a8b2983b"
+TWILIO_AUTH_TOKEN = OTP_TWILIO_AUTH = "6a04f5a4dc6f17070ff69c1ef5c6e793"
 OTP_TWILIO_TOKEN_VALIDITY = 360
 OTP_TWILIO_TOKEN_TEMPLATE = "Mã xác minh của bạn trên hệ thống siêu thị mini là {token}"
 MESSAGE_PASSWORD_TWILIO_TEMPLATE = "Mật khẩu của bạn trên hệ thống siêu thị mini là {password}, hãy truy cập vào ứng dụng và đổi mật khẩu."
