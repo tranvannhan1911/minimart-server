@@ -189,8 +189,8 @@ class OrderRefundSerializer(serializers.ModelSerializer):
         for detail in details:
             detail["order_refund"] = obj
             detail["order_detail"] = obj.order.get_detail_by_product_unit(detail["product"], detail["unit_exchange"])
-            detail["total"] = detail["order_detail"].price.price * detail["quantity"]
-            print("unit exchange", detail["unit_exchange"])
+            detail["total"] = detail["order_detail"].price.price * detail["quantity"] if detail["order_detail"].price else 0
+            # print("unit exchange", detail["unit_exchange"])
             detail["quantity_base_unit"] = detail["unit_exchange"].value * detail["quantity"]
             total += detail["total"]
             detail = OrderRefundDetail.objects.create(**detail)
