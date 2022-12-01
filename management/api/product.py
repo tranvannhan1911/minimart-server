@@ -435,7 +435,7 @@ class CategoryView(generics.GenericAPIView):
         return Response(data = ApiCode.success(data=response.data), status = status.HTTP_200_OK)
 
     def get_queryset(self):
-        return HierarchyTree.objects.filter(type="product", parent=None)
+        return HierarchyTree.objects.filter(type="product", parent=None).order_by("-date_created")
 
     @swagger_auto_schema(
         manual_parameters=[SwaggerSchema.token],
