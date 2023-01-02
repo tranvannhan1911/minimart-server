@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-6me)jt41+m#uel@o^5tm2y9tx0loa@ngsy&b*z0iib@lev_@bw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.214.169.137', 'localhost', '127.0.0.1', '192.168.1.124', 'minimart-873715931.ap-southeast-1.elb.amazonaws.com:8000']
+ALLOWED_HOSTS = ['13.214.169.137', 'localhost', '127.0.0.1', '192.168.1.124', 'minimart-873715931.ap-southeast-1.elb.amazonaws.com']
 
 
 # Application definition
